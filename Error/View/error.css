@@ -1,0 +1,120 @@
+
+div.error_box div.WARNING, div.USER_WARNING, div.CORE_WARNING, div.COMPILE_WARNING
+{
+    background-color: #ffaa00;
+}
+
+div.error_box div.ERROR, div.CORE_ERROR, div.COMPILE_ERROR, div.USER_ERROR, div.RECOVERABLE_ERROR,
+div.not_caught_Exception
+{
+    background-color: #ff0000;
+}
+
+div.error_box .PARSE
+{
+    background-color: #fa00ff;
+}
+
+div.error_box div.NOTICE, div.USER_NOTICE
+{
+    background-color: #ffff99 !important;
+    color: #888 !important;
+    border-left: 1px solid #ddd;
+    border-top: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+}
+
+div.error_box div.STRICT
+{
+    background-color: #8892BF;
+}
+
+div.error_box div.DEPRECATED, div.USER_DEPRECATED
+{
+    background-color: #c48c00;
+}
+
+div.error_box div.Micro_Exception
+{
+    background-color: #00bc09;
+}
+
+div.error_box div.Unknown_Type_Error
+{
+    background-color: #666;
+}
+
+div.error_box {
+    font-family: Consolas, monospace;
+    font-size: 97.5%;
+    margin: 5px 0;
+    border-radius: 5px;
+    min-width: 100%;
+    display: inline-block;
+}
+
+div.error_box div.error_header {
+    font-size: 110%;
+    font-weight: 500;
+    padding: 5px;
+    color: #fff;
+    border-radius: 5px 5px 0 0;
+}
+
+div.error_box div.error_content {
+    padding: 8px 15px;
+}
+
+div.error_box div.error_text {
+    font-size: 115%;
+    background-color: #aaa;
+    color: #fff;
+    text-shadow: 2px 2px 7px rgba(0, 0, 0, 0.4), 0 0 1px #555;
+}
+
+div.error_box div.error_path {
+    font-weight: 600;
+    font-size: 110%;
+    color: #444;
+    background-color: #ddd;
+    border-radius: 0 0 5px 5px;
+    text-shadow: 0 0 1px rgba(255, 255, 255, 0.7);
+}
+
+div.error_box div.error_line {
+    display: inline-block;
+    font-size: 100%;
+    font-weight: 500;
+    border-radius: 50%;
+    color: #ffff7b;
+    background-color: #bbb;
+    padding: 0.05em 0.4em 0.1em;
+    text-shadow: 2px 2px 7px rgba(0, 0, 0, 0.5);
+}
+
+
+div.error_box div.error_text span.error {
+    padding: 2px 5px;
+    background-color: #9b9b9b;
+    border-radius: 4px;
+    color: #ffff88;
+}
+
+div.error_box div.error_text span.warning {
+    color: #ffff88;
+}
+
+div.error_box  div.but_trace {
+    font-weight: 500;
+    display: inline-block;
+    border-radius: 4px;
+    color: #fff;
+    background-color: #cdcdcd;
+    padding: 0.05em 0.4em 0.2em;
+    text-shadow: 2px 2px 7px rgba(0, 0, 0, 0.5);
+}
+
+div.error_box  div.but_trace:hover {
+    cursor: pointer;
+}
+

@@ -13,7 +13,7 @@ abstract class AbstractTraceHandler
 
     protected $webDir;
 
-    public function __construct(array $dBTrace, string $webDir)
+    public function __construct(array $dBTrace, string $webDir = '')
     {
         $this->dBTrace = $dBTrace;
         $this->webDir = $webDir;
@@ -81,7 +81,7 @@ abstract class AbstractTraceHandler
 
     abstract protected function functionName(int $i);
 
-    abstract protected function objectArg(int $i, string $arg);
+    abstract protected function objectArg(int $i, $arg);
 
     abstract protected function arrayArg(int $i);
 
@@ -98,8 +98,8 @@ abstract class AbstractTraceHandler
     abstract protected function httpTable();
 
 
-    public function result(): array
+    public function result(): string
     {
-        return $this->arr;
+        return $this->traceResult;
     }
 }

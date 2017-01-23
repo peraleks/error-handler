@@ -1,0 +1,91 @@
+div.trace_wrap table.micro_trace {
+    font-size: 80%;
+    background-color: #444;
+    border-spacing: 0;
+    color: #eee;
+    min-width: 100%;
+}
+
+div.trace_wrap tr:active {
+    background-color: #000 !important;
+}
+
+div.trace_wrap {
+    min-width: 100%;
+}
+
+div.trace_wrap tr{
+    line-height: 1.8em;
+}
+
+div.trace_wrap tr.color1{
+    background-color: #555;
+}
+
+div.trace_wrap td {
+    white-space: nowrap;
+    text-align: center;
+}
+
+div.trace_wrap td.trace_path {
+    text-align: right;
+    padding-left: 3px;
+    color: #aff;
+}
+
+div.trace_wrap td.trace_file {
+    color: #28ffff;
+    text-align: left;
+}
+
+div.trace_wrap td.trace_line {
+    color: #ffff7b;
+    padding-left: 7px;
+    padding-right: 7px;
+}
+
+div.trace_wrap td.trace_class, span.trace_class {
+    text-align: left;
+    color: #49ff3f;
+}
+
+div.trace_wrap td.trace_name_space, span.trace_name_space {
+    text-align: right;
+    padding-left: 5px;
+    padding-right: 7px;
+    color: #9cea9a;
+}
+
+div.trace_wrap td.trace_function {
+    padding-left: 5px;
+    padding-right: 5px;
+    color: #ffdb70;
+}
+
+div.trace_wrap td.trace_args {
+    border-left: 1px solid #333;
+    padding-left: 3px;
+    padding-right: 3px;
+    color: #f9f9ca;
+}
+
+div.trace_wrap td.trace_args.object {
+    color: #9cea9a;
+}
+
+div.trace_wrap td.trace_args.array {
+    color: #ccc;
+}
+
+div.trace_wrap td.trace_args .end {
+    color: #f55;
+}
+
+div.trace_wrap table.micro_trace .trace_func {
+    color: #f981f3;
+}
+
+div.error_box .hidden {
+    display: none !important;
+}
+

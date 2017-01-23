@@ -7,25 +7,22 @@ class ExceptionObject extends AbstractErrorObject
 {
     public function __construct(array $dBTrace)
     {
-        $args          = $dBTrace[0]['args'][0];
-        $this->code    = $args->getCode();
-        $this->message = $args->getMessage();
-        $this->file    = $args->getFile();
-        $this->line    = $args->getLine();
+        $obj = $dBTrace[0]['args'][0];
+        $this->code    = $obj->getCode();
+        $this->message = $obj->getMessage();
+        $this->file    = $obj->getFile();
+        $this->line    = $obj->getLine();
 
-        if ($args instanceof \Error) {
-            $this->code = 1;
-        } elseif ($args instanceof \ParseError) {
-            $this->code = 4;
-        } elseif ($args instanceof \Exception && $this->code == 0) {
-            $this->code = 3;
-        }
+            if ($obj instanceof \Error) $this->code = E_ERROR;
+        elseif ($obj instanceof \ParseError) $this->code = E_PARSE;
+        elseif ($obj instanceof \Exception && $this->code == 0) $this->code = 'NCE';
+
         $this->name = self::getErrorName($this->code);
 
-        $traceArr = [];
-        $traceArr[0]['file'] = $this->file;
-        $traceArr[0]['line'] = $this->line;
-        $this->trace = ($this->getTraceHandler())->handle(array_merge($traceArr, $args->getTrace()));
+        $arr = [];
+        $arr[0]['file'] = $this->file;
+        $arr[0]['line'] = $this->line;
+        $this->trace = array_merge($arr, $obj->getTrace());
 
     }
 }

@@ -56,7 +56,7 @@ class HttpTraceHandler extends AbstractTraceHandler
         $this->arr[$i]['function'] = self::FUNC.$this->dBTrace[$i]['function'].self::TD;
     }
 
-    protected function objectArg(int $i, string $arg)
+    protected function objectArg(int $i, $arg)
     {
         $objectParts = explode('\\', get_class($arg));
 

@@ -36,7 +36,7 @@ abstract class AbstractErrorObject
         E_STRICT            => 'STRICT',
         E_RECOVERABLE_ERROR => 'RECOVERABLE ERROR',
         E_DEPRECATED        => 'DEPRECATED',
-        3                   => 'NOT CAUGHT EXCEPTION',
+        'NCE'               => 'NOT CAUGHT EXCEPTION',
     ];
 
     abstract public function __construct(array $dBTrace);
@@ -75,10 +75,5 @@ abstract class AbstractErrorObject
     public function getTrace(): array
     {
         return $this->trace;
-    }
-
-    protected function getTraceHandler()
-    {
-        return new TraceHandler;
     }
 }

@@ -2,11 +2,27 @@
 
 namespace MicroMir\Error\Notifiers;
 
+use MicroMir\Error\Trace\HttpTraceHandler;
 
-class HttpNotifier
+
+class HttpNotifier extends AbstractNotifier
 {
-    public function __construct($obj)
+    protected function display()
     {
-        $this->obj = obj;
+        $code    = $this->obj->getCode();
+        $name    = $this->obj->getName();
+        $message = $this->obj->getMessage();
+        $file    = $this->obj->getFile();
+        $line    = $this->obj->getLine();
+        $style   = file_get_contents(dirname(__DIR__).'/View/error.css');
+        if ($this->handleTrace) {
+            $trace = (new HttpTraceHandler($this->obj->getTrace()))->result();
+            $style .= file_get_contents(dirname(__DIR__).'/View/trace.css');
+        } else {
+            $trace = '';
+        }
+        $this->hidden ? $hidden = 'hidden' : $hidden = '';
+
+        include (dirname(__DIR__).'/View/error.tpl.php');
     }
 }

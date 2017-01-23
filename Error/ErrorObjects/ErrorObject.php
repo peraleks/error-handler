@@ -13,6 +13,6 @@ class ErrorObject extends AbstractErrorObject
         $this->message = $args[1];
         $this->file    = $args[2];
         $this->line    = $args[3];
-        $this->trace   = ($this->getTraceHandler())->handle($dBTrace);
+        $this->trace   = $dBTrace;
     }
 }

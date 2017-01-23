@@ -3,36 +3,23 @@
 namespace MicroMir\Error;
 
 use MicroMir\Error\ErrorObjects\AbstractErrorObject;
+use MicroMir\Error\ErrorObjects\CustomExceptionObject;
 use MicroMir\Error\ErrorObjects\ErrorObject;
 use MicroMir\Error\ErrorObjects\ExceptionObject;
-use MicroMir\Error\ErrorObjects\FatalErrorObject;
+use MicroMir\Error\ErrorObjects\ShutdownObject;
 use MicroMir\Error\Notifiers\HttpNotifier;
 
 class ErrorHandler
 {
     static private $instance;
 
-    private $headerMessages = [];
-
-    private $headerMessagesDefault = [];
-
-    private $trace = true;
-
-    private $log = true;
-
-    private $http = true;
+    private $settings;
 
     private function __construct()
     {
         set_error_handler([$this, 'error']);
-
         set_exception_handler([$this, 'exception']);
-
-        register_shutdown_function([$this, 'fatalError']);
-
-        $this->headerMessagesDefault['header']    = '500 Internal Server Error';
-        $this->headerMessagesDefault['message'][] = 'Сервер отдыхает. Зайдите позже.';
-        $this->headerMessagesDefault['message'][] = "Don't worry! Chip 'n Dale Rescue Rangers";
+        register_shutdown_function([$this, 'shutdown']);
    }
 
     static public function instance()
@@ -57,43 +44,23 @@ class ErrorHandler
 
     public function microException($obj, $traceNumber)
     {
-        $trace   = $obj->getTrace();
-        $message = $obj->getMessage();
-
-        if (is_string($traceNumber)) {
-            $arr = explode('::', $traceNumber);
-            $file = $arr[0];
-            $line = isset($arr[1]) ? $arr[1] : '';
-            $traceNumber = 0;
-
-        } elseif (isset($trace[$traceNumber]['file'])) {
-            $file = $trace[$traceNumber]['file'];
-            $line = $trace[$traceNumber]['line'];
-        } else {
-            $file = '';
-            $line = '<-';
-        }
-        $this->traceHandler($trace, $traceNumber);
-
-        $this->notify(
-            $obj->getCode(),                    // code
-            'Micro_Exception',                  // name
-            $message['displayError'],           // message
-            $message['logError'],               // log message
-            $file,
-            $line
-        );
+        $this->handle(new CustomExceptionObject(debug_backtrace()));
+        return true;
     }
 
-    public function fatalError()
+    public function shutdown()
     {
-        $this->handle(new FatalErrorObject(debug_backtrace()));
+        if ($error = error_get_last()) {
+            ob_end_clean();
+            $this->handle(new ShutdownObject($error));
+        }
     }
 
     private function handle(AbstractErrorObject $obj)
     {
-        if ($this->http)  new HttpNotifier($obj);
-        if ($this->log)  new LogNotifier($obj);
+        $this->settings = new Settings();
+        if (!$this->settings->s['display'])  new HttpNotifier($obj);
+//        if ($this->log)  new LogNotifier($obj);
     }
 
 
@@ -144,18 +111,4 @@ class ErrorHandler
         }
     }
 
-
-    private function notify($code, $name, $message, $logMess, $file, $line)
-    {
-        include(__DIR__.'/notify.php');
-    }
-
-
-    private function traceHandler($trace, int $traceNumber = 0)
-    {
-        $thisClass = __CLASS__;
-
-        include(__DIR__.'/trace.php');
-
-    }
 }
