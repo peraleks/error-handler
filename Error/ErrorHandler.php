@@ -15,17 +15,20 @@ class ErrorHandler
 
     private $settings;
 
-    private function __construct()
+    private $settingsFile;
+
+    private function __construct($settingsFile)
     {
         set_error_handler([$this, 'error']);
         set_exception_handler([$this, 'exception']);
         register_shutdown_function([$this, 'shutdown']);
-   }
+        $this->settingsFile = $settingsFile;
+    }
 
-    static public function instance()
+    static public function instance($settingsFile = null)
     {
         self::$instance
-            ?: self::$instance = new self;
+            ?: self::$instance = new self($settingsFile);
         return self::$instance;
     }
 
@@ -58,8 +61,10 @@ class ErrorHandler
 
     private function handle(AbstractErrorObject $obj)
     {
-        $this->settings = new Settings();
-        if (!$this->settings->s['display'])  new HttpNotifier($obj);
+        if (!$this->settings) $this->settings = new Settings($this->settingsFile);
+//        if (defined($this->settings->user['']))
+
+        if (!$this->settings->user['display'])  new HttpNotifier($obj);
 //        if ($this->log)  new LogNotifier($obj);
     }
 

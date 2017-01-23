@@ -6,7 +6,9 @@ namespace MicroMir\Error;
 
 class Settings
 {
-    public $s;
+    public $user;
+
+    public $errorSettings;
 
     const  DEFAULT = [
         'display'   => false,
@@ -18,19 +20,20 @@ class Settings
     ];
 
     const GUEST_MESSAGE = [
-        'header' => '500 Internal Server Error',
+        'header'  => '500 Internal Server Error',
         'message' => [
-            0 => 'Сервер отдыхает. Зайдите позже.',
-            1 => "Don't worry! Chip 'n Dale Rescue Rangers",
+            'Сервер отдыхает. Зайдите позже.',
+            "Don't worry! Chip 'n Dale Rescue Rangers",
         ]
     ];
 
-    public function __construct(array $array = null)
+    public function __construct($file)
     {
-        if (is_array($array)) {
-            $this->s = array_merge(self::DEFAULT, $array);
+        if (!is_string($file) || !file_exists($file) || !is_array($array = include $file)) {
+            $this->errorSettings = 'Error settings file';
+            $this->user = self::DEFAULT;
         } else {
-            $this->s = self::DEFAULT;
+            $this->user = array_merge(self::DEFAULT, $array);
         }
     }
 }
