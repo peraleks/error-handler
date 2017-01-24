@@ -11,7 +11,7 @@
         }
     };
 </script>
-<div class="error_box">
+<div class="error_box" style="font-size: <?= $fontSize ?>px">
     <div class="<?= $name ?> error_header"><?= '['.$code.'] '.$name; ?></div>
     <div class="error_text error_content">
         <?= $message ?>
@@ -23,5 +23,6 @@
         <div class="but_trace">trace</div>
         <?= $file ?>
         <div class="error_path error_content error_line"><?= $line ?></div>
+        <span class="app_dir"><?= $path ?></span>
     </div>
 </div>

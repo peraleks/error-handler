@@ -3,6 +3,8 @@
 namespace MicroMir\Error\Trace;
 
 
+use MicroMir\Error\Settings;
+
 abstract class AbstractTraceHandler
 {
     protected $dBTrace;
@@ -11,12 +13,12 @@ abstract class AbstractTraceHandler
 
     protected $arr;
 
-    protected $webDir;
+    protected $settings;
 
-    public function __construct(array $dBTrace, string $webDir = '')
+    public function __construct(array $dBTrace, Settings $settings)
     {
         $this->dBTrace = $dBTrace;
-        $this->webDir = $webDir;
+        $this->settings = $settings;
         $this->handleTrace();
 
     }
@@ -51,8 +53,9 @@ abstract class AbstractTraceHandler
             }
             foreach ($this->dBTrace[$i]['args'] as $arg) {
                     if (is_object($arg)) $this->objectArg($i, $arg);
-                elseif (is_array($arg))  $this->arrayArg($i);
+                elseif (is_array($arg))  $this->arrayArg($i, $arg);
                 elseif (is_string($arg)) $this->stringArg($i, $arg);
+                elseif (is_numeric($arg))$this->numericArg($i, $arg);
                 elseif (is_bool($arg))   $this->boolArg($i, $arg);
                 elseif (is_null($arg))   $this->nullArg($i);
                 else $this->otherArg($i, $arg);
@@ -73,7 +76,7 @@ abstract class AbstractTraceHandler
         return false;
     }
 
-    abstract protected function fileName(int $i, string $separator);
+    abstract protected function fileName(int $i);
 
     abstract protected function line(int $i);
 
@@ -83,15 +86,17 @@ abstract class AbstractTraceHandler
 
     abstract protected function objectArg(int $i, $arg);
 
-    abstract protected function arrayArg(int $i);
+    abstract protected function arrayArg(int $i, $arg);
 
-    abstract protected function stringArg(int $i, string $arg);
+    abstract protected function stringArg(int $i, $arg);
 
-    abstract protected function boolArg(int $i, string $arg);
+    abstract protected function numericArg(int $i, $arg);
+
+    abstract protected function boolArg(int $i, $arg);
 
     abstract protected function nullArg(int $i);
 
-    abstract protected function otherArg(int $i, string $arg);
+    abstract protected function otherArg(int $i, $arg);
 
     abstract protected function countArgs(int $i);
 

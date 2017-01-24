@@ -30,12 +30,13 @@ div.trace_wrap td {
 div.trace_wrap td.trace_path {
     text-align: right;
     padding-left: 3px;
-    color: #aff;
+    color: #7ec9c9;
 }
 
 div.trace_wrap td.trace_file {
-    color: #28ffff;
     text-align: left;
+    color: #28ffff;
+    text-shadow: 2px 2px 7px rgba(0, 0, 0, 0.5);
 }
 
 div.trace_wrap td.trace_line {
@@ -46,20 +47,24 @@ div.trace_wrap td.trace_line {
 
 div.trace_wrap td.trace_class, span.trace_class {
     text-align: left;
-    color: #49ff3f;
+    color: #fff;
+    font-weight: 100;
+    text-shadow: 2px 2px 7px rgba(0, 0, 0, 0.4), 0 0 1px #000;
 }
 
 div.trace_wrap td.trace_name_space, span.trace_name_space {
     text-align: right;
     padding-left: 5px;
     padding-right: 7px;
-    color: #9cea9a;
+    /*color: #9cea9a;*/
+    color: #dbdbad;
 }
 
 div.trace_wrap td.trace_function {
     padding-left: 5px;
     padding-right: 5px;
     color: #ffdb70;
+    text-shadow: 2px 2px 7px rgba(0, 0, 0, 0.5);
 }
 
 div.trace_wrap td.trace_args {
@@ -74,7 +79,22 @@ div.trace_wrap td.trace_args.object {
 }
 
 div.trace_wrap td.trace_args.array {
-    color: #ccc;
+    color: #b89ff2;
+    font-style: italic;
+}
+
+div.trace_wrap td.trace_args.numeric {
+    color: #eeaeef;
+}
+
+div.trace_wrap td.trace_args.string {
+    color: #81DF73;
+}
+
+div.trace_wrap td.trace_args.bool {
+    color: #FC9A46;
+    font-weight: bold;
+    font-style: italic;
 }
 
 div.trace_wrap td.trace_args .end {

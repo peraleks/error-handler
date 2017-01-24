@@ -62,7 +62,7 @@ class ErrorHandler
     {
         $this->settings ?: $this->settings = new Settings($this->settingsFile);
 
-        foreach ($this->settings->getNotifiers($this->settings->devMode()) as $notifierClass => $arr) {
+        foreach ($this->settings->getNotifiers() as $notifierClass => $arr) {
             $this->settings->setNotifierClass($notifierClass);
             new $notifierClass($obj, $this->settings);
         }

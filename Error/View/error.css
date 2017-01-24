@@ -46,7 +46,6 @@ div.error_box div.Unknown_Type_Error
 
 div.error_box {
     font-family: Consolas, monospace;
-    font-size: 97.5%;
     margin: 5px 0;
     border-radius: 5px;
     min-width: 100%;
@@ -118,3 +117,6 @@ div.error_box  div.but_trace:hover {
     cursor: pointer;
 }
 
+div.error_box div.error_content span.app_dir{
+    font-size: 75%;
+}
