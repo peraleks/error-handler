@@ -15,13 +15,14 @@ class HttpNotifier extends AbstractNotifier
         $file    = $this->obj->getFile();
         $line    = $this->obj->getLine();
         $style   = file_get_contents(dirname(__DIR__).'/View/error.css');
-        if ($this->handleTrace) {
+        if ($this->settings->get('trace')) {
             $trace = (new HttpTraceHandler($this->obj->getTrace()))->result();
             $style .= file_get_contents(dirname(__DIR__).'/View/trace.css');
         } else {
             $trace = '';
         }
-        $this->hidden ? $hidden = 'hidden' : $hidden = '';
+        $this->settings->get('hidden') ? $hidden = 'hidden' : $hidden = '';
+        \d::d($this->settings->get('hidden'));
 
         include (dirname(__DIR__).'/View/error.tpl.php');
     }

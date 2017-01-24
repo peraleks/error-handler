@@ -1,39 +1,46 @@
 <?php
 
-
 namespace MicroMir\Error;
 
+use MicroMir\Error\Notifiers\HttpNotifier;
 
 class Settings
 {
-    public $user;
+    private $userSettings = [];
 
-    public $errorSettings;
+    private $currentNotifier;
 
-    const  DEFAULT = [
-        'display'   => false,
-        'log'       => false,
-        'logFile'   => '',
-        'trace'     => false,
-        'strLength' => 80,
-        'hideTrace' => true,
-    ];
-
-    const GUEST_MESSAGE = [
-        'header'  => '500 Internal Server Error',
-        'message' => [
-            'Сервер отдыхает. Зайдите позже.',
-            "Don't worry! Chip 'n Dale Rescue Rangers",
-        ]
-    ];
+    public $settingsError;
 
     public function __construct($file)
     {
         if (!is_string($file) || !file_exists($file) || !is_array($array = include $file)) {
-            $this->errorSettings = 'Error settings file';
-            $this->user = self::DEFAULT;
+            $this->settingsError = 'Error settings file';
         } else {
-            $this->user = array_merge(self::DEFAULT, $array);
+            $this->userSettings = $array;
         }
+    }
+
+    public function getNotifiers($devMode)
+    {
+        return [
+          HttpNotifier::class => [],
+        ];
+    }
+
+    public function devMode()
+    {
+        return true;
+    }
+
+    public function get(string $param)
+    {
+        if (!isset($this->userSettings[$this->currentNotifier][$param])) return null;
+        return $this->userSettings[$this->currentNotifier][$param];
+    }
+
+    public function setNotifierClass($notifierClass)
+    {
+        $this->currentNotifier = $notifierClass;
     }
 }

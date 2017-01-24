@@ -3,20 +3,18 @@
 namespace MicroMir\Error\Notifiers;
 
 use MicroMir\Error\ErrorObjects\AbstractErrorObject;
+use MicroMir\Error\Settings;
 
 abstract class AbstractNotifier
 {
     protected $obj;
 
-    protected $hidden;
+    protected $settings;
 
-    protected $handleTrace;
-
-    public function __construct(AbstractErrorObject $obj, bool $handleTrace = true, bool $hidden = true)
+    public function __construct(AbstractErrorObject $obj, Settings $settings)
     {
         $this->obj = $obj;
-        $this->handleTrace = $handleTrace;
-        $this->hidden = $hidden;
+        $this->settings = $settings;
         $this->display();
     }
 

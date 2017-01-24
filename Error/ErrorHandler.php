@@ -7,7 +7,6 @@ use MicroMir\Error\ErrorObjects\CustomExceptionObject;
 use MicroMir\Error\ErrorObjects\ErrorObject;
 use MicroMir\Error\ErrorObjects\ExceptionObject;
 use MicroMir\Error\ErrorObjects\ShutdownObject;
-use MicroMir\Error\Notifiers\HttpNotifier;
 
 class ErrorHandler
 {
@@ -61,11 +60,12 @@ class ErrorHandler
 
     private function handle(AbstractErrorObject $obj)
     {
-        if (!$this->settings) $this->settings = new Settings($this->settingsFile);
-//        if (defined($this->settings->user['']))
+        $this->settings ?: $this->settings = new Settings($this->settingsFile);
 
-        if (!$this->settings->user['display'])  new HttpNotifier($obj);
-//        if ($this->log)  new LogNotifier($obj);
+        foreach ($this->settings->getNotifiers($this->settings->devMode()) as $notifierClass => $arr) {
+            $this->settings->setNotifierClass($notifierClass);
+            new $notifierClass($obj, $this->settings);
+        }
     }
 
 
