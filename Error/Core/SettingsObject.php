@@ -18,7 +18,9 @@ class SettingsObject
 
     public $settingsError;
 
-    public function __construct($file)
+    private $handlerClass;
+
+    public function __construct($file, $handlerClass)
     {
         if (!is_string($file) || !file_exists($file)) {
             $this->settingsError = 'Error in the name of the settings file';
@@ -31,6 +33,7 @@ class SettingsObject
             }
         }
         $this->productionMode() ?: $this->mode = 'DEV';
+        $this->handlerClass = $handlerClass;
     }
 
     public function setNotifierClass($notifierClass)
@@ -42,6 +45,11 @@ class SettingsObject
     {
         if (PHP_SAPI === 'cli') return $this->settings['CLI'];
         return $this->settings[$this->mode];
+    }
+
+    public function getHandlerClass()
+    {
+        return $this->handlerClass;
     }
 
     public function productionMode()

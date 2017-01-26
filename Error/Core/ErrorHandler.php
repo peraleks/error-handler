@@ -59,7 +59,7 @@ class ErrorHandler
     private function handle(AbstractErrorObject $obj)
     {
         if (!$this->helper) {
-            $this->helper = new Helper(new SettingsObject($this->settingsFile));
+            $this->helper = new Helper(new SettingsObject($this->settingsFile, __CLASS__));
         }
         $this->helper->handle($obj);
     }

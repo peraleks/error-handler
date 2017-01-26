@@ -25,6 +25,12 @@ abstract class AbstractTraceHandler
     protected function handleTrace()
     {
         for ($i = 0; $i < count($this->dBTrace); ++$i) {
+            //TODO обрезание trace до вызова обработчика
+//            \d::d($this->settings->getHandlerClass());
+            if (isset($this->dBTrace[$i]['class'])
+                && $this->dBTrace[$i]['class']
+                == $this->settings->getHandlerClass()) continue;
+
             //обработка имени файла
             $this->missingKey($i, 'file');
             $this->fileName($i);
@@ -43,10 +49,7 @@ abstract class AbstractTraceHandler
 
             //обработка аргументов
             $this->arr[$i]['args'] = [];
-            //TODO обрезание trace до вызова обработчика
-            if (!empty($this->dBTrace[$i]['class']) || $this->dBTrace[$i]['class'] != __CLASS__) {
-                !$this->missingKey($i, 'args') ?: $this->dBTrace[$i]['args'] = [];
-            }
+            isset($this->dBTrace[$i]['args']) ?: $this->dBTrace[$i]['args'] = [];
             foreach ($this->dBTrace[$i]['args'] as $arg) {
                     if (is_object($arg)) $this->objectArg($i, $arg);
                 elseif (is_array($arg))  $this->arrayArg($i, $arg);

@@ -7,7 +7,6 @@ use MicroMir\Error\Trace\CliTraceHandler;
 
 class CliNotifier extends AbstractNotifier
 {
-        //TODO
     const ERROR      = "\033[30;41m";
     const WARNING    = "\033[31;43m";
     const NOTICE     = "\033[1;30;43m";
@@ -15,6 +14,7 @@ class CliNotifier extends AbstractNotifier
     const DEPRECATED = "\033[30;47m";
     const CYAN       = "\033[0;36m";
     const GRAY       = "\033[0;37m";
+    const MAGENTA    = "\033[1;35m";
 
     public $codeColor = [
         E_ERROR             => self::ERROR,
@@ -50,11 +50,11 @@ class CliNotifier extends AbstractNotifier
 
         echo
             "\n".$this->codeColor[$code]."[$code] $eName $rst".self::CYAN." $file::$line $rst \n"
-            .self::GRAY.$message.$rst."\n\n";
-
+            .self::GRAY.$message.$rst."\n";
+        //TODO показать ли trace
         if (!true) return;
 
-        $trace = (new CliTraceHandler($this->obj->getTrace(), $this->settings));
+        echo (new CliTraceHandler($this->obj->getTrace(), $this->settings))->result();
 
 
     }
