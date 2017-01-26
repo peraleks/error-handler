@@ -13,8 +13,8 @@ class ExceptionObject extends AbstractErrorObject
         $this->file    = $obj->getFile();
         $this->line    = $obj->getLine();
 
-            if ($obj instanceof \Error) $this->code = E_ERROR;
-        elseif ($obj instanceof \ParseError) $this->code = E_PARSE;
+        if ($obj instanceof \ParseError) $this->code = E_PARSE;
+        elseif ($obj instanceof \Error) $this->code = E_ERROR;
         elseif ($obj instanceof \Exception && $this->code == 0) $this->code = 'NCE';
 
         $this->name = self::getErrorName($this->code);

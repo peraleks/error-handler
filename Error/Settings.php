@@ -4,7 +4,7 @@ namespace MicroMir\Error;
 
 class Settings
 {
-    private $settings = ['APP_DIR' => ' ', 'DEV' => [], 'PROD' => []];
+    private $settings = ['APP_DIR' => ' ', 'CLI' => [], 'DEV' => [], 'PROD' => []];
 
     private $currentNotifier;
 
@@ -30,11 +30,12 @@ class Settings
     public function setNotifierClass($notifierClass)
     {
         $this->currentNotifier = $notifierClass;
-        \d::d($this);
+//        \d::d($this);
     }
 
     public function getNotifiers()
     {
+        if (PHP_SAPI === 'cli') return $this->settings['CLI'];
         return $this->settings[$this->mode];
     }
 

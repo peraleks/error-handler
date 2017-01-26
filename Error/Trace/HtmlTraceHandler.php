@@ -34,19 +34,18 @@ class HtmlTraceHandler extends AbstractTraceHandler
 
     public function __construct(array $dBTrace, Settings $settings)
     {
-        !is_int($settings->get('stringLength'))
-            ?: $this->stringLength = $settings->get('stringLength');
+        !is_int(${0} = $settings->get('stringLength'))
+            ?: $this->stringLength = ${0};
         parent::__construct($dBTrace, $settings);
     }
 
     protected function fileName(int $i)
     {
         $fileParts = explode('/', $this->dBTrace[$i]['file']);
+        //получаем имя файла без пути
+        $this->arr[$i]['file'] = static::FILE.array_pop($fileParts).static::TD;
 
-        //получаем имя файла без пути и расширения
-        $this->arr[$i]['file'] = static::FILE.rtrim(array_pop($fileParts), '.php').static::TD;
-
-        //получаем путь файла без имени и обрезаем путь до веб-папки для экономии пространства в таблице
+        //получаем путь (уже без имени файла) относительно корня приложения для экономии пространства в таблице
         $path = str_replace($this->settings->appDir().'/', '', implode('/', $fileParts).'/');
         $this->arr[$i]['path'] = static::PATH.$path.static::TD;
     }
@@ -56,14 +55,15 @@ class HtmlTraceHandler extends AbstractTraceHandler
         $this->arr[$i]['line'] = static::LINE.$this->dBTrace[$i]['line'].static::TD;
     }
 
-    protected function className(int $i, string $separator)
+    protected function className(int $i)
     {
         //получаем имя класса без пространства имён
         $classParts = explode('\\', $this->dBTrace[$i]['class']);
         $this->arr[$i]['class'] = static::CLASS_NAME.array_pop($classParts).static::TD;
 
         //получаем пространство имён без имени класса
-        $this->arr[$i]['nameSpace'] = static::N_SPACE.implode('\\', $classParts).$separator.static::TD;
+        $classParts[] = '';
+        $this->arr[$i]['nameSpace'] = static::N_SPACE.implode('\\', $classParts).static::TD;
     }
 
     protected function functionName(int $i)

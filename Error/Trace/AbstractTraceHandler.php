@@ -27,20 +27,16 @@ abstract class AbstractTraceHandler
     {
         for ($i = 0; $i < count($this->dBTrace); ++$i) {
             //обработка имени файла
-            $this->missingKey($i, 'file')
-                ? $separator = ''
-                : $separator = '/';
-            $this->fileName($i, $separator);
+            $this->missingKey($i, 'file');
+            $this->fileName($i);
 
             //обработка номера строки
             $this->missingKey($i, 'line');
             $this->line($i);
 
             //обработка имени класса
-            $this->missingKey($i, 'class')
-                ? $separator = ''
-                : $separator = '\\';
-            $this->className($i, $separator);
+            $this->missingKey($i, 'class');
+            $this->className($i);
 
             //обработка имени функции
             $this->missingKey($i, 'function');
@@ -48,6 +44,7 @@ abstract class AbstractTraceHandler
 
             //обработка аргументов
             $this->arr[$i]['args'] = [];
+            //TODO обрезание trace до вызова обработчика
             if (!empty($this->dBTrace[$i]['class']) || $this->dBTrace[$i]['class'] != __CLASS__) {
                 !$this->missingKey($i, 'args') ?: $this->dBTrace[$i]['args'] = [];
             }
@@ -63,7 +60,7 @@ abstract class AbstractTraceHandler
             //подсчёт наибольшего количеста аргументов
             $this->countArgs($i);
         }
-        //подготовка http таблицы
+        //подготовка html таблицы
         $this->httpTable();
     }
 
@@ -80,7 +77,7 @@ abstract class AbstractTraceHandler
 
     abstract protected function line(int $i);
 
-    abstract protected function className(int $i, string $separator);
+    abstract protected function className(int $i);
 
     abstract protected function functionName(int $i);
 
