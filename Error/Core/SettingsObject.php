@@ -1,10 +1,16 @@
 <?php
 
-namespace MicroMir\Error;
+namespace MicroMir\Error\Core;
 
-class Settings
+class SettingsObject
 {
-    private $settings = ['APP_DIR' => ' ', 'CLI' => [], 'DEV' => [], 'PROD' => []];
+    private $settings = [
+        'ERROR_REPORTING' => E_ALL,
+        'APP_DIR'     => ' ',
+        'DEV'         => [],
+        'PROD'        => [],
+        'CLI'         => [],
+    ];
 
     private $currentNotifier;
 
@@ -24,13 +30,12 @@ class Settings
                 //TODO обработка ошибки подключения файла
             }
         }
-        !$this->devMode() ?: $this->mode = 'DEV';
+        $this->productionMode() ?: $this->mode = 'DEV';
     }
 
     public function setNotifierClass($notifierClass)
     {
         $this->currentNotifier = $notifierClass;
-//        \d::d($this);
     }
 
     public function getNotifiers()
@@ -39,15 +44,16 @@ class Settings
         return $this->settings[$this->mode];
     }
 
-    public function devMode()
+    public function productionMode()
     {
-        return true;
+        return false;
         //TODO определение режима разработчика
     }
 
     public function get(string $param)
     {
         //TODO обработка ошибки нестрокового типа аргумента $param
+        if ($param == 'ERROR_REPORTING') return $this->settings['ERROR_REPORTING'];
         if (!isset($this->settings[$this->mode][$this->currentNotifier][$param])) return null;
         return $this->settings[$this->mode][$this->currentNotifier][$param];
     }

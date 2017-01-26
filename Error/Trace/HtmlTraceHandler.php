@@ -3,7 +3,7 @@
 namespace MicroMir\Error\Trace;
 
 
-use MicroMir\Error\Settings;
+use MicroMir\Error\Core\SettingsObject;
 
 class HtmlTraceHandler extends AbstractTraceHandler
 {
@@ -32,7 +32,7 @@ class HtmlTraceHandler extends AbstractTraceHandler
     const TABLE_END    = '</table>';
     const EMPTY_ARGS   = '<td class="trace_args empty"></td>';
 
-    public function __construct(array $dBTrace, Settings $settings)
+    public function __construct(array $dBTrace, SettingsObject $settings)
     {
         !is_int(${0} = $settings->get('stringLength'))
             ?: $this->stringLength = ${0};

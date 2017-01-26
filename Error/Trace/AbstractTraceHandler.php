@@ -2,8 +2,7 @@
 
 namespace MicroMir\Error\Trace;
 
-
-use MicroMir\Error\Settings;
+use MicroMir\Error\Core\SettingsObject;
 
 abstract class AbstractTraceHandler
 {
@@ -15,7 +14,7 @@ abstract class AbstractTraceHandler
 
     protected $settings;
 
-    public function __construct(array $dBTrace, Settings $settings)
+    public function __construct(array $dBTrace, SettingsObject $settings)
     {
         $this->dBTrace = $dBTrace;
         $this->settings = $settings;
