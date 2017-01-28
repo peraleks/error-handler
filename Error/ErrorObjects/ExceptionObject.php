@@ -8,6 +8,7 @@ class ExceptionObject extends AbstractErrorObject
     public function __construct(array $dBTrace)
     {
         $obj = $dBTrace[0]['args'][0];
+        \d::d($obj);
         $this->code    = $obj->getCode();
         $this->message = $obj->getMessage();
         $this->file    = $obj->getFile();
@@ -15,14 +16,10 @@ class ExceptionObject extends AbstractErrorObject
 
         if ($obj instanceof \ParseError) $this->code = E_PARSE;
         elseif ($obj instanceof \Error) $this->code = E_ERROR;
-        elseif ($obj instanceof \Exception && $this->code == 0) $this->code = 'NCE';
+        elseif ($obj instanceof \Exception && $this->code == 0) $this->code = 3;
 
-        $this->name = self::getErrorName($this->code);
-
-        $arr = [];
-        $arr[0]['file'] = $this->file;
-        $arr[0]['line'] = $this->line;
-        $this->trace = array_merge($arr, $obj->getTrace());
+        $this->name    = self::getErrorName($this->code);
+        $this->trace   = $obj->getTrace();
 
     }
 }
