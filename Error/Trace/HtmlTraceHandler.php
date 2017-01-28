@@ -89,9 +89,10 @@ class HtmlTraceHandler extends AbstractTraceHandler
         //формируем текстовый предпросмотр массива не болле 2000 символов
         ob_start();
         print_r($arg);
-        $preview = mb_substr(ob_get_clean(), 0, 2000);
+        $title = mb_substr(ob_get_clean(), 0, 2000);
+        $title = htmlentities($title, ENT_SUBSTITUTE | ENT_COMPAT);
         $count = '['.count($arg).']';
-        $this->arr[$i]['args'][] = static::ARRAY.$preview.static::TITLE_END.'array'.$count.static::TD;
+        $this->arr[$i]['args'][] = static::ARRAY.$title.static::TITLE_END.'array'.$count.static::TD;
     }
 
     protected function stringArg(int $i, $arg)
@@ -107,7 +108,7 @@ class HtmlTraceHandler extends AbstractTraceHandler
             $length = mb_strlen($arg);
             if ($length > $this->stringLength) {
                 $end = static::STRING_END;
-                $arg = htmlentities($arg, ENT_SUBSTITUTE);
+                $arg = htmlentities($arg, ENT_SUBSTITUTE | ENT_COMPAT);
                 //обрезаем строку для таблицы
                 $str = mb_substr($arg, 0, $this->stringLength);
                 $title = 'length = '.$length.' --> '.$arg;
@@ -152,7 +153,7 @@ class HtmlTraceHandler extends AbstractTraceHandler
         $l = 1;
         $this->traceResult = '';
         $this->traceResult .= static::TABLE;
-//        \d::d($this->arr);
+        \d::d($this->arr);
         foreach ($this->arr as $value) {
             $this->traceResult
                 .= '<tr class="color'.($l = $l * -1).'">'
