@@ -5,7 +5,7 @@ div.error_box div.WARNING, div.USER_WARNING, div.CORE_WARNING, div.COMPILE_WARNI
 }
 
 div.error_box div.ERROR, div.CORE_ERROR, div.COMPILE_ERROR, div.USER_ERROR, div.RECOVERABLE_ERROR,
-div.not_caught_Exception
+div.UNCAUGHT_EXCEPTION
 {
     background-color: #ff0000;
 }
