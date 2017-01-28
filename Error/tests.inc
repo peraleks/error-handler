@@ -74,6 +74,10 @@ try{
 /** [1024]------------- E_USER_NOTICE */
 // trigger_error("E_USER_NOTICE", E_USER_NOTICE);
 
+
+/** [2048]-------------- E_STRICT */
+//
+
 /** [8192]------------- E_DEPRECATED */
 // class c {function f(){}} c::f();
 
@@ -90,15 +94,12 @@ try{
 //
 
 /** [64]--------------- E_COMPILE_ERROR */
-isset(NULL);
+//isset(NULL);
 
 /** [256]-------------- E_USER_ERROR */
 // trigger_error("E_USER_ERROR", E_USER_ERROR);
 
-/** [2048]-------------- E_STRICT */
-//
-
-/** [4096]-------------- E_STRICT */
+/** [4096]-------------- E_RECOVERABLE_ERROR */
 //class A{} echo new A();
 
 } catch (Throwable $e) {
