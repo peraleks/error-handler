@@ -13,5 +13,7 @@ class ShutdownObject extends AbstractErrorObject
         $this->file    = $error['file'];
         $this->line    = $error['line'];
         $this->trace   = debug_backtrace();
+        if ($this->code != E_COMPILE_WARNING) ob_end_clean();
+ 
     }
 }
