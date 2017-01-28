@@ -18,10 +18,10 @@ class Helper
     {
         \d::d($obj);
         $code = $obj->getCode();
-        if ($code !== ($code & $this->settings->get('ERROR_REPORTING'))) return false;
+        if ($code !== ($code & $this->settings->get('ERROR_REPORTING'))) return;
 
         $this->notify($obj);
-        return true;
+        if ($code == E_RECOVERABLE_ERROR) exit();
     }
 
     private function notify($obj)
