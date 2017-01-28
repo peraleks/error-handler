@@ -10,7 +10,7 @@ return [
     'DEV' => [
         \MicroMir\Error\Notifiers\HtmlNotifier::class => [
             'handleTrace'   => true,
-            'minimizeTrace' => true,
+//            'minimizeTrace' => true,
             'stringLength'  => 80,
             'fontSize'      => 15,
         ],
