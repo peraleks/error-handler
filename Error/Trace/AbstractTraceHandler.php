@@ -10,7 +10,7 @@ abstract class AbstractTraceHandler
 
     protected $traceResult;
 
-    protected $arr;
+    protected $arr = [];
 
     protected $settings;
 
@@ -26,7 +26,6 @@ abstract class AbstractTraceHandler
     {
         for ($i = 0; $i < count($this->dBTrace); ++$i) {
             //TODO обрезание trace до вызова обработчика
-//            \d::d($this->settings->getHandlerClass());
             if (isset($this->dBTrace[$i]['class'])
                 && $this->dBTrace[$i]['class']
                 == $this->settings->getHandlerClass()) continue;
