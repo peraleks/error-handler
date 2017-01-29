@@ -2,9 +2,6 @@
 
 namespace MicroMir\Error\Core;
 
-
-use MicroMir\Error\ErrorObjects\AbstractErrorObject;
-
 class Helper
 {
     private $settings;
@@ -14,7 +11,7 @@ class Helper
         $this->settings = $settings;
     }
 
-    public function handle(AbstractErrorObject $obj)
+    public function handle(ErrorObject $obj)
     {
         \d::d($obj);
         $code = $obj->getCode();

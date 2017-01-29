@@ -3,7 +3,7 @@
 namespace MicroMir\Error\Notifiers;
 
 use MicroMir\Error\Core\SettingsObject;
-use MicroMir\Error\ErrorObjects\AbstractErrorObject;
+use MicroMir\Error\Core\ErrorObject;
 
 abstract class AbstractNotifier
 {
@@ -11,7 +11,7 @@ abstract class AbstractNotifier
 
     protected $settings;
 
-    public function __construct(AbstractErrorObject $obj, SettingsObject $settings)
+    public function __construct(ErrorObject $obj, SettingsObject $settings)
     {
         $this->obj = $obj;
         $this->settings = $settings;
