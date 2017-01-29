@@ -12,7 +12,10 @@
     };
 </script>
 <div class="error_box" style="font-size: <?= $fontSize ?>px">
-    <div class="<?= $name ?> error_header"><?= '['.$code.'] '.$name; ?></div>
+    <div class="<?= $cssName ?> error_header">
+        <?= '['.$code.'] '.$name ?>
+        <span class="handler"> (<?= $handler ?>)</span>
+    </div>
     <div class="error_text error_content">
         <?= $message ?>
     </div>

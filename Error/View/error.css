@@ -5,12 +5,12 @@ div.error_box div.WARNING, div.USER_WARNING, div.CORE_WARNING, div.COMPILE_WARNI
 }
 
 div.error_box div.ERROR, div.CORE_ERROR, div.COMPILE_ERROR, div.USER_ERROR, div.RECOVERABLE_ERROR,
-div.UNCAUGHT_EXCEPTION
+div.unknown
 {
     background-color: #ff0000;
 }
 
-div.error_box .PARSE
+div.error_box .ParseError
 {
     background-color: #fa00ff;
 }
@@ -58,6 +58,10 @@ div.error_box div.error_header {
     padding: 5px;
     color: #fff;
     border-radius: 5px 5px 0 0;
+}
+
+div.error_box div.error_header span.handler {
+    font-size: 75%;
 }
 
 div.error_box div.error_content {

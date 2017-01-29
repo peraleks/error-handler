@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: X
- * Date: 21.01.2017
- * Time: 20:40
- */
 
 namespace MicroMir\Error\Notifiers;
 

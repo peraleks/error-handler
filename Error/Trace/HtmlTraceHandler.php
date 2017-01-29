@@ -153,7 +153,7 @@ class HtmlTraceHandler extends AbstractTraceHandler
         $l = 1;
         $this->traceResult = '';
         $this->traceResult .= static::TABLE;
-        \d::d($this->arr);
+//        \d::d($this->arr);
         foreach ($this->arr as $value) {
             $this->traceResult
                 .= '<tr class="color'.($l = $l * -1).'">'

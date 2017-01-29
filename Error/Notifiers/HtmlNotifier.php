@@ -11,6 +11,7 @@ class HtmlNotifier extends AbstractNotifier
     {
         $code    = $this->obj->getCode();
         $name    = $this->obj->getName();
+        $type    = $this->obj->getType();
         $message = $this->obj->getMessage();
         $path    = $this->settings->appDir();
         $file    = str_replace($path.'/', '', $this->obj->getFile());
@@ -24,6 +25,8 @@ class HtmlNotifier extends AbstractNotifier
         }
         $this->settings->get('minimizeTrace') ? $hidden = 'hidden' : $hidden = '';
         $fontSize = $this->settings->get('fontSize');
+        $code == E_ERROR ? $cssName = 'ERROR' : $cssName = $name;
+        $handler = $this->obj->getHandler();
 
         include (dirname(__DIR__).'/View/error.tpl.php');
     }
