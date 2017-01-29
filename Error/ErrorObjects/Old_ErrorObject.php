@@ -5,8 +5,9 @@ namespace MicroMir\Error\ErrorObjects;
 
 class ErrorObject extends AbstractErrorObject
 {
-    public function __construct(array $dBTrace)
+    public function __construct(array $dBTrace, \Throwable $thr)
     {
+        \d::d($thr);
         $args          = $dBTrace[0]['args'];
         $this->code    = $args[0];
         $this->name    = self::getErrorName($this->code);
