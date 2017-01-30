@@ -23,23 +23,13 @@ class ErrorHandler
 
     static public function instance($settingsFile = null)
     {
-        self::$instance
-            ?: self::$instance = new self($settingsFile);
-        return self::$instance;
+        return self::$instance ?? self::$instance = new self($settingsFile);
     }
 
     public function error($code, $message, $file, $line)
     {
         $this->handle(
-            new ErrorObject(
-                new \ErrorException(
-                    $message,
-                    $code,
-                    $code,
-                    $file,
-                    $line
-                ), 'error handler'
-            )
+            new ErrorObject(new \ErrorException($message, $code, $code, $file, $line),'error handler')
         );
         return true;
     }
@@ -51,16 +41,11 @@ class ErrorHandler
 
     public function shutdown()
     {
-        if (${0} = error_get_last()) {
+        if ($e = error_get_last()) {
             $this->handle(
                 new ErrorObject(
-                    new \ErrorException(
-                        ${0}['message'],
-                        ${0}['type'],
-                        ${0}['type'],
-                        ${0}['file'],
-                        ${0}['line']
-                    ), 'shutdown function'
+                    new \ErrorException($e['message'], $e['type'], $e['type'], $e['file'], $e['line']),
+                    'shutdown function'
                 )
             );
         }
@@ -69,7 +54,7 @@ class ErrorHandler
     private function handle(ErrorObject $obj)
     {
         $this->helper
-            ?: $this->helper = new Helper(new SettingsObject($this->settingsFile, ""));
+            ?: $this->helper = new Helper(new SettingsObject($this->settingsFile));
         $this->helper->handle($obj);
     }
 }
