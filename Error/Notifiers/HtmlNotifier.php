@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace MicroMir\Error\Notifiers;
 
@@ -9,6 +10,7 @@ class HtmlNotifier extends AbstractNotifier
 {
     protected function display()
     {
+        \d::d($this->obj);
         $code    = $this->obj->getCode();
         $name    = $this->obj->getName();
         $type    = $this->obj->getType();
@@ -18,7 +20,7 @@ class HtmlNotifier extends AbstractNotifier
         $line    = $this->obj->getLine();
         $style   = file_get_contents(dirname(__DIR__).'/View/error.css');
         if ($this->settings->get('handleTrace')) {
-            $trace = (new HtmlTraceHandler($this->obj->getTrace(), $this->settings))->result();
+            $trace = (new HtmlTraceHandler($this->obj->getTrace(), $this->settings))->getTrace();
             $style .= file_get_contents(dirname(__DIR__).'/View/trace.css');
         } else {
             $trace = '';

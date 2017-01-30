@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace MicroMir\Error\Notifiers;
 
@@ -22,7 +23,6 @@ class CliNotifier extends AbstractNotifier
         E_COMPILE_ERROR     => self::ERROR,
         E_USER_ERROR        => self::ERROR,
         E_RECOVERABLE_ERROR => self::ERROR,
-        'NCE'               => self::ERROR,
 
         E_WARNING           => self::WARNING,
         E_CORE_WARNING      => self::WARNING,
@@ -54,7 +54,7 @@ class CliNotifier extends AbstractNotifier
         //TODO показать ли trace
         if (!true) return;
 
-        echo (new CliTraceHandler($this->obj->getTrace(), $this->settings))->result();
+        echo (new CliTraceHandler($this->obj->getTrace(), $this->settings))->getTrace();
 
 
     }
