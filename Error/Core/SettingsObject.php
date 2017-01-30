@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
 
 namespace MicroMir\Error\Core;
 
-class SettingsObject
+
+class SettingsObject implements SettingsInterface
 {
     private $settings = [
         'ERROR_REPORTING' => E_ALL,
@@ -18,9 +20,7 @@ class SettingsObject
 
     public $settingsError;
 
-    private $handlerClass;
-
-    public function __construct($file, $handlerClass)
+    public function __construct($file)
     {
         if (!is_string($file) || !file_exists($file)) {
             $this->settingsError = 'Error in the name of the settings file';
@@ -33,26 +33,20 @@ class SettingsObject
             }
         }
         $this->productionMode() ?: $this->mode = 'DEV';
-        $this->handlerClass = $handlerClass;
     }
 
-    public function setNotifierClass($notifierClass)
+    public function setNotifierClass(string $notifierClass)
     {
         $this->currentNotifier = $notifierClass;
     }
 
-    public function getNotifiers()
+    public function getNotifiers(): array
     {
         if (PHP_SAPI === 'cli') return $this->settings['CLI'];
         return $this->settings[$this->mode];
     }
 
-    public function getHandlerClass()
-    {
-        return $this->handlerClass;
-    }
-
-    public function productionMode()
+    public function productionMode(): bool
     {
         return false;
         //TODO определение режима разработчика
@@ -61,13 +55,16 @@ class SettingsObject
     public function get(string $param)
     {
         //TODO обработка ошибки нестрокового типа аргумента $param
-        if ($param == 'ERROR_REPORTING') return $this->settings['ERROR_REPORTING'];
-        if (!isset($this->settings[$this->mode][$this->currentNotifier][$param])) return null;
+        if ($param == 'ERROR_REPORTING')
+            return $this->settings['ERROR_REPORTING'];
+        if (!isset($this->settings[$this->mode][$this->currentNotifier][$param]))
+            return null;
         return $this->settings[$this->mode][$this->currentNotifier][$param];
     }
 
-    public function appDir()
+    public function appDir(): string
     {
+        //TODO оповещение об ощибочных настройках
         if (is_string($this->settings['APP_DIR'])) {
             return $this->settings['APP_DIR'];
         }
