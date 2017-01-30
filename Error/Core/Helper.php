@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace MicroMir\Error\Core;
 
@@ -6,14 +7,14 @@ class Helper
 {
     private $settings;
 
-    public function __construct(SettingsObject $settings)
+    public function __construct(SettingsInterface $settings)
     {
         $this->settings = $settings;
     }
 
     public function handle(ErrorObject $obj)
     {
-        \d::d($obj);
+//        \d::d($obj);
         $code = $obj->getCode();
         if ($code !== ($code & $this->settings->get('ERROR_REPORTING'))) return;
 
@@ -23,7 +24,6 @@ class Helper
 
     private function notify($obj)
     {
-//        \d::d($this->settings);
         foreach ($this->settings->getNotifiers() as $notifierClass => ${0}) {
             $this->settings->setNotifierClass($notifierClass);
             new $notifierClass($obj, $this->settings);
