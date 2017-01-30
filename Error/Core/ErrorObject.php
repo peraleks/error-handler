@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace MicroMir\Error\Core;
 
-class ErrorObject
+final class ErrorObject
 {
     protected $throwable;
 
@@ -39,9 +39,7 @@ class ErrorObject
         $this->throwable = $throwable;
         $this->code = $this->throwable->getCode();
         if ($this->throwable instanceof \ErrorException) {
-            isset(self::$codeName[$this->code])
-                ? $this->name = self::$codeName[$this->code]
-                : $this->name = "unknown";
+            $this->name = self::$codeName[$this->code] ?? "unknown";
         } else {
             $this->throwable instanceof \ParseError ? $this->code = E_PARSE : $this->code = E_ERROR;
             $this->name = get_class($this->throwable);
