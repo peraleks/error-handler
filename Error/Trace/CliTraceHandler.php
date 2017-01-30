@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace MicroMir\Error\Trace;
 
@@ -16,95 +17,96 @@ class CliTraceHandler extends AbstractTraceHandler
 
     protected $stringLength = 80;
 
+    protected function before()
+    {
+        //TODO валидация настроек
+    }
+
     protected function space(string $string, int $align = null)
     {
-        $align = $align ?: $this->align;
-        return sprintf("%".$align."s", $string).' ';
+        return sprintf("%".($align ?? $this->align)."s", $string).' ';
     }
 
-    protected function fileName(int $i)
+    protected function file(string $file, &$arr)
     {
-        $this->arr[$i]['file'] = $this->dBTrace[$i]['file'];
+        $arr['file'] = $file;
     }
 
-    protected function line(int $i)
+    protected function line(int $line, array &$arr)
     {
-        $this->arr[$i]['line'] = $this->dBTrace[$i]['line'];
+        $arr['line'] = (string)$line;
     }
 
-    protected function className(int $i)
+    protected function className(string $class, array &$arr)
     {
-        $this->arr[$i]['class'] = $this->dBTrace[$i]['class'];
+        $arr['class'] = $class;
     }
 
-    protected function functionName(int $i)
+    protected function functionName(string $function, array &$arr)
     {
-        $this->arr[$i]['function'] = $this->dBTrace[$i]['function'];
+        $arr['function'] = $function;
     }
 
-    protected function objectArg(int $i, $arg)
+    protected function objectArg($arg): string
     {
-        $this->arr[$i]['args'][] = static::GREEN.$this->space('obj').static::rst.get_class($arg);
+        return static::GREEN.$this->space('obj').static::rst.get_class($arg);
     }
 
-    protected function arrayArg(int $i, $arg)
+    protected function arrayArg($arg): string
     {
-        ${0} = '';
-        foreach ($arg as $key => $v) {
-            ${0} .= '['.$key.']=>..., ';
-            if (mb_strlen(${0}) > $this->stringLength) break;
+        $preview = '';
+        foreach ($arg as $key => ${0}) {
+            $preview .= '['.$key.']=>..., ';
+            if (mb_strlen($preview) > $this->stringLength) break;
         }
-        $this->arr[$i]['args'][] = static::GREEN.$this->space('array['.count($arg).']').static::rst.${0};
+        return static::GREEN.$this->space('array['.count($arg).']').static::rst.$preview;
     }
 
-    protected function stringArg(int $i, $arg)
+    protected function stringArg($arg): string
     {
         $length = mb_strlen($arg);
-        ${0} = static::GREEN.$this->space('['.$length.']str').static::rst.substr($arg, 0, $this->stringLength);
-        if ($length > $this->stringLength) ${0} .= ' ...';
-        $this->arr[$i]['args'][] = ${0};
+        $str = static::GREEN.$this->space('['.$length.']str').static::rst
+            .static::GRAY.substr($arg, 0, $this->stringLength);
+        if ($length > $this->stringLength) $str .= '...';
+        return $str.static::rst;
     }
 
-    protected function numericArg(int $i, $arg)
+    protected function numericArg($arg): string
     {
-        $this->arr[$i]['args'][] = static::GREEN.$this->space('num').static::rst.$arg;
+        return static::GREEN.$this->space('num').static::rst.$arg;
     }
 
-    protected function boolArg(int $i, $arg)
+    protected function boolArg($arg): string
     {
-        $arg === true ? ${0} = 'true' : ${0} = 'false';
-        $this->arr[$i]['args'][] = static::GREEN.$this->space('bool').static::rst.${0};
+        $arg = $arg === true ? 'true' : 'false';
+        return static::GREEN.$this->space('bool').static::rst.$arg;
     }
 
-    protected function nullArg(int $i)
+    protected function nullArg(): string
     {
-        $this->arr[$i]['args'][] = static::GREEN.$this->space('null').static::rst;
+        return static::GREEN.$this->space('null').static::rst;
     }
 
-    protected function otherArg(int $i, $arg)
+    protected function otherArg($arg): string
     {
-        $this->arr[$i]['args'][] = static::GREEN.$this->space('other').static::rst.(string)$arg;
+        return static::GREEN.$this->space('other').static::rst.(string)$arg;
     }
 
-    protected function countArgs(int $i) { return; }
-
-    protected function httpTable()
+    protected function completion(): string
     {
-        $this->traceResult .= self::MAGENTA.'trace >>>'.static::rst."\n";
+        $trace = '';
+        $trace .= self::MAGENTA.'trace >>>'.static::rst."\n";
         foreach ($this->arr as $v) {
-
-            $this->traceResult .= static::CYAN.$v['file'].'::'.$v['line'].static::rst." ";
-
-            $this->traceResult .= $v['class']."\n".' -> ';
-
-            $this->traceResult .= static::YELLOW.$v['function'].'('.static::rst;
+            $trace .= static::CYAN.$v['file'].'::'.$v['line'].static::rst." ";
+            $trace .= $v['class']."\n".' -> ';
+            $trace .= static::YELLOW.$v['function'].'('.static::rst;
 
             foreach ($v['args'] as $arg) {
-                $this->traceResult .= "\n".$arg;
+                $trace .= "\n".$arg;
             }
-            $this->traceResult .= "\n".static::YELLOW.$this->space(')', 5).static::rst."\n";
+            $trace .= "\n".static::YELLOW.$this->space(')', 5).static::rst."\n";
         }
-        $this->traceResult .= self::MAGENTA.'<<< trace_end'.static::rst."\n";
+        return $trace .= self::MAGENTA.'<<< trace_end'.static::rst."\n";
     }
 
 }

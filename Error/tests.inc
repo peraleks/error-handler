@@ -88,8 +88,7 @@ try{
 
 /** [4096]-------------- E_RECOVERABLE_ERROR ---- error_handler
  Если не зарегистрирована error_handler
- будет сгенерировано Catchable fatal error,
- выполнение скрипта будет прервано.
+ получим Catchable fatal error, выполнение скрипта будет прервано.
  Micro-error-handler, являясь глобальным обработчиком, прервёт скрипт после оповещения.
  Если необходимо продолжать выполнение скрипта, производим регистрацию и дерегистрацию
  локальной error_handler в конкретном месте скрипта */
@@ -111,10 +110,10 @@ try{
 //isset(NULL);
 
 /** [256]-------------- E_USER_ERROR ------------ error_handler */
-// trigger_error("E_USER_ERROR", E_USER_ERROR);
+ trigger_error("E_USER_ERROR", E_USER_ERROR);
 
 
 } catch (Throwable $e) {
     echo 'перехвачено '.$e;
 }
-echo "\nВыполнение скрипта не прервано";
+echo "\nВыполнение скрипта не прервано\n";

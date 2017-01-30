@@ -1,102 +1,88 @@
 <?php
+declare(strict_types=1);
 
 namespace MicroMir\Error\Trace;
 
-use MicroMir\Error\Core\SettingsObject;
+use MicroMir\Error\Core\SettingsInterface;
 
 abstract class AbstractTraceHandler
 {
-    protected $dBTrace;
+    protected $settings;
 
     protected $traceResult;
 
     protected $arr = [];
 
-    protected $settings;
+    protected $maxNumberOfArgs = 0;
 
-    public function __construct(array $dBTrace, SettingsObject $settings)
+    public final function __construct(array $dBTrace, SettingsInterface $settings)
     {
-        $this->dBTrace = $dBTrace;
         $this->settings = $settings;
-        $this->handleTrace();
-
+        $this->before();
+        $this->handleTrace($dBTrace);
     }
 
-    protected function handleTrace()
+    abstract protected function before();
+
+    protected final function handleTrace($dBTrace)
     {
-        for ($i = 0; $i < count($this->dBTrace); ++$i) {
+        for ($i = 0; $i < count($dBTrace); ++$i) {
+            $arr =& $this->arr[$i];
+            $dbt =& $dBTrace[$i];
             //обработка имени файла
-            $this->missingKey($i, 'file');
-            $this->fileName($i);
-
+            $this->file($dbt['file'] ?? '', $arr);
             //обработка номера строки
-            $this->missingKey($i, 'line');
-            $this->line($i);
-
+            $this->line($dbt['line'] ?? 0, $arr);
             //обработка имени класса
-            $this->missingKey($i, 'class');
-            $this->className($i);
-
+            $this->className($dbt['class'] ?? '', $arr);
             //обработка имени функции
-            $this->missingKey($i, 'function');
-            $this->functionName($i);
-
+            $this->functionName($dbt['function'] ?? '', $arr);
             //обработка аргументов
-            $this->arr[$i]['args'] = [];
-            isset($this->dBTrace[$i]['args']) ?: $this->dBTrace[$i]['args'] = [];
-            foreach ($this->dBTrace[$i]['args'] as $arg) {
-                    if (is_object($arg)) $this->objectArg($i, $arg);
-                elseif (is_array($arg))  $this->arrayArg($i, $arg);
-                elseif (is_string($arg)) $this->stringArg($i, $arg);
-                elseif (is_numeric($arg))$this->numericArg($i, $arg);
-                elseif (is_bool($arg))   $this->boolArg($i, $arg);
-                elseif (is_null($arg))   $this->nullArg($i);
-                else $this->otherArg($i, $arg);
+            $arr['args'] = [];
+            $args =& $arr['args'];
+            isset($dbt['args']) ?: $dbt['args'] = [];
+            foreach ($dbt['args'] as $arg) {
+                    if (is_object($arg))  $args[] = $this->objectArg($arg);
+                elseif (is_array($arg))   $args[] = $this->arrayArg($arg);
+                elseif (is_string($arg))  $args[] = $this->stringArg($arg);
+                elseif (is_numeric($arg)) $args[] = $this->numericArg($arg);
+                elseif (is_bool($arg))    $args[] = $this->boolArg($arg);
+                elseif (is_null($arg))    $args[] = $this->nullArg();
+                else $args[] = $this->otherArg($arg);
             }
             //подсчёт наибольшего количеста аргументов
-            $this->countArgs($i);
+            $cnt = count($arr['args']);
+            $this->maxNumberOfArgs > $cnt ?: $this->maxNumberOfArgs = $cnt;
         }
-        //подготовка html таблицы
-        $this->httpTable();
+        //завершающяя обработка (формирование строки)
+        $this->traceResult = $this->completion();
     }
 
-    protected function missingKey($i, $key)
-    {
-        if (!isset($this->dBTrace[$i][$key])) {
-            $this->dBTrace[$i][$key] = '';
-            return true;
-        }
-        return false;
-    }
+    abstract protected function file(string $file, &$arr);
 
-    abstract protected function fileName(int $i);
+    abstract protected function line(int $line, array &$arr);
 
-    abstract protected function line(int $i);
+    abstract protected function className(string $class, array &$arr);
 
-    abstract protected function className(int $i);
+    abstract protected function functionName(string $function, array &$arr);
 
-    abstract protected function functionName(int $i);
+    abstract protected function objectArg($arg): string;
 
-    abstract protected function objectArg(int $i, $arg);
+    abstract protected function arrayArg($arg): string ;
 
-    abstract protected function arrayArg(int $i, $arg);
+    abstract protected function stringArg($arg): string;
 
-    abstract protected function stringArg(int $i, $arg);
+    abstract protected function numericArg($arg): string;
 
-    abstract protected function numericArg(int $i, $arg);
+    abstract protected function boolArg($arg): string;
 
-    abstract protected function boolArg(int $i, $arg);
+    abstract protected function nullArg(): string;
 
-    abstract protected function nullArg(int $i);
+    abstract protected function otherArg($arg): string;
 
-    abstract protected function otherArg(int $i, $arg);
+    abstract protected function completion(): string ;
 
-    abstract protected function countArgs(int $i);
-
-    abstract protected function httpTable();
-
-
-    public function result(): string
+    public final function getTrace(): string
     {
         return $this->traceResult;
     }

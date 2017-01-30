@@ -1,15 +1,14 @@
 <?php
+declare(strict_types=1);
 
 namespace MicroMir\Error\Trace;
 
 
-use MicroMir\Error\Core\SettingsObject;
-
 class HtmlTraceHandler extends AbstractTraceHandler
 {
-    protected $countArgs;
-
     protected $stringLength = 80;
+
+    protected $titleLength = 1500;
 
     const TD         = '</td>';
     const FILE       = '<td class="trace_file">';
@@ -20,7 +19,7 @@ class HtmlTraceHandler extends AbstractTraceHandler
     const FUNC       = '<td class="trace_function">';
     const ARGS       = '<td class="trace_args">';
     const NUM        = '<td class="trace_args numeric">';
-    const TITLE_END  = '">';
+    const TAG_END    = '">';
     const STRING     = '<td class="trace_args string" title="';
     const ARRAY      = '<td class="trace_args array" title="';
     const BOOL       = '<td class="trace_args bool">';
@@ -31,150 +30,136 @@ class HtmlTraceHandler extends AbstractTraceHandler
     const TABLE        = '<table class="micro_trace">';
     const TABLE_END    = '</table>';
     const EMPTY_ARGS   = '<td class="trace_args empty"></td>';
+    const STRIPE       = '<tr class="color';
 
-    public function __construct(array $dBTrace, SettingsObject $settings)
+    protected function before()
     {
-        !is_int(${0} = $settings->get('stringLength'))
+        //TODO валидацю массива настроек
+        !is_int(${0} = $this->settings->get('stringLength'))
             ?: $this->stringLength = ${0};
-        parent::__construct($dBTrace, $settings);
     }
 
-    protected function fileName(int $i)
+    protected function file(string $file, &$arr)
     {
-        $fileParts = explode('/', $this->dBTrace[$i]['file']);
+        $parts = explode('/', $file);
         //получаем имя файла без пути
-        $this->arr[$i]['file'] = static::FILE.array_pop($fileParts).static::TD;
+        $arr['file'] = static::FILE.array_pop($parts).static::TD;
 
         //получаем путь (уже без имени файла) относительно корня приложения для экономии пространства в таблице
-        $path = str_replace($this->settings->appDir().'/', '', implode('/', $fileParts).'/');
-        $this->arr[$i]['path'] = static::PATH.$path.static::TD;
+        $path = str_replace($this->settings->appDir().'/', '', implode('/', $parts).'/');
+        $arr['path'] = static::PATH.$path.static::TD;
     }
 
-    protected function line(int $i)
+    protected function line(int $line, array &$arr)
     {
-        $this->arr[$i]['line'] = static::LINE.$this->dBTrace[$i]['line'].static::TD;
+        $arr['line'] = static::LINE.$line.static::TD;
     }
 
-    protected function className(int $i)
+    protected function className(string $class, array &$arr)
     {
         //получаем имя класса без пространства имён
-        $classParts = explode('\\', $this->dBTrace[$i]['class']);
-        $this->arr[$i]['class'] = static::CLASS_NAME.array_pop($classParts).static::TD;
+        $parts = explode('\\', $class);
+        $arr['class'] = static::CLASS_NAME.array_pop($parts).static::TD;
 
         //получаем пространство имён без имени класса
-        $classParts[] = '';
-        $this->arr[$i]['nameSpace'] = static::N_SPACE.implode('\\', $classParts).static::TD;
+        $parts[] = '';
+        $arr['nameSpace'] = static::N_SPACE.implode('\\', $parts).static::TD;
     }
 
-    protected function functionName(int $i)
+    protected function functionName(string $func, array &$arr)
     {
-        $this->arr[$i]['function'] = static::FUNC.$this->dBTrace[$i]['function'].static::TD;
+        $arr['function'] = static::FUNC.$func.static::TD;
     }
 
-    protected function objectArg(int $i, $arg)
+    protected function objectArg($arg): string
     {
-        $objectParts = explode('\\', get_class($arg));
+        $parts = explode('\\', get_class($arg));
 
         //имя класса без пространства имён
-        $obj = static::S_CLASS_NAME.array_pop($objectParts).static::SPAN;
+        $obj = static::S_CLASS_NAME.array_pop($parts).static::SPAN;
 
         //пространство имён без имени класса
-        $space = static::S_N_SPACE.implode('\\', $objectParts).'\\'.static::SPAN;
-
-        $this->arr[$i]['args'][] = static::ARGS.$space.$obj.static::TD;
+        $space = static::S_N_SPACE.implode('\\', $parts).'\\'.static::SPAN;
+        return
+            static::ARGS.$space.$obj.static::TD;
     }
 
-    protected function arrayArg(int $i, $arg)
+    protected function arrayArg($arg): string
     {
-        //формируем текстовый предпросмотр массива не болле 2000 символов
+        //формируем текстовый предпросмотр массива в title
         ob_start();
         print_r($arg);
-        $title = mb_substr(ob_get_clean(), 0, 2000);
+        $title = mb_substr(ob_get_clean(), 0, $this->titleLength);
         $title = htmlentities($title, ENT_SUBSTITUTE | ENT_COMPAT);
         $count = '['.count($arg).']';
-        $this->arr[$i]['args'][] = static::ARRAY.$title.static::TITLE_END.'array'.$count.static::TD;
+        return
+            static::ARRAY.$title.static::TAG_END.'array'.$count.static::TD;
     }
 
-    protected function stringArg(int $i, $arg)
+    protected function stringArg($arg): string
     {
-        //подмена пустой строки на видимое обозначение
+        $length = mb_strlen($arg);
         if ($arg === '') {
-            $this->arr[$i]['args'][] = static::BOOL.'empty_string'.static::TD;
-            //подмена пробельной строки на видимое обозначение
+            //подмена пустой строки на видимое обозначение
+            return static::BOOL.'empty_string'.static::TD;
+
         } elseif (preg_match('/^\s*$/', $arg)) {
-            $num = '{'.mb_strlen($arg).'}';
-            $this->arr[$i]['args'][] = static::BOOL.'space'.$num.static::TD;
+            //подмена пробельной строки на видимое обозначение
+            return static::BOOL.'space{'.$length.'}'.static::TD;
+
         } else {
-            $length = mb_strlen($arg);
+            $title = 'length = '.$length;
+            $arg = htmlentities($arg, ENT_SUBSTITUTE | ENT_COMPAT);
+
             if ($length > $this->stringLength) {
+                //обрезаем строку для ячейки таблицы и для предпросмотра в title
+                $title .= ' --> '.mb_substr($arg, 0, $this->titleLength);
+                $arg = mb_substr($arg, 0, $this->stringLength);
                 $end = static::STRING_END;
-                $arg = htmlentities($arg, ENT_SUBSTITUTE | ENT_COMPAT);
-                //обрезаем строку для таблицы
-                $str = mb_substr($arg, 0, $this->stringLength);
-                $title = 'length = '.$length.' --> '.$arg;
             } else {
                 $end = '';
-                $title = 'length = '.$length;
-                $str = htmlentities($arg, ENT_SUBSTITUTE);
             }
-            $this->arr[$i]['args'][] = static::STRING.$title.static::TITLE_END.$str.$end.static::TD;
+            return static::STRING.$title.static::TAG_END.$arg.$end.static::TD;
         }
     }
 
-    protected function numericArg(int $i, $arg)
+    protected function numericArg($arg): string
     {
-        $this->arr[$i]['args'][] = static::NUM.$arg.static::TD;
+        return static::NUM.$arg.static::TD;
     }
 
-    protected function boolArg(int $i, $arg)
+    protected function boolArg($arg): string
     {
-        $arg == true ? $arg = 'true' : $arg = 'false';
-        $this->arr[$i]['args'][] = static::BOOL.$arg.static::TD;
+        $arg = $arg === true ? 'true' : 'false';
+        return static::BOOL.$arg.static::TD;
     }
 
-    protected function nullArg(int $i)
+    protected function nullArg(): string
     {
-        $this->arr[$i]['args'][] = static::BOOL.'null'.static::TD;
+        return static::BOOL.'null'.static::TD;
     }
 
-    protected function otherArg(int $i, $arg)
+    protected function otherArg($arg): string
     {
-        $this->arr[$i]['args'][] = static::ARGS.$arg.static::TD;
+        return static::ARGS.$arg.static::TD;
     }
 
-    protected function countArgs(int $i)
+    protected function completion(): string
     {
-        $cnt = count($this->arr[$i]['args']);
-        $this->countArgs > $cnt ?: $this->countArgs = $cnt;
-    }
+        $l = 1; // полосатая таблица
+        $trace = '';
+        $trace .= static::TABLE;
+        foreach ($this->arr as $v) {
+            $trace .= static::STRIPE.($l *= -1).static::TAG_END
+                .$v['path'].$v['line'].$v['file'].$v['nameSpace'].$v['class'].$v['function'];
 
-    protected function httpTable()
-    {
-        $l = 1;
-        $this->traceResult = '';
-        $this->traceResult .= static::TABLE;
-//        \d::d($this->arr);
-        foreach ($this->arr as $value) {
-            $this->traceResult
-                .= '<tr class="color'.($l = $l * -1).'">'
-                .$value['path']
-                .$value['line']
-                .$value['file']
-                .$value['nameSpace']
-                .$value['class']
-                .$value['function'];
+            isset($v['args']) ?: $v['args'] = [];
 
-            if (!isset($value['args'])) $value['args'] = [];
-
-            for ($k = 0; $k < $this->countArgs; ++$k) {
-                if (array_key_exists($k, $value['args'])) {
-                    $this->traceResult .= $value['args'][$k];
-                } else {
-                    $this->traceResult .= static::EMPTY_ARGS;
-                }
+            for ($k = 0; $k < $this->maxNumberOfArgs; ++$k) {
+                $trace .= $v['args'][$k] ?? static::EMPTY_ARGS;
             }
         }
-        $this->traceResult .= static::TABLE_END;
+        return $trace .= static::TABLE_END;
     }
 
 }
