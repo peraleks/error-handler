@@ -8,9 +8,10 @@ use MicroMir\Error\Trace\HtmlTraceHandler;
 
 class HtmlNotifier extends AbstractNotifier
 {
-    protected function display()
+    protected function prepare(): string { return ''; }
+
+    protected function notify(string $notice)
     {
-        \d::d($this->obj);
         $code    = $this->obj->getCode();
         $name    = $this->obj->getName();
         $type    = $this->obj->getType();

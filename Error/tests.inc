@@ -2,7 +2,7 @@
 /*********************** Перехватываемые -- try{} catch (Throwable $e)  ************************/
 
 /** [1]----------------  Error ------------------ exception_handler */
-//undefined_function();
+undefined_function();
 
 /** [1]---------------- ArithmeticError --------- exception_handler */
 //intdiv(PHP_INT_MIN, -1);
@@ -110,7 +110,7 @@ try{
 //isset(NULL);
 
 /** [256]-------------- E_USER_ERROR ------------ error_handler */
- trigger_error("E_USER_ERROR", E_USER_ERROR);
+// trigger_error("E_USER_ERROR", E_USER_ERROR);
 
 
 } catch (Throwable $e) {

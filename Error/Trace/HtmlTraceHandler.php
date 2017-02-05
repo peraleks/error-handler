@@ -8,29 +8,53 @@ class HtmlTraceHandler extends AbstractTraceHandler
 {
     protected $stringLength = 80;
 
-    protected $titleLength = 1500;
+    protected $tooltipLength = 1500;
 
-    const TD         = '</td>';
-    const FILE       = '<td class="trace_file">';
-    const PATH       = '<td class="trace_path">';
-    const LINE       = '<td class="trace_line">';
-    const CLASS_NAME = '<td class="trace_class">';
-    const N_SPACE    = '<td class="trace_name_space">';
-    const FUNC       = '<td class="trace_function">';
-    const ARGS       = '<td class="trace_args">';
-    const NUM        = '<td class="trace_args numeric">';
-    const TAG_END    = '">';
-    const STRING     = '<td class="trace_args string" title="';
-    const ARRAY      = '<td class="trace_args array" title="';
-    const BOOL       = '<td class="trace_args bool">';
-    const STRING_END   = '<span class="trace_args end">...</span>';
-    const SPAN         = '</span>';
-    const S_CLASS_NAME = '<span class="trace_class">';
-    const S_N_SPACE    = '<span class="trace_name_space">';
-    const TABLE        = '<table class="micro_trace">';
-    const TABLE_END    = '</table>';
+    protected $recursion = 0;
+
+    const FILE       = '<td class="trace_file">%s</td>';
+
+    const PATH       = '<td class="trace_path">%s</td>';
+
+    const LINE       = '<td class="trace_line">%s</td>';
+
+    const CLASS_NAME = '<td class="trace_class">%s</td>';
+
+    const N_SPACE    = '<td class="trace_name_space">%s</td>';
+
+    const FUNC       = '<td class="trace_function">%s</td>';
+
+    const PARAMS     = '<span>%s</span>';
+
+    const ARGS       = '<td class="trace_args">%s</td>';
+
+    const NUM        = '<td class="trace_args numeric">%s</td>';
+
+    const CALLABLE   = '<td class="trace_args callable">%s</td>';
+
+    const STRING     = '<td class="trace_args string tooltip"><span>%s&prime;</span>%s<span>&prime;</span><div class="%s hidden string"><span>&prime;</span>%s<span>&prime;</span></div></td>';
+
+    const ARRAY      = '<td class="trace_args array tooltip">%s<div class="tooltip_wrap hidden">%s</div></td>';
+
+    const RESOURCE   = '<td class="trace_args resource tooltip">%s<div class="tooltip_wrap hidden">%s</div></td>';
+
+    const BOOL       = '<td class="trace_args bool">%s</td>';
+
+    const ETC        = '<span class="etc">...</span>';
+
+    const S_CLASS_NAME = '<span class="trace_class">%s</span>';
+
+    const S_N_SPACE    = '<span class="trace_name_space">%s</span>';
+
+    const TABLE        = '<table>%s</table>';
+
     const EMPTY_ARGS   = '<td class="trace_args empty"></td>';
-    const STRIPE       = '<tr class="color';
+
+    const TR           = '<tr>%s</tr>';
+
+    const TD           = '<td>%s</td>';
+
+    const QUOTES       = '<span class="string_quotes">&prime;</span>';
 
     protected function before()
     {
@@ -39,36 +63,120 @@ class HtmlTraceHandler extends AbstractTraceHandler
             ?: $this->stringLength = ${0};
     }
 
-    protected function file(string $file, &$arr)
+    protected function file(string $file): string
     {
         $parts = explode('/', $file);
         //получаем имя файла без пути
-        $arr['file'] = static::FILE.array_pop($parts).static::TD;
-
+        $file = sprintf(static::FILE, array_pop($parts));
         //получаем путь (уже без имени файла) относительно корня приложения для экономии пространства в таблице
         $path = str_replace($this->settings->appDir().'/', '', implode('/', $parts).'/');
-        $arr['path'] = static::PATH.$path.static::TD;
+        $path = sprintf(static::PATH, $path);
+
+        return $path.$file;
     }
 
-    protected function line(int $line, array &$arr)
+    protected function line(int $line): string
     {
-        $arr['line'] = static::LINE.$line.static::TD;
+        return sprintf(static::LINE, $line);
     }
 
-    protected function className(string $class, array &$arr)
+    protected function className(string $class): string
     {
         //получаем имя класса без пространства имён
         $parts = explode('\\', $class);
-        $arr['class'] = static::CLASS_NAME.array_pop($parts).static::TD;
-
+        $class = sprintf(static::CLASS_NAME, array_pop($parts));
         //получаем пространство имён без имени класса
         $parts[] = '';
-        $arr['nameSpace'] = static::N_SPACE.implode('\\', $parts).static::TD;
+        $nameSpace = sprintf(static::N_SPACE, implode('\\', $parts));
+
+        return $nameSpace.$class;
     }
 
-    protected function functionName(string $func, array &$arr)
+    protected function functionName(string $func, string $class): string
     {
-        $arr['function'] = static::FUNC.$func.static::TD;
+        $p = '';
+        if ('' != $class) {
+            $ref = new \ReflectionMethod($class, $func);
+        } elseif (function_exists($func)) {
+            $ref = new \ReflectionFunction($func);
+        }
+        if (isset($ref)) {
+            $param = $ref->getNumberOfParameters();
+            $reqParam = $ref->getNumberOfRequiredParameters();
+            $p = sprintf(static::PARAMS, $param.'.'.$reqParam);
+        }
+        return sprintf(static::FUNC, $func.' '.$p);
+    }
+
+    protected function stringArg($arg): string
+    {
+        $length = mb_strlen($arg);
+        $string = mb_substr($arg, 0, $this->stringLength);
+        $string = preg_replace('/\s/', '&nbsp;', $string);
+
+        if ($length > $this->stringLength) {
+            // просмотр полной строки, но не длиннее tooltipLength
+            $tooltip = mb_substr($arg, 0, $this->tooltipLength);
+            $tooltip = htmlentities($tooltip, ENT_SUBSTITUTE | ENT_COMPAT);
+            $tooltip = preg_replace('/\s/', '&nbsp;', $tooltip);
+            $end = static::ETC;
+            $css_class = 'tooltip_wrap';
+        } else {
+            $tooltip = $end = '';
+            $css_class = '';
+        }
+        return sprintf(static::STRING, $length, $string.$end, $css_class, $tooltip);
+    }
+
+    protected function numericArg($arg): string
+    {
+        return sprintf(static::NUM, $arg);
+    }
+
+    protected function arrayArg($arg): string
+    {
+        if ($this->recursion > 3) { return static::ETC; }
+        ++$this->recursion;
+        $tooltip = $this->arrayHandler($arg);
+        --$this->recursion;
+        return sprintf(static::ARRAY, 'array['.count($arg).']', $tooltip);
+    }
+
+    protected function arrayHandler(array $array): string
+    {
+        $tr = '';
+        foreach ($array as $key => $value) {
+            $key = htmlentities((string)$key, ENT_SUBSTITUTE | ENT_COMPAT);
+            $key = preg_replace('/\s/', '&nbsp;', $key);
+            $tr .= sprintf(static::TD, $key);
+                if (is_string($value))  $tr .= $this->stringArg($value);
+            elseif (is_numeric($value)) $tr .= $this->numericArg($value);
+            elseif (is_array($value))   $tr .= $this->arrayArg($value);
+            elseif (is_bool($value))    $tr .= $this->boolArg($value);
+            elseif (is_null($value))    $tr .= $this->nullArg();
+            elseif ($value instanceof \Closure)$tr .= $this->callableArg($value);
+            elseif (is_object($value))  $tr .= $this->objectArg($value);
+            elseif (is_resource($value))$tr .= $this->resourceArg($value);
+            else $tr .= '<td>'.gettype($value).'</td>';
+            $tr = sprintf(static::TR, $tr);
+        }
+        return sprintf(static::TABLE, $tr);
+
+    }
+
+    protected function boolArg($arg): string
+    {
+        return sprintf(static::BOOL, $arg === true ? 'true' : 'false');
+    }
+
+    protected function nullArg(): string
+    {
+        return sprintf(static::BOOL, 'null');
+    }
+
+    protected function callableArg($arg): string
+    {
+        return sprintf(static::CALLABLE, 'callable');
     }
 
     protected function objectArg($arg): string
@@ -76,90 +184,46 @@ class HtmlTraceHandler extends AbstractTraceHandler
         $parts = explode('\\', get_class($arg));
 
         //имя класса без пространства имён
-        $obj = static::S_CLASS_NAME.array_pop($parts).static::SPAN;
+        $obj = sprintf(static::S_CLASS_NAME, array_pop($parts));
 
         //пространство имён без имени класса
-        $space = static::S_N_SPACE.implode('\\', $parts).'\\'.static::SPAN;
-        return
-            static::ARGS.$space.$obj.static::TD;
+        $space = sprintf(static::S_N_SPACE, implode('\\', $parts).'\\');
+
+        return sprintf(static::ARGS, $space.$obj);
     }
 
-    protected function arrayArg($arg): string
+    protected function resourceArg($arg): string
     {
-        //формируем текстовый предпросмотр массива в title
-        ob_start();
-        print_r($arg);
-        $title = mb_substr(ob_get_clean(), 0, $this->titleLength);
-        $title = htmlentities($title, ENT_SUBSTITUTE | ENT_COMPAT);
-        $count = '['.count($arg).']';
-        return
-            static::ARRAY.$title.static::TAG_END.'array'.$count.static::TD;
-    }
-
-    protected function stringArg($arg): string
-    {
-        $length = mb_strlen($arg);
-        if ($arg === '') {
-            //подмена пустой строки на видимое обозначение
-            return static::BOOL.'empty_string'.static::TD;
-
-        } elseif (preg_match('/^\s*$/', $arg)) {
-            //подмена пробельной строки на видимое обозначение
-            return static::BOOL.'space{'.$length.'}'.static::TD;
-
-        } else {
-            $title = 'length = '.$length;
-            $arg = htmlentities($arg, ENT_SUBSTITUTE | ENT_COMPAT);
-
-            if ($length > $this->stringLength) {
-                //обрезаем строку для ячейки таблицы и для предпросмотра в title
-                $title .= ' --> '.mb_substr($arg, 0, $this->titleLength);
-                $arg = mb_substr($arg, 0, $this->stringLength);
-                $end = static::STRING_END;
-            } else {
-                $end = '';
-            }
-            return static::STRING.$title.static::TAG_END.$arg.$end.static::TD;
-        }
-    }
-
-    protected function numericArg($arg): string
-    {
-        return static::NUM.$arg.static::TD;
-    }
-
-    protected function boolArg($arg): string
-    {
-        $arg = $arg === true ? 'true' : 'false';
-        return static::BOOL.$arg.static::TD;
-    }
-
-    protected function nullArg(): string
-    {
-        return static::BOOL.'null'.static::TD;
+        return sprintf(static::RESOURCE, 'resource', $this->arrayHandler(stream_get_meta_data($arg)));
     }
 
     protected function otherArg($arg): string
     {
-        return static::ARGS.$arg.static::TD;
+        if ('unknown type' === $type = gettype($arg)) {
+            ob_start();
+            echo $arg;
+            $string = ob_get_clean();
+            if (preg_match('/^Resource id (\#\d+)$/', $string, $arr)) $type = 'closed resource '.$arr[1];
+        }
+
+        return sprintf( static::RESOURCE, $type, '');
     }
+
 
     protected function completion(): string
     {
-        $l = 1; // полосатая таблица
         $trace = '';
-        $trace .= static::TABLE;
         foreach ($this->arr as $v) {
-            $trace .= static::STRIPE.($l *= -1).static::TAG_END
-                .$v['path'].$v['line'].$v['file'].$v['nameSpace'].$v['class'].$v['function'];
+            $tr = $v['file'].$v['line'].$v['class'].$v['function'];
 
             isset($v['args']) ?: $v['args'] = [];
 
             for ($k = 0; $k < $this->maxNumberOfArgs; ++$k) {
-                $trace .= $v['args'][$k] ?? static::EMPTY_ARGS;
+                $tr .= $v['args'][$k] ?? static::EMPTY_ARGS;
             }
+            $trace .= sprintf(static::TR, $tr);
         }
-        return $trace .= static::TABLE_END;
+        return sprintf(static::TABLE, $trace);
     }
 
 }

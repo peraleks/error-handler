@@ -5,6 +5,7 @@ namespace MicroMir\Error\Notifiers;
 
 class LogNotifier extends AbstractNotifier
 {
+
     protected function display()
     {
         if (defined('MICRO_ERROR_LOG') && MICRO_ERROR_LOG === false) { return; }

@@ -30,24 +30,26 @@ abstract class AbstractTraceHandler
             $arr =& $this->arr[$i];
             $dbt =& $dBTrace[$i];
             //обработка имени файла
-            $this->file($dbt['file'] ?? '', $arr);
+            $arr['file'] = $this->file($dbt['file'] ?? '', $arr);
             //обработка номера строки
-            $this->line($dbt['line'] ?? 0, $arr);
+            $arr['line'] = $this->line($dbt['line'] ?? 0, $arr);
             //обработка имени класса
-            $this->className($dbt['class'] ?? '', $arr);
+            $arr['class'] = $this->className($dbt['class'] ?? '', $arr);
             //обработка имени функции
-            $this->functionName($dbt['function'] ?? '', $arr);
+            $arr['function'] = $this->functionName($dbt['function'] ?? '', $dbt['class'] ?? '', $arr);
             //обработка аргументов
             $arr['args'] = [];
             $args =& $arr['args'];
             isset($dbt['args']) ?: $dbt['args'] = [];
             foreach ($dbt['args'] as $arg) {
-                    if (is_object($arg))  $args[] = $this->objectArg($arg);
-                elseif (is_array($arg))   $args[] = $this->arrayArg($arg);
-                elseif (is_string($arg))  $args[] = $this->stringArg($arg);
+                    if (is_string($arg))  $args[] = $this->stringArg($arg);
                 elseif (is_numeric($arg)) $args[] = $this->numericArg($arg);
+                elseif (is_array($arg))   $args[] = $this->arrayArg($arg);
                 elseif (is_bool($arg))    $args[] = $this->boolArg($arg);
                 elseif (is_null($arg))    $args[] = $this->nullArg();
+                elseif ($arg instanceof \Closure)$args[] = $this->callableArg($arg);
+                elseif (is_object($arg))  $args[] = $this->objectArg($arg);
+                elseif (is_resource($arg))$args[] = $this->resourceArg($arg);
                 else $args[] = $this->otherArg($arg);
             }
             //подсчёт наибольшего количеста аргументов
@@ -58,29 +60,36 @@ abstract class AbstractTraceHandler
         $this->traceResult = $this->completion();
     }
 
-    abstract protected function file(string $file, &$arr);
+    abstract protected function file(string $file): string;
 
-    abstract protected function line(int $line, array &$arr);
+    abstract protected function line(int $line): string;
 
-    abstract protected function className(string $class, array &$arr);
+    abstract protected function className(string $class): string;
 
-    abstract protected function functionName(string $function, array &$arr);
-
-    abstract protected function objectArg($arg): string;
-
-    abstract protected function arrayArg($arg): string ;
+    abstract protected function functionName(string $function, string $class): string;
 
     abstract protected function stringArg($arg): string;
 
     abstract protected function numericArg($arg): string;
 
-    abstract protected function boolArg($arg): string;
+    abstract protected function arrayArg($arg): string ;
 
     abstract protected function nullArg(): string;
 
-    abstract protected function otherArg($arg): string;
+    abstract protected function boolArg($arg): string;
+
+    abstract protected function callableArg($arg): string;
+
+    abstract protected function objectArg($arg): string;
+
+    abstract protected function resourceArg($arg): string ;
 
     abstract protected function completion(): string ;
+
+    protected function otherArg($arg): string
+    {
+        return gettype($arg);
+    }
 
     public final function getTrace(): string
     {

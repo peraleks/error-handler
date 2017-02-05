@@ -32,7 +32,8 @@ class SettingsObject implements SettingsInterface
                 //TODO обработка ошибки подключения файла
             }
         }
-        $this->productionMode() ?: $this->mode = 'DEV';
+        if (PHP_SAPI === 'cli') $this->mode = 'CLI';
+        else $this->productionMode() ?: $this->mode = 'DEV';
     }
 
     public function setNotifierClass(string $notifierClass)
@@ -42,7 +43,6 @@ class SettingsObject implements SettingsInterface
 
     public function getNotifiers(): array
     {
-        if (PHP_SAPI === 'cli') return $this->settings['CLI'];
         return $this->settings[$this->mode];
     }
 

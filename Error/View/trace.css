@@ -1,4 +1,4 @@
-div.trace_wrap table.micro_trace {
+div.trace_wrap>table {
     font-size: 80%;
     background-color: #444;
     border-spacing: 0;
@@ -6,8 +6,8 @@ div.trace_wrap table.micro_trace {
     min-width: 100%;
 }
 
-div.trace_wrap tr:active {
-    background-color: #000 !important;
+div.trace_wrap tr:hover {
+    background-color: #222 !important;
 }
 
 div.trace_wrap {
@@ -18,8 +18,8 @@ div.trace_wrap tr{
     line-height: 1.8em;
 }
 
-div.trace_wrap tr.color1{
-    background-color: #555;
+div.trace_wrap tr:nth-child(2n){
+    background-color: #4d4d4d;
 }
 
 div.trace_wrap td {
@@ -30,12 +30,12 @@ div.trace_wrap td {
 div.trace_wrap td.trace_path {
     text-align: right;
     padding-left: 3px;
-    color: #7ec9c9;
+    color: #00BABA;
 }
 
 div.trace_wrap td.trace_file {
     text-align: left;
-    color: #28ffff;
+    color: #a6dbdb;
     text-shadow: 2px 2px 7px rgba(0, 0, 0, 0.5);
 }
 
@@ -56,7 +56,6 @@ div.trace_wrap td.trace_name_space, span.trace_name_space {
     text-align: right;
     padding-left: 5px;
     padding-right: 7px;
-    /*color: #9cea9a;*/
     color: #dbdbad;
 }
 
@@ -68,7 +67,7 @@ div.trace_wrap td.trace_function {
 }
 
 div.trace_wrap td.trace_args {
-    border-left: 1px solid #333;
+    border-left: 1px solid #393939;
     padding-left: 3px;
     padding-right: 3px;
     color: #f9f9ca;
@@ -78,17 +77,32 @@ div.trace_wrap td.trace_args.object {
     color: #9cea9a;
 }
 
+div.trace_wrap td.trace_args.resource {
+    color: #7e65ff;
+    font-style: italic;
+}
+
 div.trace_wrap td.trace_args.array {
-    color: #b89ff2;
+    color: #bbcc00;
     font-style: italic;
 }
 
 div.trace_wrap td.trace_args.numeric {
-    color: #eeaeef;
+    color: #68ace0;
 }
 
-div.trace_wrap td.trace_args.string {
+div.trace_wrap td.trace_args.string, td.trace_args.string div.string{
     color: #81DF73;
+}
+
+div.trace_wrap .string>span, .trace_function>span{
+    color: #888;
+    font-weight: bold;
+}
+
+div.trace_wrap td.trace_args.callable {
+    color: #fff26b;
+    font-style: italic;
 }
 
 div.trace_wrap td.trace_args.bool {
@@ -97,15 +111,54 @@ div.trace_wrap td.trace_args.bool {
     font-style: italic;
 }
 
-div.trace_wrap td.trace_args .end {
+div.trace_wrap td.trace_args .etc {
     color: #f55;
-}
-
-div.trace_wrap table.micro_trace .trace_func {
-    color: #f981f3;
 }
 
 div.error_box .hidden {
     display: none !important;
 }
+
+
+/******************************************************************* tooltip */
+div.trace_wrap div.tooltip_wrap  {
+    font-family: Consolas, monospace;
+    border: 1px solid #666;
+    background-color: #4d4d4d;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    text-align: left;
+}
+
+div.trace_wrap .tooltip_wrap.string {
+    max-width: 580px;
+}
+
+div.trace_wrap .tooltip_wrap.string:hover {
+    background-color: #222;
+}
+
+div.trace_wrap .tooltip_wrap table {
+    font-size: 100%;
+    border-spacing: 0;
+    color: #ccc;
+    min-width: 100%;
+}
+
+div.trace_wrap .tooltip_wrap table tr:nth-child(2n){
+    background-color: #444;
+}
+
+div.trace_wrap .tooltip_wrap td:nth-child(1) {
+    color: #c18ddd;
+    padding: 0 5px 0 10px;
+    text-align: right;
+}
+
+div.trace_wrap .tooltip_wrap td:nth-child(2){
+    font-size: 13px;
+    padding: 0 10px 0 5px;
+    text-align: left;
+}
+
 

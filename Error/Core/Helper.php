@@ -14,7 +14,6 @@ class Helper
 
     public function handle(ErrorObject $obj)
     {
-//        \d::d($obj);
         $code = $obj->getCode();
         if ($code !== ($code & $this->settings->get('ERROR_REPORTING'))) return;
 

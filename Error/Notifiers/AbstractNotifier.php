@@ -16,9 +16,11 @@ abstract class AbstractNotifier
     {
         $this->obj = $obj;
         $this->settings = $settings;
-        $this->display();
+        $this->notify($this->prepare());
     }
 
-    abstract protected function display();
+    abstract protected function prepare(): string;
+
+    abstract protected function notify(string $notice);
 
 }
