@@ -17,7 +17,7 @@ class HtmlNotifier extends AbstractNotifier
         $type    = $this->obj->getType();
         $message = $this->obj->getMessage();
         $path    = $this->settings->appDir();
-        $file    = str_replace($path.'/', '', $this->obj->getFile());
+        $file    = preg_replace('#^'.$path.'#', '', $this->obj->getFile());
         $line    = $this->obj->getLine();
         $style   = file_get_contents(dirname(__DIR__).'/View/error.css');
         if ($this->settings->get('handleTrace')) {
