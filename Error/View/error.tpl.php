@@ -12,9 +12,7 @@
         var wraps = document.querySelectorAll('.trace_wrap');
         for (var i = 0; i < wraps.length; i++) {
             wraps[i].addEventListener('click', function (e) {
-                    console.log(e.target);
                     var target = e.target.querySelector('.tooltip_wrap');
-                    console.log(target);
                     if (null != target) {
                         target.classList.toggle('hidden');
                     }

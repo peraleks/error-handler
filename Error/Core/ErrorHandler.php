@@ -49,6 +49,7 @@ class ErrorHandler
                 )
             );
         }
+        \d::m();
     }
 
     private function handle(ErrorObject $obj)

@@ -80,7 +80,7 @@ div.error_box div.error_line {
     display: inline-block;
     font-size: 100%;
     font-weight: 500;
-    border-radius: 4px;
+    border-radius: 3px;
     color: #ffff7b;
     background-color: #bbb;
     padding: 0.05em 0.4em 0.1em;
@@ -102,7 +102,7 @@ div.error_box div.error_text span.warning {
 div.error_box  div.but_trace {
     font-weight: 500;
     display: inline-block;
-    border-radius: 4px;
+    border-radius: 3px;
     color: #fff;
     background-color: #cdcdcd;
     padding: 0.05em 0.4em 0.2em;

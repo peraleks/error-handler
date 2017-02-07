@@ -3,7 +3,7 @@
 return [
     'ERROR_REPORTING' => E_ALL,
 
-    'APP_DIR' => dirname(__DIR__),
+    'APP_DIR' => $_SERVER['DOCUMENT_ROOT'],
 
     //TODO настройка productionMode
 

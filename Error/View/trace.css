@@ -64,6 +64,7 @@ div.trace_wrap td.trace_function {
     padding-right: 5px;
     color: #ffdb70;
     text-shadow: 2px 2px 7px rgba(0, 0, 0, 0.5);
+    text-align: right;
 }
 
 div.trace_wrap td.trace_args {
@@ -95,7 +96,7 @@ div.trace_wrap td.trace_args.string, td.trace_args.string div.string{
     color: #81DF73;
 }
 
-div.trace_wrap .string>span, .trace_function>span{
+div.trace_wrap .string>span, .trace_function_params{
     color: #888;
     font-weight: bold;
 }
