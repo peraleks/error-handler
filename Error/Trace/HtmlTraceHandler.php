@@ -10,7 +10,11 @@ class HtmlTraceHandler extends AbstractTraceHandler
 
     protected $tooltipLength = 1500;
 
+    protected $recLevel = 1;
+
     protected $recursion = 0;
+
+    const tooltipEnable = 'tooltip_wrap';
 
     const FILE       = '<td class="trace_file">%s</td>';
 
@@ -24,17 +28,17 @@ class HtmlTraceHandler extends AbstractTraceHandler
 
     const FUNC       = '<td class="trace_function">%s</td>';
 
-    const PARAMS     = '<span>%s</span>';
+    const PARAMS     = '<td class="trace_function_params">%s</td>';
 
     const ARGS       = '<td class="trace_args">%s</td>';
 
     const NUM        = '<td class="trace_args numeric">%s</td>';
 
-    const CALLABLE   = '<td class="trace_args callable">%s</td>';
+    const CALL       = '<td class="trace_args callable">%s</td>';
 
     const STRING     = '<td class="trace_args string tooltip"><span>%s&prime;</span>%s<span>&prime;</span><div class="%s hidden string"><span>&prime;</span>%s<span>&prime;</span></div></td>';
 
-    const ARRAY      = '<td class="trace_args array tooltip">%s<div class="tooltip_wrap hidden">%s</div></td>';
+    const ARR        = '<td class="trace_args array tooltip">%s<div class="tooltip_wrap hidden">%s</div></td>';
 
     const RESOURCE   = '<td class="trace_args resource tooltip">%s<div class="tooltip_wrap hidden">%s</div></td>';
 
@@ -65,11 +69,11 @@ class HtmlTraceHandler extends AbstractTraceHandler
 
     protected function file(string $file): string
     {
-        $parts = explode('/', $file);
+        $parts = explode(DIRECTORY_SEPARATOR, $file);
         //получаем имя файла без пути
-        $file = sprintf(static::FILE, array_pop($parts));
+        $file = sprintf(static::FILE, '/'.array_pop($parts));
         //получаем путь (уже без имени файла) относительно корня приложения для экономии пространства в таблице
-        $path = str_replace($this->settings->appDir().'/', '', implode('/', $parts).'/');
+        $path = preg_replace('#^'.$this->settings->appDir().'#', '', implode('/', $parts));
         $path = sprintf(static::PATH, $path);
 
         return $path.$file;
@@ -92,20 +96,21 @@ class HtmlTraceHandler extends AbstractTraceHandler
         return $nameSpace.$class;
     }
 
-    protected function functionName(string $func, string $class): string
+    protected function functionName(string $func, string $class, int $cntArgs): string
     {
-        $p = '';
         if ('' != $class) {
             $ref = new \ReflectionMethod($class, $func);
         } elseif (function_exists($func)) {
             $ref = new \ReflectionFunction($func);
         }
+        $p = sprintf(static::TD, '');
         if (isset($ref)) {
             $param = $ref->getNumberOfParameters();
             $reqParam = $ref->getNumberOfRequiredParameters();
-            $p = sprintf(static::PARAMS, $param.'.'.$reqParam);
+            $c = $reqParam > $cntArgs ? ' unset '.($reqParam - $cntArgs) : '';
+            $p = sprintf(static::PARAMS, $param.'.'.$reqParam.$c);
         }
-        return sprintf(static::FUNC, $func.' '.$p);
+        return sprintf(static::FUNC, $func).$p;
     }
 
     protected function stringArg($arg): string
@@ -120,7 +125,7 @@ class HtmlTraceHandler extends AbstractTraceHandler
             $tooltip = htmlentities($tooltip, ENT_SUBSTITUTE | ENT_COMPAT);
             $tooltip = preg_replace('/\s/', '&nbsp;', $tooltip);
             $end = static::ETC;
-            $css_class = 'tooltip_wrap';
+            $css_class = static::tooltipEnable;
         } else {
             $tooltip = $end = '';
             $css_class = '';
@@ -135,11 +140,11 @@ class HtmlTraceHandler extends AbstractTraceHandler
 
     protected function arrayArg($arg): string
     {
-        if ($this->recursion > 3) { return static::ETC; }
+        if ($this->recursion > $this->recLevel) { return sprintf(static::TD, static::ETC); }
         ++$this->recursion;
         $tooltip = $this->arrayHandler($arg);
         --$this->recursion;
-        return sprintf(static::ARRAY, 'array['.count($arg).']', $tooltip);
+        return sprintf(static::ARR, 'array['.count($arg).']', $tooltip);
     }
 
     protected function arrayHandler(array $array): string
@@ -157,7 +162,7 @@ class HtmlTraceHandler extends AbstractTraceHandler
             elseif ($value instanceof \Closure)$tr .= $this->callableArg($value);
             elseif (is_object($value))  $tr .= $this->objectArg($value);
             elseif (is_resource($value))$tr .= $this->resourceArg($value);
-            else $tr .= '<td>'.gettype($value).'</td>';
+            else $tr .= sprintf(static::TD, gettype($value));
             $tr = sprintf(static::TR, $tr);
         }
         return sprintf(static::TABLE, $tr);
@@ -176,7 +181,7 @@ class HtmlTraceHandler extends AbstractTraceHandler
 
     protected function callableArg($arg): string
     {
-        return sprintf(static::CALLABLE, 'callable');
+        return sprintf(static::CALL, 'callable');
     }
 
     protected function objectArg($arg): string
@@ -199,6 +204,7 @@ class HtmlTraceHandler extends AbstractTraceHandler
 
     protected function otherArg($arg): string
     {
+        // определяем является ли тип закрытым ресурсом
         if ('unknown type' === $type = gettype($arg)) {
             ob_start();
             echo $arg;

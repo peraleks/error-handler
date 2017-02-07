@@ -30,17 +30,17 @@ abstract class AbstractTraceHandler
             $arr =& $this->arr[$i];
             $dbt =& $dBTrace[$i];
             //обработка имени файла
-            $arr['file'] = $this->file($dbt['file'] ?? '', $arr);
+            $arr['file'] = $this->file($dbt['file'] ?? '');
             //обработка номера строки
-            $arr['line'] = $this->line($dbt['line'] ?? 0, $arr);
+            $arr['line'] = $this->line($dbt['line'] ?? 0);
             //обработка имени класса
-            $arr['class'] = $this->className($dbt['class'] ?? '', $arr);
+            $arr['class'] = $this->className($dbt['class'] ?? '');
             //обработка имени функции
-            $arr['function'] = $this->functionName($dbt['function'] ?? '', $dbt['class'] ?? '', $arr);
+            isset($dbt['args']) ?: $dbt['args'] = [];
+            $arr['function'] = $this->functionName($dbt['function'] ?? '', $dbt['class'] ?? '', count($dbt['args']));
             //обработка аргументов
             $arr['args'] = [];
             $args =& $arr['args'];
-            isset($dbt['args']) ?: $dbt['args'] = [];
             foreach ($dbt['args'] as $arg) {
                     if (is_string($arg))  $args[] = $this->stringArg($arg);
                 elseif (is_numeric($arg)) $args[] = $this->numericArg($arg);
@@ -66,7 +66,7 @@ abstract class AbstractTraceHandler
 
     abstract protected function className(string $class): string;
 
-    abstract protected function functionName(string $function, string $class): string;
+    abstract protected function functionName(string $function, string $class, int $cntArgs): string;
 
     abstract protected function stringArg($arg): string;
 
