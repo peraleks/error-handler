@@ -8,7 +8,6 @@ class SettingsObject implements SettingsInterface
 {
     private $settings = [
         'ERROR_REPORTING' => E_ALL,
-        'APP_DIR'     => ' ',
         'DEV'         => [],
         'PROD'        => [],
         'CLI'         => [],
@@ -32,8 +31,20 @@ class SettingsObject implements SettingsInterface
                 //TODO обработка ошибки подключения файла
             }
         }
+        $this->settingsValidate();
+    }
+
+    private function settingsValidate()
+    {
+        // валидация режима работы
         if (PHP_SAPI === 'cli') $this->mode = 'CLI';
         else $this->productionMode() ?: $this->mode = 'DEV';
+
+        // валидация настройки APP_DIR
+        $ad =& $this->settings['APP_DIR'];
+        $ad = is_string($ad) ? $ad : null;
+        $ad = $ad ?? dirname($_SERVER['DOCUMENT_ROOT'] ?? '');
+        $ad = str_replace('\\', '/', $ad);
     }
 
     public function setNotifierClass(string $notifierClass)
