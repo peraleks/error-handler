@@ -73,7 +73,7 @@ final class ErrorObject
 
     public function getFile(): string
     {
-        return $this->throwable->getFile();
+        return str_replace('\\', '/', $this->throwable->getFile());
     }
 
     public function getLine(): int
