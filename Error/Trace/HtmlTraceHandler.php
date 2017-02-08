@@ -96,21 +96,9 @@ class HtmlTraceHandler extends AbstractTraceHandler
         return $nameSpace.$class;
     }
 
-    protected function functionName(string $func, string $class, int $cntArgs): string
+    protected function functionName(string $func, string $params): string
     {
-        if ('' != $class) {
-            $ref = new \ReflectionMethod($class, $func);
-        } elseif (function_exists($func)) {
-            $ref = new \ReflectionFunction($func);
-        }
-        $p = sprintf(static::TD, '');
-        if (isset($ref)) {
-            $param = $ref->getNumberOfParameters();
-            $reqParam = $ref->getNumberOfRequiredParameters();
-            $c = $reqParam > $cntArgs ? ' unset '.($reqParam - $cntArgs) : '';
-            $p = sprintf(static::PARAMS, $param.'.'.$reqParam.$c);
-        }
-        return sprintf(static::FUNC, $func).$p;
+        return sprintf(static::FUNC, $func).sprintf(static::PARAMS, $params);
     }
 
     protected function stringArg($arg): string
@@ -204,15 +192,7 @@ class HtmlTraceHandler extends AbstractTraceHandler
 
     protected function otherArg($arg): string
     {
-        // определяем является ли тип закрытым ресурсом
-        if ('unknown type' === $type = gettype($arg)) {
-            ob_start();
-            echo $arg;
-            $string = ob_get_clean();
-            if (preg_match('/^Resource id (\#\d+)$/', $string, $arr)) $type = 'closed resource '.$arr[1];
-        }
-
-        return sprintf( static::RESOURCE, $type, '');
+        return sprintf( static::RESOURCE, $this->isClosedResource($arg), '');
     }
 
 
@@ -231,5 +211,4 @@ class HtmlTraceHandler extends AbstractTraceHandler
         }
         return sprintf(static::TABLE, $trace);
     }
-
 }

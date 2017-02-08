@@ -37,7 +37,8 @@ abstract class AbstractTraceHandler
             $arr['class'] = $this->className($dbt['class'] ?? '');
             //обработка имени функции
             isset($dbt['args']) ?: $dbt['args'] = [];
-            $arr['function'] = $this->functionName($dbt['function'] ?? '', $dbt['class'] ?? '', count($dbt['args']));
+            $func = $dbt['function'] ?? '';
+            $arr['function'] = $this->functionName($func, $this->params($func, $dbt['class'] ?? '', count($dbt['args'])));
             //обработка аргументов
             $arr['args'] = [];
             $args =& $arr['args'];
@@ -66,7 +67,7 @@ abstract class AbstractTraceHandler
 
     abstract protected function className(string $class): string;
 
-    abstract protected function functionName(string $function, string $class, int $cntArgs): string;
+    abstract protected function functionName(string $function, string $param): string;
 
     abstract protected function stringArg($arg): string;
 
@@ -95,4 +96,33 @@ abstract class AbstractTraceHandler
     {
         return $this->traceResult;
     }
+
+    protected function isClosedResource($arg): string
+    {
+        // определяем является ли тип закрытым ресурсом
+        if ('unknown type' === $type = gettype($arg)) {
+            ob_start();
+            echo $arg;
+            if (preg_match('/^Resource id (\#\d+)$/', ob_get_clean(), $arr)) $type = 'closed resource '.$arr[1];
+        }
+        return $type;
+    }
+
+    protected function params(string $func, string $class, int $cntArgs): string
+    {
+        if ('' != $class) {
+            $ref = new \ReflectionMethod($class, $func);
+        } elseif (function_exists($func)) {
+            $ref = new \ReflectionFunction($func);
+        }
+        $p = '';
+        if (isset($ref)) {
+            $param = $ref->getNumberOfParameters();
+            $reqParam = $ref->getNumberOfRequiredParameters();
+            $c = $reqParam > $cntArgs ? ' unset '.($reqParam - $cntArgs) : '';
+            $p = $param.'.'.$reqParam.$c;
+        }
+        return $p;
+    }
+
 }
