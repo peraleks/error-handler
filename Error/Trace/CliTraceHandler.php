@@ -6,15 +6,19 @@ namespace MicroMir\Error\Trace;
 
 class CliTraceHandler extends AbstractTraceHandler
 {
-
-    const MAGENTA = "\033[1;35m";
-    const YELLOW  = "\033[0;33m";
-    const GREEN   = "\033[1;30m";
-    const CYAN    = "\033[0;36m";
-    const GRAY    = "\033[3;37m";
-    const RST     = "\033[0m";
-
-    const TYPE    = self::GRAY;
+    const FILE       = "\033[0;36m%s\033[0m";
+    const LINE       = "\033[0;36m%s\033[0m";
+    const CLASS_NAME = "\033[37m%s\033[0m";
+    const FUNC       = "\033[33m%s\033[0m";
+    const TYPE       = "\033[1;30m%s\033[0m";
+    const OBJ        = "\033[1;30m%s\033[0m";
+    const ARR        = "\033[35m%s\033[0m";
+    const STRING     = "\033[32m%s\033[0m";
+    const TRIM       = "\033[1;30m%s\033[0m";
+    const NUM        = "\033[1;34m%s\033[0m";
+    const BOOL       = "\033[31m%s\033[0m";
+    const TRACE      = "\033[1;35m%s\033[0m";
+    const TRACE_CNT  = "\033[1;30m%s\033[0m";
 
     protected $align = 15;
 
@@ -30,29 +34,31 @@ class CliTraceHandler extends AbstractTraceHandler
         return sprintf("%".($align ?? $this->align)."s", $string).' ';
     }
 
-    protected function file(string $file, &$arr)
+    protected function file(string $file): string
     {
-        $arr['file'] = $file;
+        return sprintf(static::FILE, $file);
     }
 
-    protected function line(int $line, array &$arr)
+    protected function line(int $line): string
     {
-        $arr['line'] = (string)$line;
+        return sprintf(static::LINE, '('.(string)$line.')');
     }
 
-    protected function className(string $class, array &$arr)
+    protected function className(string $class): string
     {
-        $arr['class'] = $class ?  $class."\n->" : "\n  ";
+        return sprintf(static::CLASS_NAME, $class ?  $class."\n->" : "\n  ");
     }
 
-    protected function functionName(string $function, array &$arr)
+    protected function functionName(string $func, string $params): string
     {
-        $arr['function'] = $function;
+        $params === '' ?: $params = '{'.$params.'}';
+
+        return sprintf(static::FUNC, $func.$params.'(');
     }
 
     protected function objectArg($arg): string
     {
-        return static::GREEN.$this->space('obj').static::RST.get_class($arg);
+        return sprintf(static::TYPE, ($this->space('obj'))).sprintf(static::OBJ, get_class($arg));
     }
 
     protected function arrayArg($arg): string
@@ -62,53 +68,63 @@ class CliTraceHandler extends AbstractTraceHandler
             $preview .= '['.$key.']=>..., ';
             if (mb_strlen($preview) > $this->stringLength) break;
         }
-        return static::GREEN.$this->space('array['.count($arg).']').static::RST.$preview;
+        return sprintf(static::TYPE, $this->space('array['.count($arg).']')).sprintf(static::ARR, $preview);
     }
 
     protected function stringArg($arg): string
     {
         $length = mb_strlen($arg);
-        $str = static::GREEN.$this->space('['.$length.']str').static::RST
-            .static::GRAY.substr($arg, 0, $this->stringLength);
-        if ($length > $this->stringLength) $str .= '...';
-        return $str.static::RST;
+        $type = sprintf(static::TYPE, $this->space('['.$length.']str'));
+        $str = sprintf(static::STRING, mb_substr($arg, 0, $this->stringLength));
+        if ($length > $this->stringLength) $str .= sprintf(static::TRIM, '...');
+        return $type.$str;
     }
 
     protected function numericArg($arg): string
     {
-        return static::GREEN.$this->space('num').static::RST.$arg;
+        return sprintf(static::TYPE, $this->space('num')).sprintf(static::NUM, $arg);
     }
 
     protected function boolArg($arg): string
     {
         $arg = $arg === true ? 'true' : 'false';
-        return static::GREEN.$this->space('bool').static::RST.$arg;
+        return sprintf(static::TYPE, $this->space('bool')).sprintf(static::BOOL, $arg);
     }
 
     protected function nullArg(): string
     {
-        return static::GREEN.$this->space('null').static::RST;
+        return sprintf(static::TYPE, $this->space('null'));
+    }
+
+    protected function callableArg($arg): string
+    {
+        return sprintf(static::TYPE, $this->space('callable'));
+    }
+
+    protected function resourceArg($arg): string
+    {
+        return sprintf(static::TYPE, $this->space('resource'));
     }
 
     protected function otherArg($arg): string
     {
-        return static::GREEN.$this->space('other').static::RST.(string)$arg;
+        return sprintf(static::TYPE, $this->space($this->isClosedResource($arg)));
     }
 
     protected function completion(): string
     {
         $trace = '';
-        $trace .= self::MAGENTA.'trace >>>'.static::RST."\n";
+        $trace .= sprintf(self::TRACE, 'trace >>>')."\n";
+        $trCount = count($this->arr);
         foreach ($this->arr as $v) {
-            $trace .= static::CYAN.$v['file'].'::'.$v['line'].static::RST." ".$v['class'];
-            $trace .= static::YELLOW.$v['function'].'('.static::RST;
+            $trace .= sprintf(static::TRACE_CNT, '#'.--$trCount).$v['file'].$v['line']." ".$v['class'];
+            $trace .= $v['function'];
 
             foreach ($v['args'] as $arg) {
                 $trace .= "\n".$arg;
             }
-            $trace .= "\n".static::YELLOW.$this->space(')', 5).static::RST."\n";
+            $trace .= "\n".sprintf(static::FUNC, $this->space(')', 3))."\n";
         }
-        return $trace .= self::MAGENTA.'<<< trace_end'.static::RST."\n";
+        return $trace .= sprintf(self::TRACE, '<<< trace_end')."\n";
     }
-
 }

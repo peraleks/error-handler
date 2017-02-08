@@ -3,22 +3,19 @@ declare(strict_types=1);
 
 namespace MicroMir\Error\Notifiers;
 
-
 use MicroMir\Error\Core\ErrorObject;
 use MicroMir\Error\Core\SettingsInterface;
 use MicroMir\Error\Trace\CliTraceHandler;
 
 class CliNotifier extends AbstractNotifier
 {
-    const RST        = "\033[0m";   // reset color
-    const ERROR      = "\033[30;41m";
-    const WARNING    = "\033[31;43m";
-    const NOTICE     = "\033[1;30;43m";
-    const PARSE      = "\033[45m";
-    const DEPRECATED = "\033[30;47m";
-    const CYAN       = "\033[0;36m";
-    const GRAY       = "\033[0;37m";
-    const MAGENTA    = "\033[1;35m";
+    const ERROR      = "\033[30;41m%s\033[0m";
+    const WARNING    = "\033[31;43m%s\033[0m";
+    const NOTICE     = "\033[1;30;43m%s\033[0m";
+    const PARSE      = "\033[45m%s\033[0m";
+    const DEPRECATED = "\033[30;47m%s\033[0m";
+    const FILE       = "\033[0;36m%s\033[0m";
+    const MESSAGE    = "\033[37m%s\033[0m";
 
     protected $codeColor;
 
@@ -57,12 +54,13 @@ class CliNotifier extends AbstractNotifier
         $line    = $this->obj->getLine();
         $message = $this->obj->getMessage();
 
-        $notice = $this->codeColor[$code]."[$code] $eName ".static::RST.static::CYAN." $file::$line ".static::RST."\n"
-            .static::GRAY.$message.static::RST."\n";
+        $notice = sprintf($this->codeColor[$code], "[$code] $eName ")
+            .sprintf(static::FILE, " $file($line) ")."\n"
+            .sprintf(static::MESSAGE, $message)."\n";
 
         if ($this->settings->get('handleTrace')) {
             $notice .= ((new CliTraceHandler($this->obj->getTrace(), $this->settings))->getTrace());
-        }
+        } else { $notice .= "\n"; }
         return $notice;
     }
 
