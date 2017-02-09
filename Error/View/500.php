@@ -1,12 +1,11 @@
-<?php isset($phrase) ?: $phrase = ''?>
 <style>
 div.error_user_mmessage {
-    font-size: 120%;
     font-family: monospace;
     text-align: center;
     border-radius: 5px;
     margin: 0 auto;
-    max-width: 20em;
+    max-width: 100%;
+    margin-bottom: 3px;
 }
 
 div.error_user_mmessage div.error_header {
@@ -20,7 +19,7 @@ div.error_user_mmessage div.error_header {
 
 div.error_user_mmessage div.error_text {
     padding: 5px 15px;
-    font-family: sans-serif;
+    font-family: Consolas, monospace;
     background-color: #aaa;
     color: #fff;
     border-radius: 0 0 5px 5px;
@@ -29,13 +28,9 @@ div.error_user_mmessage div.error_text {
 
 </style>
 <div class="error_user_mmessage">
-    <div class="error_header"><?php echo $statusCode.' '.$phrase ?></div>
+    <div class="error_header"><?= $type.' '.$file.'('.$line ?>)</div>
     <div></div>
     <div class="error_text">
-        <?php
-        foreach ($message as $MessageValue) {
-            echo $MessageValue.'<br>';
-        }
-        ?>
+        <?= $message ?>
     </div>
 </div>

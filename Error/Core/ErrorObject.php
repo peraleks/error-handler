@@ -15,7 +15,7 @@ final class ErrorObject
 
     protected $handler = '';
 
-    private static $codeName = [
+    public static $codeName = [
         E_ERROR             => 'ERROR',
         E_WARNING           => 'WARNING',
         E_PARSE             => 'PARSE',

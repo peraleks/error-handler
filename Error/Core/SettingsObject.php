@@ -22,15 +22,11 @@ class SettingsObject implements SettingsInterface
     public function __construct($file)
     {
         if (!is_string($file) || !file_exists($file)) {
-            $this->settingsError = 'Error in the name of the settings file';
-            //TODO обработка ошибки подключения файла
-        } else {
-            try { $this->settings = array_merge($this->settings, include $file);
-            } catch (\Error $e) {
-                \d::d($e);
-                //TODO обработка ошибки подключения файла
-            }
+            throw new \Exception('Wrong name of the settings file: '.$file);
+        } elseif (!is_array($arr = include $file)) {
+            throw new \Exception('The configuration file should return an array, '.gettype($file).' returned');
         }
+        $this->settings = array_merge($this->settings, $arr);
         $this->settingsValidate();
     }
 
@@ -63,11 +59,14 @@ class SettingsObject implements SettingsInterface
         //TODO определение режима разработчика
     }
 
+    public function getErrorReporting(): int
+    {
+        return $this->settings['ERROR_REPORTING'];
+    }
+
     public function get(string $param)
     {
         //TODO обработка ошибки нестрокового типа аргумента $param
-        if ($param == 'ERROR_REPORTING')
-            return $this->settings['ERROR_REPORTING'];
         if (!isset($this->settings[$this->mode][$this->currentNotifier][$param]))
             return null;
         return $this->settings[$this->mode][$this->currentNotifier][$param];
