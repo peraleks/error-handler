@@ -52,6 +52,10 @@ div.trace_wrap td.trace_class, span.trace_class {
     text-shadow: 2px 2px 7px rgba(0, 0, 0, 0.4), 0 0 1px #000;
 }
 
+div.trace_wrap td.trace_call_type {
+    color: #aaa;
+}
+
 div.trace_wrap td.trace_name_space, span.trace_name_space {
     text-align: right;
     padding-left: 5px;
