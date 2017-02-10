@@ -24,6 +24,8 @@ class HtmlTraceHandler extends AbstractTraceHandler
 
     const CLASS_NAME = '<td class="trace_class">%s</td>';
 
+    const CALL_TYPE  = '<td class="trace_call_type">%s</td>';
+
     const N_SPACE    = '<td class="trace_name_space">%s</td>';
 
     const FUNC       = '<td class="trace_function">%s</td>';
@@ -84,7 +86,7 @@ class HtmlTraceHandler extends AbstractTraceHandler
         return sprintf(static::LINE, $line);
     }
 
-    protected function className(string $class): string
+    protected function className(string $class, string $type): string
     {
         //получаем имя класса без пространства имён
         $parts = explode('\\', $class);
@@ -92,8 +94,10 @@ class HtmlTraceHandler extends AbstractTraceHandler
         //получаем пространство имён без имени класса
         $parts[] = '';
         $nameSpace = sprintf(static::N_SPACE, implode('\\', $parts));
+        //тип вызова функции
+        $type = sprintf(static::CALL_TYPE, $type);
 
-        return $nameSpace.$class;
+        return $nameSpace.$class.$type;
     }
 
     protected function functionName(string $func, string $params): string
