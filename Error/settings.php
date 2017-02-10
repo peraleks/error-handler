@@ -1,11 +1,13 @@
 <?php
 
+define('DEVELOPMENT_MODE', true);
+
 return [
     'ERROR_REPORTING' => E_ALL,
 
     'APP_DIR' => $_SERVER['DOCUMENT_ROOT'],
 
-    //TODO настройка productionMode
+    'DEVELOPMENT_MODE_CONSTANT' => 'DEVELOPMENT_MODE',
 
     'DEV' => [
         \MicroMir\Error\Notifiers\HtmlNotifier::class => [
@@ -14,10 +16,10 @@ return [
             'stringLength'  => 80,
             'fontSize'      => 15,
         ],
-//        \MicroMir\Error\Notifiers\TailNotifier::class => [
-//            'handleTrace'   => true,
-//            'file' => $_SERVER['DOCUMENT_ROOT'].'/tail_error.log',
-//        ]
+        \MicroMir\Error\Notifiers\TailNotifier::class => [
+            'handleTrace'   => true,
+            'file' => $_SERVER['DOCUMENT_ROOT'].'/Tests/tail/tail_error.log',
+        ],
     ],
 
     'PROD' => [
@@ -26,7 +28,7 @@ return [
 
     'CLI'  => [
         \MicroMir\Error\Notifiers\CliNotifier::class => [
-            'handleTrace'   => true,
+//            'handleTrace'   => true,
         ],
 
     ],

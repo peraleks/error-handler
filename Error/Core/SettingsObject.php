@@ -4,10 +4,13 @@ declare(strict_types=1);
 namespace MicroMir\Error\Core;
 
 
+use MicroMir\Error\Exception\ErrorHandlerException;
+
 class SettingsObject implements SettingsInterface
 {
     private $settings = [
         'ERROR_REPORTING' => E_ALL,
+        'DEVELOPMENT_MODE_CONSTANT' => '',
         'DEV'         => [],
         'PROD'        => [],
         'CLI'         => [],
@@ -17,14 +20,14 @@ class SettingsObject implements SettingsInterface
 
     private $mode = 'PROD';
 
-    public $settingsError;
-
     public function __construct($file)
     {
-        if (!is_string($file) || !file_exists($file)) {
-            throw new \Exception('Wrong name of the settings file: '.$file);
+        if (!is_string($file)) {
+            throw new ErrorHandlerException('ErrorHandler::instance($file): $file must be a string, '.gettype($file).' defined');
+        } elseif (!file_exists($file)) {
+            throw new ErrorHandlerException('File not exist: ErrorHandler::instance('.$file.')');
         } elseif (!is_array($arr = include $file)) {
-            throw new \Exception('The configuration file should return an array, '.gettype($file).' returned');
+            throw new ErrorHandlerException('The configuration file '.$file.' should return an array, '.gettype($arr).' returned');
         }
         $this->settings = array_merge($this->settings, $arr);
         $this->settingsValidate();
@@ -55,8 +58,9 @@ class SettingsObject implements SettingsInterface
 
     public function productionMode(): bool
     {
-        return false;
-        //TODO определение режима разработчика
+        if (defined($this->settings['DEVELOPMENT_MODE_CONSTANT'])
+            && constant($this->settings['DEVELOPMENT_MODE_CONSTANT']) === true
+        ) { return false; } else { return true; }
     }
 
     public function getErrorReporting(): int
