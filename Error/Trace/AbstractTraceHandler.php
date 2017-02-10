@@ -34,7 +34,7 @@ abstract class AbstractTraceHandler
             //обработка номера строки
             $arr['line'] = $this->line($dbt['line'] ?? 0);
             //обработка имени класса
-            $arr['class'] = $this->className($dbt['class'] ?? '');
+            $arr['class'] = $this->className($dbt['class'] ?? '', $dbt['type'] ?? '');
             //обработка имени функции
             isset($dbt['args']) ?: $dbt['args'] = [];
             $func = $dbt['function'] ?? '';
@@ -65,7 +65,7 @@ abstract class AbstractTraceHandler
 
     abstract protected function line(int $line): string;
 
-    abstract protected function className(string $class): string;
+    abstract protected function className(string $class, string $type): string;
 
     abstract protected function functionName(string $function, string $param): string;
 
