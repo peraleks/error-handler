@@ -22,5 +22,4 @@ abstract class AbstractNotifier
     abstract protected function prepare(): string;
 
     abstract protected function notify(string $notice);
-
 }

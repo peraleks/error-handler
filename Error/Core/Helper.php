@@ -20,9 +20,9 @@ class Helper
 
     public function handle(ErrorObject $obj)
     {
+        if (!$this->settings) return;
         $code = $obj->getCode();
-        $errorReporting = $this->settings ? $this->settings->getErrorReporting() : E_ALL;
-        if ($code !== ($code & $errorReporting)) return;
+        if ($code !== ($code & $this->settings->getErrorReporting())) return;
 
         $this->notify($obj);
         if ($code == E_RECOVERABLE_ERROR) exit();

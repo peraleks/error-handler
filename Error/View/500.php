@@ -1,5 +1,5 @@
 <style>
-div.error_user_mmessage {
+div.error_user_message {
     font-family: monospace;
     text-align: center;
     border-radius: 5px;
@@ -8,7 +8,7 @@ div.error_user_mmessage {
     margin-bottom: 3px;
 }
 
-div.error_user_mmessage div.error_header {
+div.error_user_message div.error_header {
     font-size: 110%;
     font-weight: 500;
     padding: 5px;
@@ -17,7 +17,11 @@ div.error_user_mmessage div.error_header {
     background-color: #00bc09;
 }
 
-div.error_user_mmessage div.error_text {
+div.error_user_message div.error_header>span {
+    color: yellow;
+}
+
+div.error_user_message div.error_text {
     padding: 5px 15px;
     font-family: Consolas, monospace;
     background-color: #aaa;
@@ -27,8 +31,8 @@ div.error_user_mmessage div.error_text {
 }
 
 </style>
-<div class="error_user_mmessage">
-    <div class="error_header"><?= $type.' '.$file.'('.$line ?>)</div>
+<div class="error_user_message">
+    <div class="error_header"><span><?= $type ?></span> <?= $file.'('.$line ?>)</div>
     <div></div>
     <div class="error_text">
         <?= $message ?>

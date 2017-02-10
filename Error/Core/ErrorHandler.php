@@ -11,9 +11,8 @@ class ErrorHandler
 
     private $settingsFile;
 
-    private function __construct($settingsFile)
+    private function __construct($settingsFile = null)
     {
-//        ini_set('display_errors', false);
         error_reporting(E_ALL);
         set_error_handler([$this, 'error']);
         set_exception_handler([$this, 'exception']);
@@ -55,7 +54,7 @@ class ErrorHandler
     private function handle(ErrorObject $obj)
     {
         $this->helper
-            ?: $this->helper = new Helper(new SettingsObject($this->settingsFile));
+            ?: $this->helper = new Helper($this->settingsFile);
         $this->helper->handle($obj);
     }
 }

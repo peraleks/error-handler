@@ -104,7 +104,7 @@ final class ErrorObject
 
     public function __toString()
     {
-        //TODO вщзврат всей информации в строке
+        //TODO возврат всей информации в строке
         return $this->throwable->getMessage();
     }
 }

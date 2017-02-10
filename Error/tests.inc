@@ -2,7 +2,7 @@
 /*********************** Перехватываемые -- try{} catch (Throwable $e)  ************************/
 
 /** [1]----------------  Error ------------------ exception_handler */
-undefined_function();
+//undefined_function();
 
 /** [1]---------------- ArithmeticError --------- exception_handler */
 //intdiv(PHP_INT_MIN, -1);
