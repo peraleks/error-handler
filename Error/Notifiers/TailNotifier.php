@@ -1,7 +1,11 @@
 <?php
+declare(strict_types=1);
 
 namespace MicroMir\Error\Notifiers;
 
+
+use MicroMir\Error\Exception\PropertyMustBeDefinedException;
+use MicroMir\Error\Exception\PropertyTypeException;
 
 class TailNotifier extends CliNotifier
 {
@@ -11,10 +15,10 @@ class TailNotifier extends CliNotifier
     protected function prepare(): string
     {
         if (!$file = $this->settings->get('file')) {
-            throw new \Exception(__CLASS__.' The file is not defined');
+            throw new PropertyMustBeDefinedException('file');
         }
         if (!is_string($file)) {
-            throw new \Exception('Wrong name of the settings file');
+            throw new PropertyTypeException($file, 'file', 'string');
         }
         return parent::prepare();
     }
@@ -23,24 +27,23 @@ class TailNotifier extends CliNotifier
     public function notify(string $notice)
     {
         $file = $this->settings->get('file');
-        $fileRep = $file.'.repeat';
+        $fileRepeat = $file.'.repeat';
 
-        $fileRepRes = fopen($fileRep, 'r+b');
-        if (!$fileRepRes) return;
+        if (!file_exists($fileRepeat)) file_put_contents($fileRepeat, '');
+        $fileRepeatRes = fopen($fileRepeat, 'rb');
+        if (!$fileRepeatRes) return;
 
-        if (file_exists($file)) {
-            $a = crc32($notice);
-            $b = (int)fread($fileRepRes, 12);
-            if ($a == $b) {
-                $notice = $this->time().sprintf(static::REPEAT, '>>repeat ');
-            } else {
-                fwrite($fileRepRes, crc32($notice));
-                $notice = "\n".$this->time().' '.$notice;
-            }
+        $a = crc32($notice);
+        $b = (int)fread($fileRepeatRes, 12);
+        if ($a == $b) {
+            $notice = $this->time().sprintf(static::REPEAT, '>>repeat ');
         } else {
-            fwrite($fileRepRes, crc32($notice));
+            $fileRepeatRes = fopen($fileRepeat, 'wb');
+            if (!$fileRepeatRes) return;
+            fwrite($fileRepeatRes, (string)crc32($notice));
+            $notice = "\n\n".$this->time().' '.$notice;
         }
-        fclose($fileRepRes);
+        fclose($fileRepeatRes);
 
         $fileRes = fopen($file, 'ab');
         if (!$fileRes) return;
