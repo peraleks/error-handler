@@ -6,14 +6,6 @@ namespace MicroMir\Error\Trace;
 
 class HtmlTraceHandler extends AbstractTraceHandler
 {
-    protected $stringLength = 80;
-
-    protected $tooltipLength = 1500;
-
-    protected $recLevel = 1;
-
-    protected $recursion = 0;
-
     const tooltipEnable = 'tooltip_wrap';
 
     const FILE       = '<td class="trace_file">%s</td>';
@@ -62,11 +54,21 @@ class HtmlTraceHandler extends AbstractTraceHandler
 
     const QUOTES       = '<span class="string_quotes">&prime;</span>';
 
+    protected $stringLength = 80;
+
+    protected $tooltipLength = 1500;
+
+    protected $arrayLevel = 2;
+
+    protected $recursion = 0;
+
     protected function before()
     {
-        //TODO валидацю массива настроек
-        !is_int(${0} = $this->settings->get('stringLength'))
-            ?: $this->stringLength = ${0};
+        $sets = $this->settingsObject;
+
+        !is_int($level  = $sets->get('arrayLevel')) ?: $this->arrayLevel = $level;
+        !is_int($length = $sets->get('stringLength')) ?: $this->stringLength = $length;
+        !is_int($length = $sets->get('tooltipLength')) ?: $this->tooltipLength = $length;
     }
 
     protected function file(string $file): string
@@ -75,7 +77,7 @@ class HtmlTraceHandler extends AbstractTraceHandler
         //получаем имя файла без пути
         $file = sprintf(static::FILE, '/'.array_pop($parts));
         //получаем путь (уже без имени файла) относительно корня приложения для экономии пространства в таблице
-        $path = preg_replace('#^'.$this->settings->appDir().'#', '', implode('/', $parts));
+        $path = preg_replace('#^'.$this->settingsObject->appDir().'#', '', implode('/', $parts));
         $path = sprintf(static::PATH, $path);
 
         return $path.$file;
@@ -116,6 +118,7 @@ class HtmlTraceHandler extends AbstractTraceHandler
             $tooltip = mb_substr($arg, 0, $this->tooltipLength);
             $tooltip = htmlentities($tooltip, ENT_SUBSTITUTE | ENT_COMPAT);
             $tooltip = preg_replace('/\s/', '&nbsp;', $tooltip);
+            if ($length > $this->tooltipLength) $tooltip .= static::ETC;
             $end = static::ETC;
             $css_class = static::tooltipEnable;
         } else {
@@ -132,7 +135,7 @@ class HtmlTraceHandler extends AbstractTraceHandler
 
     protected function arrayArg($arg): string
     {
-        if ($this->recursion > $this->recLevel) { return sprintf(static::TD, static::ETC); }
+        if ($this->recursion > $this->arrayLevel) { return sprintf(static::ARGS, static::ETC); }
         ++$this->recursion;
         $tooltip = $this->arrayHandler($arg);
         --$this->recursion;
@@ -146,6 +149,13 @@ class HtmlTraceHandler extends AbstractTraceHandler
             $key = htmlentities((string)$key, ENT_SUBSTITUTE | ENT_COMPAT);
             $key = preg_replace('/\s/', '&nbsp;', $key);
             $tr .= sprintf(static::TD, $key);
+
+            /* останавливаем рекурсию GLOBALS[] */
+            if ($value == $GLOBALS) {
+                $tr .= sprintf(static::ARGS, static::ETC);
+                $tr = sprintf(static::TR, $tr);
+                continue;
+            }
                 if (is_string($value))  $tr .= $this->stringArg($value);
             elseif (is_numeric($value)) $tr .= $this->numericArg($value);
             elseif (is_array($value))   $tr .= $this->arrayArg($value);
