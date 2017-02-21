@@ -3,12 +3,17 @@ declare(strict_types=1);
 
 namespace MicroMir\Error\Core;
 
+use MicroMir\Error\Notifiers\AbstractNotifier;
+
 class Helper
 {
     private $settings;
 
-    public function __construct($settingsFile)
+    private $errorHandler;
+
+    public function __construct($settingsFile, $errorHandler)
     {
+        $this->errorHandler = $errorHandler;
         try {
             set_error_handler([$this, 'internalErrorHandler']);
             $this->settings = new SettingsObject($settingsFile);
@@ -22,19 +27,31 @@ class Helper
     {
         if (!$this->settings) return;
         $code = $obj->getCode();
-        if ($code !== ($code & $this->settings->getErrorReporting())) return;
 
-        $this->notify($obj);
-        if ($code == E_RECOVERABLE_ERROR) exit();
+        /* обработка параметра ERROR_REPORTING (файла настроек) */
+        if (0 == ($code & $this->settings->getErrorReporting())) return;
+
+        $this->notify($obj, $this->settings, $this->errorHandler);
+
+        /* воспроизводим стандартное поведение PHP для ошибок
+         * E_RECOVERABLE_ERROR,  E_USER_ERROR (скрипт должен быть остановлен,
+         * если пользовательский обработчик не был определён)*/
+        if ($code & (E_RECOVERABLE_ERROR | E_USER_ERROR)) exit;
     }
 
-    private function notify($obj)
+    private function notify(ErrorObject $obj, SettingsInterface $settings, $errorHandler)
     {
         try {
             set_error_handler([$this, 'internalErrorHandler']);
-            foreach ($this->settings->getNotifiers() as $notifierClass => ${0}) {
-                $this->settings->setNotifierClass($notifierClass);
-                new $notifierClass($obj, $this->settings);
+            foreach ($settings->getNotifiers() as  $notifierClass => ${0}) {
+                $settings->setNotifierClass($notifierClass);
+
+                /* проверяем надо ли обрабатывать ошибку для конкретного Notifier */
+                if (0 == ($settings->get('enabledFor') & $obj->getCode())) continue;
+
+                /* @var $notifier AbstractNotifier */
+                $notifier = new $notifierClass($obj, $settings, $errorHandler);
+                $notifier->notify();
             }
             restore_error_handler();
         } catch (\Throwable $e) {
