@@ -2,23 +2,31 @@
 
 define('DEVELOPMENT_MODE', true);
 
+const TRACE = E_ERROR | E_RECOVERABLE_ERROR;
+
 return [
     'ERROR_REPORTING' => E_ALL,
 
-    'APP_DIR' => $_SERVER['DOCUMENT_ROOT'],
-
     'DEVELOPMENT_MODE_CONSTANT' => 'DEVELOPMENT_MODE',
+
+    'APP_DIR' => $_SERVER['DOCUMENT_ROOT'],
 
     'DEV' => [
         \MicroMir\Error\Notifiers\HtmlNotifier::class => [
-            'handleTrace'   => true,
-//            'minimizeTrace' => true,
-            'stringLength'  => 80,
-            'fontSize'      => 15,
+            'enabledFor'     => E_ALL,
+            'deferredView'   => true,
+            'hideView'       => true,
+            'handleTraceFor' => TRACE,
+            'hideTrace'      => true,
+            'fontSize'       => 15,
+            'stringLength'   => 80,
+            'tooltipLength'  => 1000,
+            'arrayLevel'     => 2,
         ],
         \MicroMir\Error\Notifiers\TailNotifier::class => [
-            'handleTrace'   => true,
-            'file' => $_SERVER['DOCUMENT_ROOT'].'/Tests/tail/tail_error.log',
+//            'enabledFor'  => E_ALL,
+            'handleTrace' => TRACE,
+            'file'        => $_SERVER['DOCUMENT_ROOT'].'/tail_error.log',
         ],
     ],
 
@@ -26,9 +34,10 @@ return [
 
     ],
 
-    'CLI'  => [
+    'CLI' => [
         \MicroMir\Error\Notifiers\CliNotifier::class => [
-//            'handleTrace'   => true,
+            'enabledFor' => E_ALL,
+//            'handleTrace'   => TRACE,
         ],
 
     ],
