@@ -8,29 +8,70 @@ use MicroMir\Error\Trace\HtmlTraceHandler;
 
 class HtmlNotifier extends AbstractNotifier
 {
-    protected function prepare(): string { return ''; }
+    protected $errorCss;
 
-    protected function notify(string $notice)
+    protected $traceCss;
+
+    protected $errorTpl;
+
+    protected $wrapperTpl;
+
+    protected static $count;
+
+    protected function prepare()
     {
-        $code    = $this->obj->getCode();
-        $name    = $this->obj->getName();
-        $type    = $this->obj->getType();
-        $message = $this->obj->getMessage();
-        $path    = $this->settings->appDir();
-        $file    = preg_replace('#^'.$path.'#', '', $this->obj->getFile());
-        $line    = $this->obj->getLine();
-        $style   = file_get_contents(dirname(__DIR__).'/View/error.css');
-        if ($this->settings->get('handleTrace')) {
-            $trace = (new HtmlTraceHandler($this->obj->getTrace(), $this->settings))->getTrace();
-            $style .= file_get_contents(dirname(__DIR__).'/View/trace.css');
-        } else {
-            $trace = '';
-        }
-        $this->settings->get('minimizeTrace') ? $hidden = 'hidden' : $hidden = '';
-        $fontSize = $this->settings->get('fontSize');
-        $code == E_ERROR ? $cssName = 'ERROR' : $cssName = $name;
-        $handler = $this->obj->getHandler();
+        $viewDir = dirname(__DIR__).'/View';
+        $this->errorCss   = $viewDir.'/error.css';
+        $this->traceCss   = $viewDir.'/trace.css';
+        $this->errorTpl   = $viewDir.'/error.tpl.php';
+        $this->wrapperTpl = $viewDir.'/wrapper.tpl.php';
+    }
 
-        include (dirname(__DIR__).'/View/error.tpl.php');
+    public function notify()
+    {
+        $sets = $this->settingsObject;
+
+        if (!$sets->get('deferredView')) {
+            $this->view();
+            return;
+        }
+        $this->errorHandler->addToCallbackDataArray('htmlNotifier', $this);
+        if (!self::$count) {
+            $this->errorHandler->addCallback(function ($callbackData) use ($sets){
+                $sets->setNotifierClass(__CLASS__);
+                $hideView = $sets->get('hideView') ? 'hidden' : '';
+                include($this->wrapperTpl);
+            });
+            ++self::$count;
+        }
+    }
+
+    public function view()
+    {
+        $eObj = $this->errorObject;
+        $sets = $this->settingsObject;
+
+        $code    = $eObj->getCode();
+        $name    = $eObj->getName();
+        $type    = $eObj->getType();
+        $message = $eObj->getMessage();
+        $path    = $sets->appDir();
+        $file    = preg_replace('#^'.$path.'#', '', $eObj->getFile());
+        $line    = $eObj->getLine();
+        $style   = file_get_contents($this->errorCss);
+
+        /* получаем трейс для конкретной ошибки если указана битовая маска в файле настроек*/
+        if (0 != ($sets->get('handleTraceFor') & $eObj->getCode())) {
+            $trace = (new HtmlTraceHandler($eObj->getTrace(), $sets))->getTrace();
+            $style .= file_get_contents($this->traceCss);
+        } else { $trace = ''; }
+
+        $sets->get('hideTrace') ? $hidden = 'hidden' : $hidden = '';
+        $fontSize = $sets->get('fontSize');
+        $code == E_ERROR ? $cssName = 'ERROR' : $cssName = $name;
+        $handler = $eObj->getHandler();
+
+        include ($this->errorTpl);
+
     }
 }
