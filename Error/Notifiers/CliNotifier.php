@@ -19,7 +19,9 @@ class CliNotifier extends AbstractNotifier
 
     protected $codeColor;
 
-    public function __construct(ErrorObject $obj, SettingsInterface $settings)
+    protected $preparedNotice;
+
+    public function __construct(ErrorObject $errorObject, SettingsInterface $settingsObject, $eH)
     {
         $this->codeColor = [
             E_ERROR             => static::ERROR,
@@ -43,30 +45,33 @@ class CliNotifier extends AbstractNotifier
             E_USER_DEPRECATED => static::DEPRECATED,
         ];
 
-        parent::__construct($obj, $settings);
+        parent::__construct($errorObject, $settingsObject, $eH);
     }
 
-    protected function prepare(): string
+    protected function prepare()
     {
-        $code    = $this->obj->getCode();
-        $eName   = $this->obj->getName();
-        $file    = $this->obj->getFile();
-        $line    = $this->obj->getLine();
-        $message = $this->obj->getMessage();
+        $eObj = $this->errorObject;
+        $sets = $this->settingsObject;
+
+        $code    = $eObj->getCode();
+        $eName   = $eObj->getName();
+        $file    = $eObj->getFile();
+        $line    = $eObj->getLine();
+        $message = $eObj->getMessage();
 
         $notice = sprintf($this->codeColor[$code], "[$code] $eName ")
             .sprintf(static::FILE, " $file($line) ")."\n"
             .sprintf(static::MESSAGE, $message)."\n";
 
-        if ($this->settings->get('handleTrace')) {
-            $notice .= ((new CliTraceHandler($this->obj->getTrace(), $this->settings))->getTrace());
+        if ($sets->get('handleTrace')) {
+            $notice .= ((new CliTraceHandler($eObj->getTrace(), $sets))->getTrace());
         } else { $notice .= "\n"; }
-        return $notice;
+        $this->preparedNotice = $notice;
     }
 
-    protected function notify(string $notice)
+    public function notify()
     {
-        echo "\n".$notice;
+        echo "\n".$this->preparedNotice;
     }
 
 }
