@@ -33,7 +33,7 @@ final class ErrorObject
         E_USER_DEPRECATED   => 'USER_DEPRECATED',
     ];
 
-    public function __construct(\Throwable $throwable, string $handler)
+    public function __construct($throwable, string $handler)
     {
         $this->handler = $handler;
         $this->throwable = $throwable;
