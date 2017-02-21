@@ -7,7 +7,7 @@ use MicroMir\Error\Core\SettingsInterface;
 
 abstract class AbstractTraceHandler
 {
-    protected $settings;
+    protected $settingsObject;
 
     protected $traceResult;
 
@@ -15,9 +15,9 @@ abstract class AbstractTraceHandler
 
     protected $maxNumberOfArgs = 0;
 
-    public final function __construct(array $dBTrace, SettingsInterface $settings)
+    public final function __construct(array $dBTrace, SettingsInterface $settingsObject)
     {
-        $this->settings = $settings;
+        $this->settingsObject = $settingsObject;
         $this->before();
         $this->handleTrace($dBTrace);
     }
@@ -29,17 +29,17 @@ abstract class AbstractTraceHandler
         for ($i = 0; $i < count($dBTrace); ++$i) {
             $arr =& $this->arr[$i];
             $dbt =& $dBTrace[$i];
-            //обработка имени файла
+            /* обработка имени файла */
             $arr['file'] = $this->file($dbt['file'] ?? '');
-            //обработка номера строки
+            /* обработка номера строки */
             $arr['line'] = $this->line($dbt['line'] ?? 0);
-            //обработка имени класса
+            /* обработка имени класса */
             $arr['class'] = $this->className($dbt['class'] ?? '', $dbt['type'] ?? '');
-            //обработка имени функции
+            /* обработка имени функции */
             isset($dbt['args']) ?: $dbt['args'] = [];
             $func = $dbt['function'] ?? '';
             $arr['function'] = $this->functionName($func, $this->params($func, $dbt['class'] ?? '', count($dbt['args'])));
-            //обработка аргументов
+            /* обработка аргументов */
             $arr['args'] = [];
             $args =& $arr['args'];
             foreach ($dbt['args'] as $arg) {
@@ -53,11 +53,11 @@ abstract class AbstractTraceHandler
                 elseif (is_resource($arg))$args[] = $this->resourceArg($arg);
                 else $args[] = $this->otherArg($arg);
             }
-            //подсчёт наибольшего количеста аргументов
+            /* подсчёт наибольшего количеста аргументов */
             $cnt = count($arr['args']);
             $this->maxNumberOfArgs > $cnt ?: $this->maxNumberOfArgs = $cnt;
         }
-        //завершающяя обработка (формирование строки)
+        /* завершающяя обработка (формирование строки) */
         $this->traceResult = $this->completion();
     }
 
@@ -99,7 +99,7 @@ abstract class AbstractTraceHandler
 
     protected function isClosedResource($arg): string
     {
-        // определяем является ли тип закрытым ресурсом
+        /* определяем является ли тип закрытым ресурсом */
         if ('unknown type' === $type = gettype($arg)) {
             ob_start();
             echo $arg;
@@ -110,7 +110,7 @@ abstract class AbstractTraceHandler
 
     protected function params(string $func, string $class, int $cntArgs): string
     {
-        if ('' != $class) {
+        if ('' != $class && '{closure}' != $func) {
             $ref = new \ReflectionMethod($class, $func);
         } elseif (function_exists($func)) {
             $ref = new \ReflectionFunction($func);
