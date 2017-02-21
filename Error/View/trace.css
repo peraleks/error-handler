@@ -3,7 +3,7 @@ div.trace_wrap>table {
     background-color: #444;
     border-spacing: 0;
     color: #eee;
-    min-width: 100%;
+    width: 100%;
 }
 
 div.trace_wrap tr:hover {
@@ -14,8 +14,11 @@ div.trace_wrap {
     min-width: 100%;
 }
 
-div.trace_wrap tr{
+div.trace_wrap tr, div.trace_wrap td{
     line-height: 1.8em;
+    border: 0;
+    font-size: 100%;
+    vertical-align: baseline;
 }
 
 div.trace_wrap tr:nth-child(2n){
@@ -25,6 +28,7 @@ div.trace_wrap tr:nth-child(2n){
 div.trace_wrap td {
     white-space: nowrap;
     text-align: center;
+    padding: 1px;
 }
 
 div.trace_wrap td.trace_path {
@@ -124,7 +128,6 @@ div.error_box .hidden {
     display: none !important;
 }
 
-
 /******************************************************************* tooltip */
 div.trace_wrap div.tooltip_wrap  {
     font-family: Consolas, monospace;
@@ -135,19 +138,21 @@ div.trace_wrap div.tooltip_wrap  {
     text-align: left;
 }
 
+div.tooltip_wrap table {
+    font-size: 100%;
+    font-style: normal;
+    border-spacing: 0;
+    color: #ccc;
+    width: 100%;
+    box-shadow: none;
+}
+
 div.trace_wrap .tooltip_wrap.string {
     max-width: 580px;
 }
 
 div.trace_wrap .tooltip_wrap.string:hover {
     background-color: #222;
-}
-
-div.trace_wrap .tooltip_wrap table {
-    font-size: 100%;
-    border-spacing: 0;
-    color: #ccc;
-    min-width: 100%;
 }
 
 div.trace_wrap .tooltip_wrap table tr:nth-child(2n){
@@ -161,7 +166,7 @@ div.trace_wrap .tooltip_wrap td:nth-child(1) {
 }
 
 div.trace_wrap .tooltip_wrap td:nth-child(2){
-    font-size: 13px;
+    font-size: 100%;
     padding: 0 10px 0 5px;
     text-align: left;
 }

@@ -41,9 +41,11 @@ div.error_box div.Micro_Exception
 
 div.error_box {
     font-family: Consolas, monospace;
-    margin: 5px 0;
-    min-width: 100%;
+    margin: 5px 2px;
+    min-width: 99.5%;
     display: inline-block;
+    position: relative;
+    z-index: 10000;
 }
 
 div.error_box div.error_header {
