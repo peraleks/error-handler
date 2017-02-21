@@ -5,21 +5,27 @@ namespace MicroMir\Error\Notifiers;
 
 use MicroMir\Error\Core\SettingsInterface;
 use MicroMir\Error\Core\ErrorObject;
+use MicroMir\Error\Core\ShutdownCallbackInterface;
 
 abstract class AbstractNotifier
 {
-    protected $obj;
+    protected $errorObject;
 
-    protected $settings;
+    protected $settingsObject;
 
-    public function __construct(ErrorObject $obj, SettingsInterface $settings)
+    protected $errorHandler;
+
+    public function __construct(ErrorObject $errorObject,
+                                SettingsInterface $settingsObject,
+                                ShutdownCallbackInterface $errorHandler)
     {
-        $this->obj = $obj;
-        $this->settings = $settings;
-        $this->notify($this->prepare());
+        $this->errorObject = $errorObject;
+        $this->settingsObject = $settingsObject;
+        $this->errorHandler = $errorHandler;
+        $this->prepare();
     }
 
-    abstract protected function prepare(): string;
+    abstract protected function prepare();
 
-    abstract protected function notify(string $notice);
+    abstract public function notify();
 }
