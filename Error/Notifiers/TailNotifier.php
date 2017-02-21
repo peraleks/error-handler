@@ -12,21 +12,23 @@ class TailNotifier extends CliNotifier
     const REPEAT = "\033[31m%s\033[0";
     const DATE   = "\033[33m%s\033[0";
 
-    protected function prepare(): string
+    protected function prepare()
     {
-        if (!$file = $this->settings->get('file')) {
+        if (!$file = $this->settingsObject->get('file')) {
             throw new PropertyMustBeDefinedException('file');
         }
         if (!is_string($file)) {
             throw new PropertyTypeException($file, 'file', 'string');
         }
-        return parent::prepare();
+        parent::prepare();
     }
 
 
-    public function notify(string $notice)
+    public function notify()
     {
-        $file = $this->settings->get('file');
+        $notice =& $this->preparedNotice;
+
+        $file = $this->settingsObject->get('file');
         $fileRepeat = $file.'.repeat';
 
         if (!file_exists($fileRepeat)) file_put_contents($fileRepeat, '');
