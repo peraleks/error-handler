@@ -1,7 +1,6 @@
+/.idea
+/dev
 /vendor
 composer.lock
-TODO.txt
 php_errors.log
-/.idea
-index.php
-/Tests
+
