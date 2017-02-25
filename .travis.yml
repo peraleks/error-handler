@@ -11,9 +11,15 @@ cache:
   directories:
     - $HOME/.composer/cache
 
+matrix:
+  include:
+    - php: hhvm
+      env: 'COMPOSER_FLAGS="--ignore-platform-reqs"'
+
+
 
 before_script:
-  - travis_retry composer update -v --no-interaction --prefer-dist
+  - travis_retry composer update -v --no-interaction --prefer-dist ${COMPOSER_FLAGS}
 
 
 script:
