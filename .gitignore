@@ -2,6 +2,7 @@
 /build
 /dev
 /vendor
+coverage.clover
 composer.lock
 
 
