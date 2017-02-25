@@ -1,5 +1,5 @@
 language: php
-sudo: required
+dist: trusty
 
 php:
   - 7.0
@@ -12,19 +12,12 @@ cache:
   directories:
     - $HOME/.composer/cache
 
-matrix:
-  include:
-    - php: hhvm-nightly
-      env: 'COMPOSER_FLAGS="--ignore-platform-reqs"'
-
-
 
 before_script:
-  - travis_retry composer update -v --no-interaction --prefer-dist ${COMPOSER_FLAGS}
+  - travis_retry composer update -v --no-interaction --prefer-dist
 
 
 script:
-  - vendor/bin/phpcs --encoding=utf-8 --standard=PSR2  src/
   - vendor/bin/phpunit --coverage-text --coverage-clover=coverage.clover
 
 
