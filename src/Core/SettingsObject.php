@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Peraleks\ErrorHandler\Core;
 
-
 use Peraleks\ErrorHandler\Exception\ErrorHandlerException;
 
 class SettingsObject implements SettingsInterface
@@ -36,8 +35,11 @@ class SettingsObject implements SettingsInterface
     private function settingsValidate()
     {
         // валидация режима работы
-        if (PHP_SAPI === 'cli') $this->mode = 'CLI';
-        else $this->productionMode() ?: $this->mode = 'DEV';
+        if (PHP_SAPI === 'cli') {
+            $this->mode = 'CLI';
+        } else {
+            $this->productionMode() ?: $this->mode = 'DEV';
+        }
 
         // валидация настройки APP_DIR
         $ad =& $this->settings['APP_DIR'];
@@ -60,7 +62,11 @@ class SettingsObject implements SettingsInterface
     {
         if (defined($this->settings['DEVELOPMENT_MODE_CONSTANT'])
             && constant($this->settings['DEVELOPMENT_MODE_CONSTANT']) === true
-        ) { return false; } else { return true; }
+        ) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     public function getErrorReporting(): int
@@ -71,8 +77,9 @@ class SettingsObject implements SettingsInterface
     public function get(string $param)
     {
         //TODO обработка ошибки нестрокового типа аргумента $param
-        if (!isset($this->settings[$this->mode][$this->currentNotifier][$param]))
+        if (!isset($this->settings[$this->mode][$this->currentNotifier][$param])) {
             return null;
+        }
         return $this->settings[$this->mode][$this->currentNotifier][$param];
     }
 

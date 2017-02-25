@@ -14,7 +14,7 @@
         <?= $trace ?>
     </div>
     <div class="error_path error_content">
-        <?php if ($trace != ''): ?>
+        <?php if ($trace != '') : ?>
         <div class="but_trace" onclick = "parentNode.previousElementSibling.classList.toggle('hidden')">
             trace
         </div>
@@ -24,7 +24,7 @@
         <span class="app_dir"><?= $path ?></span>
     </div>
 </div>
-<?php if ($trace != ''): ?>
+<?php if ($trace != '') : ?>
 <script>
     (function () {
         var wrap = document.getElementById('<?= $id ?>');

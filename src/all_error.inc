@@ -1,4 +1,5 @@
 <?php
+// @codingStandardsIgnoreFile
 /*********************** Перехватываемые (catchable)-- try{} catch (Throwable $e)  ******************
  * Все исключения (catchable exceptions) прерывают выполнение скрипта (FATAL) */
 
@@ -62,10 +63,10 @@
 
 
 /***************** Неперехватываемые (uncatchable) конструкцией -- try{} catch() *******************/
-try{
+try {
 /***************** Не прерывающие выполнение скрипта (NONFATAL) *********************/
 /** [2]---------------- E_WARNING --------------- error_handler */
-$i = 2 / 0;
+    $i = 2 / 0;
 
 /** [8]---------------- E_NOTICE ---------------- error_handler */
 // echo $undefined_var;
@@ -113,8 +114,6 @@ $i = 2 / 0;
  * Micro-error-handler, являясь глобальным обработчиком,
  * прервёт скрипт после оповещения. */
 // class A{} echo new A();
-
-
 } catch (Throwable $e) {
     echo "\n перехвачено | caught -- \n".$e;
 }

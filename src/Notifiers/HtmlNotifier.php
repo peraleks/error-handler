@@ -5,7 +5,6 @@ namespace Peraleks\ErrorHandler\Notifiers;
 
 use Peraleks\ErrorHandler\Trace\HtmlTraceHandler;
 
-
 class HtmlNotifier extends AbstractNotifier
 {
     protected $errorCss;
@@ -37,7 +36,7 @@ class HtmlNotifier extends AbstractNotifier
         }
         $this->errorHandler->addToCallbackDataArray('htmlNotifier', $this);
         if (!self::$count) {
-            $this->errorHandler->addCallback(function ($callbackData) use ($sets){
+            $this->errorHandler->addCallback(function ($callbackData) use ($sets) {
                 $sets->setNotifierClass(__CLASS__);
                 $hideView = $sets->get('hideView') ? 'hidden' : '';
                 include($this->wrapperTpl);
@@ -64,14 +63,15 @@ class HtmlNotifier extends AbstractNotifier
         if (0 != ($sets->get('handleTraceFor') & $eObj->getCode())) {
             $trace = (new HtmlTraceHandler($eObj->getTrace(), $sets))->getTrace();
             $style .= file_get_contents($this->traceCss);
-        } else { $trace = ''; }
+        } else {
+            $trace = '';
+        }
 
         $sets->get('hideTrace') ? $hidden = 'hidden' : $hidden = '';
         $fontSize = $sets->get('fontSize');
         $code == E_ERROR ? $cssName = 'ERROR' : $cssName = $name;
         $handler = $eObj->getHandler();
 
-        include ($this->errorTpl);
-
+        include($this->errorTpl);
     }
 }

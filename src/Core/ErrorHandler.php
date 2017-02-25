@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace Peraleks\ErrorHandler\Core;
 
-require 'ShutdownCallbackInterface.php';
-
 class ErrorHandler implements ShutdownCallbackInterface
 {
     static private $instance;
@@ -25,7 +23,7 @@ class ErrorHandler implements ShutdownCallbackInterface
         $this->settingsFile = $settingsFile;
     }
 
-    static public function instance($settingsFile = null)
+    public static function instance($settingsFile = null)
     {
         return self::$instance ?? self::$instance = new self($settingsFile);
     }
@@ -33,7 +31,7 @@ class ErrorHandler implements ShutdownCallbackInterface
     public function error($code, $message, $file, $line)
     {
         $this->passToHelper(
-            new ErrorObject(new \ErrorException($message, $code, $code, $file, $line),'error handler')
+            new ErrorObject(new \ErrorException($message, $code, $code, $file, $line), 'error handler')
         );
         return true;
     }
@@ -60,7 +58,14 @@ class ErrorHandler implements ShutdownCallbackInterface
                     call_user_func($callback, $this->callbackData);
                     restore_error_handler();
                 } catch (\Throwable $e) {
-                    $this->helper->internalErrorHandler($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine(), '', get_class($e));
+                    $this->helper->internalErrorHandler(
+                        $e->getCode(),
+                        $e->getMessage(),
+                        $e->getFile(),
+                        $e->getLine(),
+                        '',
+                        get_class($e)
+                    );
                 }
             }
         }

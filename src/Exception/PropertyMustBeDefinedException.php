@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Peraleks\ErrorHandler\Exception;
 
-
 class PropertyMustBeDefinedException extends ErrorHandlerException
 {
     use ExceptionSourceNameTrait;

@@ -89,7 +89,9 @@ final class ErrorObject
             $this->trace = $this->throwable->getTrace();
             array_shift($this->trace);
             return $this->trace;
-        } else return $this->throwable->getTrace();
+        } else {
+            return $this->throwable->getTrace();
+        }
     }
 
     public function getTraceAsString(): string

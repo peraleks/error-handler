@@ -15,10 +15,12 @@ abstract class AbstractNotifier
 
     protected $errorHandler;
 
-    public function __construct(ErrorObject $errorObject,
-                                SettingsInterface $settingsObject,
-                                ShutdownCallbackInterface $errorHandler)
-    {
+    public function __construct(
+        ErrorObject $errorObject,
+        SettingsInterface $settingsObject,
+        ShutdownCallbackInterface $errorHandler
+    ) {
+    
         $this->errorObject = $errorObject;
         $this->settingsObject = $settingsObject;
         $this->errorHandler = $errorHandler;

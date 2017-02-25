@@ -65,7 +65,9 @@ class CliNotifier extends AbstractNotifier
 
         if ($sets->get('handleTrace')) {
             $notice .= ((new CliTraceHandler($eObj->getTrace(), $sets))->getTrace());
-        } else { $notice .= "\n"; }
+        } else {
+            $notice .= "\n";
+        }
         $this->preparedNotice = $notice;
     }
 
@@ -73,5 +75,4 @@ class CliNotifier extends AbstractNotifier
     {
         echo "\n".$this->preparedNotice;
     }
-
 }

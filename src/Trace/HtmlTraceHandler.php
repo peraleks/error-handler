@@ -3,10 +3,9 @@ declare(strict_types=1);
 
 namespace Peraleks\ErrorHandler\Trace;
 
-
 class HtmlTraceHandler extends AbstractTraceHandler
 {
-    const tooltipEnable = 'tooltip_wrap';
+    const TOOLTIP_ENABLE = 'tooltip_wrap';
 
     const FILE       = '<td class="trace_file">%s</td>';
 
@@ -118,9 +117,11 @@ class HtmlTraceHandler extends AbstractTraceHandler
             $tooltip = mb_substr($arg, 0, $this->tooltipLength);
             $tooltip = htmlentities($tooltip, ENT_SUBSTITUTE | ENT_COMPAT);
             $tooltip = preg_replace('/\s/', '&nbsp;', $tooltip);
-            if ($length > $this->tooltipLength) $tooltip .= static::ETC;
+            if ($length > $this->tooltipLength) {
+                $tooltip .= static::ETC;
+            }
             $end = static::ETC;
-            $css_class = static::tooltipEnable;
+            $css_class = static::TOOLTIP_ENABLE;
         } else {
             $tooltip = $end = '';
             $css_class = '';
@@ -135,7 +136,9 @@ class HtmlTraceHandler extends AbstractTraceHandler
 
     protected function arrayArg($arg): string
     {
-        if ($this->recursion > $this->arrayLevel) { return sprintf(static::ARGS, static::ETC); }
+        if ($this->recursion > $this->arrayLevel) {
+            return sprintf(static::ARGS, static::ETC);
+        }
         ++$this->recursion;
         $tooltip = $this->arrayHandler($arg);
         --$this->recursion;
@@ -156,19 +159,28 @@ class HtmlTraceHandler extends AbstractTraceHandler
                 $tr = sprintf(static::TR, $tr);
                 continue;
             }
-                if (is_string($value))  $tr .= $this->stringArg($value);
-            elseif (is_numeric($value)) $tr .= $this->numericArg($value);
-            elseif (is_array($value))   $tr .= $this->arrayArg($value);
-            elseif (is_bool($value))    $tr .= $this->boolArg($value);
-            elseif (is_null($value))    $tr .= $this->nullArg();
-            elseif ($value instanceof \Closure)$tr .= $this->callableArg($value);
-            elseif (is_object($value))  $tr .= $this->objectArg($value);
-            elseif (is_resource($value))$tr .= $this->resourceArg($value);
-            else $tr .= sprintf(static::TD, gettype($value));
+            if (is_string($value)) {
+                $tr .= $this->stringArg($value);
+            } elseif (is_numeric($value)) {
+                $tr .= $this->numericArg($value);
+            } elseif (is_array($value)) {
+                $tr .= $this->arrayArg($value);
+            } elseif (is_bool($value)) {
+                $tr .= $this->boolArg($value);
+            } elseif (is_null($value)) {
+                $tr .= $this->nullArg();
+            } elseif ($value instanceof \Closure) {
+                $tr .= $this->callableArg($value);
+            } elseif (is_object($value)) {
+                $tr .= $this->objectArg($value);
+            } elseif (is_resource($value)) {
+                $tr .= $this->resourceArg($value);
+            } else {
+                $tr .= sprintf(static::TD, gettype($value));
+            }
             $tr = sprintf(static::TR, $tr);
         }
         return sprintf(static::TABLE, $tr);
-
     }
 
     protected function boolArg($arg): string
@@ -206,7 +218,7 @@ class HtmlTraceHandler extends AbstractTraceHandler
 
     protected function otherArg($arg): string
     {
-        return sprintf( static::RESOURCE, $this->isClosedResource($arg), '');
+        return sprintf(static::RESOURCE, $this->isClosedResource($arg), '');
     }
 
 

@@ -15,7 +15,7 @@ abstract class AbstractTraceHandler
 
     protected $maxNumberOfArgs = 0;
 
-    public final function __construct(array $dBTrace, SettingsInterface $settingsObject)
+    final public function __construct(array $dBTrace, SettingsInterface $settingsObject)
     {
         $this->settingsObject = $settingsObject;
         $this->before();
@@ -24,7 +24,7 @@ abstract class AbstractTraceHandler
 
     abstract protected function before();
 
-    protected final function handleTrace($dBTrace)
+    final protected function handleTrace($dBTrace)
     {
         for ($i = 0; $i < count($dBTrace); ++$i) {
             $arr =& $this->arr[$i];
@@ -43,15 +43,25 @@ abstract class AbstractTraceHandler
             $arr['args'] = [];
             $args =& $arr['args'];
             foreach ($dbt['args'] as $arg) {
-                    if (is_string($arg))  $args[] = $this->stringArg($arg);
-                elseif (is_numeric($arg)) $args[] = $this->numericArg($arg);
-                elseif (is_array($arg))   $args[] = $this->arrayArg($arg);
-                elseif (is_bool($arg))    $args[] = $this->boolArg($arg);
-                elseif (is_null($arg))    $args[] = $this->nullArg();
-                elseif ($arg instanceof \Closure)$args[] = $this->callableArg($arg);
-                elseif (is_object($arg))  $args[] = $this->objectArg($arg);
-                elseif (is_resource($arg))$args[] = $this->resourceArg($arg);
-                else $args[] = $this->otherArg($arg);
+                if (is_string($arg)) {
+                    $args[] = $this->stringArg($arg);
+                } elseif (is_numeric($arg)) {
+                    $args[] = $this->numericArg($arg);
+                } elseif (is_array($arg)) {
+                    $args[] = $this->arrayArg($arg);
+                } elseif (is_bool($arg)) {
+                    $args[] = $this->boolArg($arg);
+                } elseif (is_null($arg)) {
+                    $args[] = $this->nullArg();
+                } elseif ($arg instanceof \Closure) {
+                    $args[] = $this->callableArg($arg);
+                } elseif (is_object($arg)) {
+                    $args[] = $this->objectArg($arg);
+                } elseif (is_resource($arg)) {
+                    $args[] = $this->resourceArg($arg);
+                } else {
+                    $args[] = $this->otherArg($arg);
+                }
             }
             /* подсчёт наибольшего количеста аргументов */
             $cnt = count($arr['args']);
@@ -92,7 +102,7 @@ abstract class AbstractTraceHandler
         return gettype($arg);
     }
 
-    public final function getTrace(): string
+    final public function getTrace(): string
     {
         return $this->traceResult;
     }
@@ -103,7 +113,9 @@ abstract class AbstractTraceHandler
         if ('unknown type' === $type = gettype($arg)) {
             ob_start();
             echo $arg;
-            if (preg_match('/^Resource id (\#\d+)$/', ob_get_clean(), $arr)) $type = 'closed resource '.$arr[1];
+            if (preg_match('/^Resource id (\#\d+)$/', ob_get_clean(), $arr)) {
+                $type = 'closed resource '.$arr[1];
+            }
         }
         return $type;
     }
@@ -124,5 +136,4 @@ abstract class AbstractTraceHandler
         }
         return $p;
     }
-
 }

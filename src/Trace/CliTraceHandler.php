@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Peraleks\ErrorHandler\Trace;
 
-
 class CliTraceHandler extends AbstractTraceHandler
 {
     const FILE       = "\033[0;36m%s\033[0m";
@@ -66,7 +65,9 @@ class CliTraceHandler extends AbstractTraceHandler
         $preview = '';
         foreach ($arg as $key => ${0}) {
             $preview .= '['.$key.']=>..., ';
-            if (mb_strlen($preview) > $this->stringLength) break;
+            if (mb_strlen($preview) > $this->stringLength) {
+                break;
+            }
         }
         return sprintf(static::TYPE, $this->space('array['.count($arg).']')).sprintf(static::ARR, $preview);
     }
@@ -76,7 +77,9 @@ class CliTraceHandler extends AbstractTraceHandler
         $length = mb_strlen($arg);
         $type = sprintf(static::TYPE, $this->space('['.$length.']str'));
         $str = sprintf(static::STRING, mb_substr($arg, 0, $this->stringLength));
-        if ($length > $this->stringLength) $str .= sprintf(static::TRIM, '...');
+        if ($length > $this->stringLength) {
+            $str .= sprintf(static::TRIM, '...');
+        }
         return $type.$str;
     }
 
