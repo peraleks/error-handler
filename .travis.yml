@@ -13,6 +13,7 @@ cache:
 
 
 before_script:
+  - travis_retry composer update -v --no-interaction --prefer-dist
 
 
 script:
