@@ -7,42 +7,36 @@ use Peraleks\ErrorHandler\Notifiers\AbstractNotifier;
 
 class Helper
 {
-    private $settings;
+    private $config;
 
     private $errorHandler;
 
-    public function __construct($settingsFile, $errorHandler)
+    public function __construct($configFile, $errorHandler)
     {
         $this->errorHandler = $errorHandler;
+
         try {
-            set_error_handler([$this, 'internalErrorHandler']);
-            $this->settings = new SettingsObject($settingsFile);
+            set_error_handler([$this, 'error']);
+            $this->config = new ConfigObject($configFile);
             restore_error_handler();
         } catch (\Throwable $e) {
-            $this->internalErrorHandler(
-                $e->getCode(),
-                $e->getMessage(),
-                $e->getFile(),
-                $e->getLine(),
-                '',
-                get_class($e)
-            );
+            $this->exception($e);
         }
     }
 
     public function handle(ErrorObject $obj)
     {
-        if (!$this->settings) {
+        if (!$this->config) {
             return;
         }
         $code = $obj->getCode();
 
         /* обработка параметра ERROR_REPORTING (файла настроек) */
-        if (0 == ($code & $this->settings->getErrorReporting())) {
+        if (0 == ($code & $this->config->getErrorReporting())) {
             return;
         }
 
-        $this->notify($obj, $this->settings, $this->errorHandler);
+        $this->notify($obj, $this->config, $this->errorHandler);
 
         /* воспроизводим стандартное поведение PHP для ошибок
          * E_RECOVERABLE_ERROR,  E_USER_ERROR (скрипт должен быть остановлен,
@@ -52,40 +46,44 @@ class Helper
         }
     }
 
-    private function notify(ErrorObject $obj, SettingsInterface $settings, $errorHandler)
+    private function notify(ErrorObject $obj, ConfigInterface $config, $errorHandler)
     {
         try {
-            set_error_handler([$this, 'internalErrorHandler']);
-            foreach ($settings->getNotifiers() as $notifierClass => ${0}) {
-                $settings->setNotifierClass($notifierClass);
+            set_error_handler([$this, 'error']);
+            foreach ($config->getNotifiers() as $notifierClass => ${0}) {
+                $config->setNotifierClass($notifierClass);
 
-                /* проверяем надо ли обрабатывать ошибку для конкретного Notifier */
-                if (0 == ($settings->get('enabledFor') & $obj->getCode())) {
+                /* проверяем для конкретного Notifier надо ли обрабатывать ошибку */
+                if (0 == ($config->get('enabled') & $obj->getCode())) {
                     continue;
                 }
 
                 /* @var $notifier AbstractNotifier */
-                $notifier = new $notifierClass($obj, $settings, $errorHandler);
+                $notifier = new $notifierClass($obj, $config, $errorHandler);
                 $notifier->notify();
             }
             restore_error_handler();
         } catch (\Throwable $e) {
-            $this->internalErrorHandler(
-                $e->getCode(),
-                $e->getMessage(),
-                $e->getFile(),
-                $e->getLine(),
-                '',
-                get_class($e)
-            );
+            $this->exception($e);
         }
     }
 
-    public function internalErrorHandler($code, $message, $file, $line, $c, $type = null)
+    public function error($code, $message, $file, $line)
     {
-        if (!$type) {
-            $type = ErrorObject::$codeName[$code] ?? 'unknown';
+        $this->exception(new \ErrorException($message, $code, $code, $file, $line));
+        return true;
+    }
+
+    public function exception(\Throwable $obj)
+    {
+        if ($obj instanceof \ErrorException) {
+            $type = ErrorObject::$codeName[$obj->getCode()] ?? 'unknown';
+        } else {
+            $type = get_class($obj);
         }
+        $file = $obj->getFile();
+        $line = $obj->getLine();
+        $message = $obj->getMessage();
         include dirname(__DIR__).'/View/500.php';
     }
 }
