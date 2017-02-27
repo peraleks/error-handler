@@ -55,7 +55,7 @@ class HtmlTraceHandler extends AbstractTraceHandler
 
     protected $stringLength = 80;
 
-    protected $tooltipLength = 1500;
+    protected $tooltipLength = 1000;
 
     protected $arrayLevel = 2;
 
@@ -63,7 +63,7 @@ class HtmlTraceHandler extends AbstractTraceHandler
 
     protected function before()
     {
-        $sets = $this->settingsObject;
+        $sets = $this->configObject;
 
         !is_int($level  = $sets->get('arrayLevel')) ?: $this->arrayLevel = $level;
         !is_int($length = $sets->get('stringLength')) ?: $this->stringLength = $length;
@@ -76,7 +76,7 @@ class HtmlTraceHandler extends AbstractTraceHandler
         //получаем имя файла без пути
         $file = sprintf(static::FILE, '/'.array_pop($parts));
         //получаем путь (уже без имени файла) относительно корня приложения для экономии пространства в таблице
-        $path = preg_replace('#^'.$this->settingsObject->appDir().'#', '', implode('/', $parts));
+        $path = preg_replace('#^'.$this->configObject->appDir().'#', '', implode('/', $parts));
         $path = sprintf(static::PATH, $path);
 
         return $path.$file;
@@ -154,30 +154,20 @@ class HtmlTraceHandler extends AbstractTraceHandler
             $tr .= sprintf(static::TD, $key);
 
             /* останавливаем рекурсию GLOBALS[] */
-            if ($value == $GLOBALS) {
+            if ($value === $GLOBALS) {
                 $tr .= sprintf(static::ARGS, static::ETC);
                 $tr = sprintf(static::TR, $tr);
                 continue;
             }
-            if (is_string($value)) {
-                $tr .= $this->stringArg($value);
-            } elseif (is_numeric($value)) {
-                $tr .= $this->numericArg($value);
-            } elseif (is_array($value)) {
-                $tr .= $this->arrayArg($value);
-            } elseif (is_bool($value)) {
-                $tr .= $this->boolArg($value);
-            } elseif (is_null($value)) {
-                $tr .= $this->nullArg();
-            } elseif ($value instanceof \Closure) {
-                $tr .= $this->callableArg($value);
-            } elseif (is_object($value)) {
-                $tr .= $this->objectArg($value);
-            } elseif (is_resource($value)) {
-                $tr .= $this->resourceArg($value);
-            } else {
-                $tr .= sprintf(static::TD, gettype($value));
-            }
+            if (is_string($value))       $tr .= $this->stringArg($value);
+            elseif (is_numeric($value))  $tr .= $this->numericArg($value);
+            elseif (is_array($value))    $tr .= $this->arrayArg($value);
+            elseif (is_bool($value))     $tr .= $this->boolArg($value);
+            elseif (is_null($value))     $tr .= $this->nullArg();
+            elseif ($value instanceof \Closure) $tr .= $this->callableArg($value);
+            elseif (is_object($value))   $tr .= $this->objectArg($value);
+            elseif (is_resource($value)) $tr .= $this->resourceArg($value);
+            else $tr .= sprintf(static::TD, gettype($value));
             $tr = sprintf(static::TR, $tr);
         }
         return sprintf(static::TABLE, $tr);
