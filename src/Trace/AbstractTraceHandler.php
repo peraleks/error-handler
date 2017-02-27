@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace Peraleks\ErrorHandler\Trace;
 
-use Peraleks\ErrorHandler\Core\SettingsInterface;
+use Peraleks\ErrorHandler\Core\ConfigInterface;
 
 abstract class AbstractTraceHandler
 {
-    protected $settingsObject;
+    protected $configObject;
 
     protected $traceResult;
 
@@ -15,9 +15,9 @@ abstract class AbstractTraceHandler
 
     protected $maxNumberOfArgs = 0;
 
-    final public function __construct(array $dBTrace, SettingsInterface $settingsObject)
+    final public function __construct(array $dBTrace, ConfigInterface $configObject)
     {
-        $this->settingsObject = $settingsObject;
+        $this->configObject = $configObject;
         $this->before();
         $this->handleTrace($dBTrace);
     }
