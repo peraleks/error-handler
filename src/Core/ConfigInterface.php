@@ -1,7 +1,7 @@
 <?php
 namespace Peraleks\ErrorHandler\Core;
 
-interface SettingsInterface
+interface ConfigInterface
 {
     public function setNotifierClass(string $notifierClass);
 
