@@ -9,7 +9,7 @@ final class ErrorObject
 
     protected $code;
 
-    protected $name = '';
+    protected $type = '';
 
     protected $trace;
 
@@ -33,27 +33,23 @@ final class ErrorObject
         E_USER_DEPRECATED   => 'USER_DEPRECATED',
     ];
 
+    /* @var $throwable \Throwable */
     public function __construct($throwable, string $handler)
     {
         $this->handler = $handler;
         $this->throwable = $throwable;
         $this->code = $this->throwable->getCode();
         if ($this->throwable instanceof \ErrorException) {
-            $this->name = self::$codeName[$this->code] ?? "unknown";
+            $this->type = self::$codeName[$this->code] ?? "unknown";
         } else {
             $this->throwable instanceof \ParseError ? $this->code = E_PARSE : $this->code = E_ERROR;
-            $this->name = get_class($this->throwable);
+            $this->type = get_class($this->throwable);
         }
-    }
-
-    public function getName(): string
-    {
-        return $this->name;
     }
 
     public function getType(): string
     {
-        return get_class($this->throwable);
+        return $this->type;
     }
 
     public function getHandler(): string
