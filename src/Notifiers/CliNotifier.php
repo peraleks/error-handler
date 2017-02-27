@@ -4,7 +4,8 @@ declare(strict_types=1);
 namespace Peraleks\ErrorHandler\Notifiers;
 
 use Peraleks\ErrorHandler\Core\ErrorObject;
-use Peraleks\ErrorHandler\Core\SettingsInterface;
+use Peraleks\ErrorHandler\Core\ConfigInterface;
+use Peraleks\ErrorHandler\Trace\CliSimpleTraceHandler;
 use Peraleks\ErrorHandler\Trace\CliTraceHandler;
 
 class CliNotifier extends AbstractNotifier
@@ -21,7 +22,7 @@ class CliNotifier extends AbstractNotifier
 
     protected $preparedNotice;
 
-    public function __construct(ErrorObject $errorObject, SettingsInterface $settingsObject, $eH)
+    public function __construct(ErrorObject $errorObject, ConfigInterface $configObject, $errorHandler)
     {
         $this->codeColor = [
             E_ERROR             => static::ERROR,
@@ -45,34 +46,34 @@ class CliNotifier extends AbstractNotifier
             E_USER_DEPRECATED => static::DEPRECATED,
         ];
 
-        parent::__construct($errorObject, $settingsObject, $eH);
+        parent::__construct($errorObject, $configObject, $errorHandler);
     }
 
     protected function prepare()
     {
-        $eObj = $this->errorObject;
-        $sets = $this->settingsObject;
-
-        $code    = $eObj->getCode();
-        $eName   = $eObj->getName();
-        $file    = $eObj->getFile();
-        $line    = $eObj->getLine();
-        $message = $eObj->getMessage();
-
-        $notice = sprintf($this->codeColor[$code], "[$code] $eName ")
-            .sprintf(static::FILE, " $file($line) ")."\n"
-            .sprintf(static::MESSAGE, $message)."\n";
-
-        if ($sets->get('handleTrace')) {
-            $notice .= ((new CliTraceHandler($eObj->getTrace(), $sets))->getTrace());
-        } else {
-            $notice .= "\n";
-        }
-        $this->preparedNotice = $notice;
+        $this->traceHandlerClass = $this->configObject->get('simpleTrace')
+            ? CliSimpleTraceHandler::class
+            : CliTraceHandler::class;
     }
 
     public function notify()
     {
-        echo "\n".$this->preparedNotice;
+        echo "\n".$this->renderedError."\n";
+    }
+
+    protected function renderError(string $trace): string
+    {
+        $code    = $this->errorObject->getCode();
+        $eName   = $this->errorObject->getType();
+        $file    = $this->errorObject->getFile();
+        $line    = $this->errorObject->getLine();
+        $message = $this->errorObject->getMessage();
+
+        $error = sprintf($this->codeColor[$code], "[$code] $eName ")
+            .sprintf(static::FILE, " $file($line) ")."\n"
+            .sprintf(static::MESSAGE, $message);
+        $n = $trace == '' ? '' : "\n";
+
+        return $error.$n.$trace;
     }
 }

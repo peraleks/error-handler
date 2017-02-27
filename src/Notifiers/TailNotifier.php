@@ -8,12 +8,12 @@ use Peraleks\ErrorHandler\Exception\PropertyTypeException;
 
 class TailNotifier extends CliNotifier
 {
-    const REPEAT = "\033[31m%s\033[0";
+    const REPEAT = "\033[1;30m%s\033[0m";
     const DATE   = "\033[33m%s\033[0";
 
     protected function prepare()
     {
-        if (!$file = $this->settingsObject->get('file')) {
+        if (!$file = $this->configObject->get('file')) {
             throw new PropertyMustBeDefinedException('file');
         }
         if (!is_string($file)) {
@@ -25,9 +25,9 @@ class TailNotifier extends CliNotifier
 
     public function notify()
     {
-        $notice =& $this->preparedNotice;
+        $notice =& $this->renderedError;
 
-        $file = $this->settingsObject->get('file');
+        $file = $this->configObject->get('file');
         $fileRepeat = $file.'.repeat';
 
         if (!file_exists($fileRepeat)) {
@@ -48,7 +48,7 @@ class TailNotifier extends CliNotifier
                 return;
             }
             fwrite($fileRepeatRes, (string)crc32($notice));
-            $notice = "\n\n".$this->time().' '.$notice;
+            $notice = "\n".$this->time().' '.$notice."\n";
         }
         fclose($fileRepeatRes);
 
