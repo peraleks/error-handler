@@ -9,83 +9,82 @@ class ErrorHandler implements ShutdownCallbackInterface
 
     private $helper;
 
-    private $settingsFile;
+    private $configFile;
 
     private $callbackData;
 
-    private $callbacks;
+    private $errorCallbacks;
 
-    private function __construct($settingsFile = null)
+    private $userCallbacks;
+
+    private function __construct($configFile = null)
     {
         set_error_handler([$this, 'error']);
         set_exception_handler([$this, 'exception']);
         register_shutdown_function([$this, 'shutdown']);
-        $this->settingsFile = $settingsFile;
+        $this->configFile = $configFile;
     }
 
-    public static function instance($settingsFile = null)
+    public static function instance($configFile = null)
     {
-        return self::$instance ?? self::$instance = new self($settingsFile);
+        return self::$instance ?? self::$instance = new self($configFile);
     }
 
     public function error($code, $message, $file, $line)
     {
-        $this->passToHelper(
-            new ErrorObject(new \ErrorException($message, $code, $code, $file, $line), 'error handler')
-        );
+        $this->exception(new \ErrorException($message, $code, $code, $file, $line), 'error handler');
         return true;
     }
 
-    public function exception($obj)
+    public function exception($obj, $handler = 'exception handler')
     {
-        $this->passToHelper(new ErrorObject($obj, 'exception handler'));
+        $this->helper ?: $this->helper = new Helper($this->configFile, $this);
+        $this->helper->handle(new ErrorObject($obj, $handler));
     }
 
     public function shutdown()
     {
+        if ($this->userCallbacks) {
+            $this->invokeCallbacks($this, $this->userCallbacks);
+        }
+
         if ($e = error_get_last()) {
-            $this->passToHelper(
-                new ErrorObject(
-                    new \ErrorException($e['message'], $e['type'], $e['type'], $e['file'], $e['line']),
-                    'shutdown function'
-                )
+            $this->exception(
+                new \ErrorException($e['message'], $e['type'], $e['type'], $e['file'], $e['line']),
+                'shutdown function'
             );
         }
-        if ($this->callbacks) {
-            foreach ($this->callbacks as $callback) {
-                try {
-                    set_error_handler([$this->helper, 'internalErrorHandler']);
-                    call_user_func($callback, $this->callbackData);
-                    restore_error_handler();
-                } catch (\Throwable $e) {
-                    $this->helper->internalErrorHandler(
-                        $e->getCode(),
-                        $e->getMessage(),
-                        $e->getFile(),
-                        $e->getLine(),
-                        '',
-                        get_class($e)
-                    );
-                }
-            }
+        if ($this->errorCallbacks) {
+            $this->invokeCallbacks($this->helper, $this->errorCallbacks, $this->callbackData);
         }
 //        \d::m();
     }
 
-    private function passToHelper(ErrorObject $obj)
+    private function invokeCallbacks($handlerObj, $callbacks, $data = null)
     {
-        $this->helper
-            ?: $this->helper = new Helper($this->settingsFile, $this);
-        $this->helper->handle($obj);
+        try {
+            set_error_handler([$handlerObj, 'error']);
+            foreach ($callbacks as $callback) {
+                call_user_func($callback, $data);
+            }
+            restore_error_handler();
+        } catch (\Throwable $e) {
+            $handlerObj->exception($e);
+        }
     }
 
-    public function addToCallbackDataArray(string $key, $value)
+    public function addErrorCallbackData(string $key, $value)
     {
         $this->callbackData[$key][] = $value;
     }
 
-    public function addCallback(callable $callback)
+    public function addErrorCallback(callable $callback)
     {
-        $this->callbacks[] = $callback;
+        $this->errorCallbacks[] = $callback;
+    }
+
+    public function addUserCallback(callable $callback)
+    {
+        $this->userCallbacks[] = $callback;
     }
 }
