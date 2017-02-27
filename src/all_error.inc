@@ -4,7 +4,7 @@
  * Все исключения (catchable exceptions) прерывают выполнение скрипта (FATAL) */
 
 /** [1]----------------  Error ------------------ exception_handler */
-// undefined_function();
+ undefined_function();
 
 /** [1]---------------- ArithmeticError --------- exception_handler */
 // intdiv(PHP_INT_MIN, -1);
@@ -37,27 +37,27 @@
 
 
 /** [1]---------------- Exception --------------- exception_handler */
-// throw new Exception('exception');
+// throw new \Exception('exception');
 
 /** [1]---------------- SPL Exception ----------- exception_handler
  (выбрасываются пользователем) */
-// throw new BadFunctionCallException();
-// throw new BadMethodCallException();
-// throw new DomainException();
-// throw new InvalidArgumentException();
-// throw new LengthException();
-// throw new LogicException();
-// throw new OutOfBoundsException();
-//throw new OutOfRangeException();
-//throw new OverflowException();
-//throw new RangeException();
-//throw new RuntimeException();
-//throw new UnderflowException();
-//throw new UnexpectedValueException();
+// throw new \BadFunctionCallException();
+// throw new \BadMethodCallException();
+// throw new \DomainException();
+// throw new \InvalidArgumentException();
+// throw new \LengthException();
+// throw new \LogicException();
+// throw new \OutOfBoundsException();
+// throw new \OutOfRangeException();
+// throw new \OverflowException();
+// throw new \RangeException();
+// throw new \RuntimeException();
+// throw new \UnderflowException();
+// throw new \UnexpectedValueException();
 
 /** [1]---------------- ErrorException ---------- exception_handler
  * объект для конвертации ошибки в исключение*/
-// throw new ErrorException('текст ошибки', 1, E_ERROR, 'имя файла', 35);
+// throw new \ErrorException('текст ошибки', 1, E_ERROR, 'имя файла', 35);
 
 
 
@@ -66,7 +66,7 @@
 try {
 /***************** Не прерывающие выполнение скрипта (NONFATAL) *********************/
 /** [2]---------------- E_WARNING --------------- error_handler */
-    $i = 2 / 0;
+//    $i = 2 / 0;
 
 /** [8]---------------- E_NOTICE ---------------- error_handler */
 // echo $undefined_var;
@@ -102,6 +102,8 @@ try {
 
 /** [64]--------------- E_COMPILE_ERROR --------- shutdown_function */
 // isset(NULL);
+// class A{function a(){class B{}}}
+// class x{} class x{}
 
 /** [256]-------------- E_USER_ERROR ------------ error_handler
  * Если зарегистрирована error_handler, выполнение скрипта не будет прервано.
@@ -114,6 +116,7 @@ try {
  * Micro-error-handler, являясь глобальным обработчиком,
  * прервёт скрипт после оповещения. */
 // class A{} echo new A();
+
 } catch (Throwable $e) {
     echo "\n перехвачено | caught -- \n".$e;
 }
