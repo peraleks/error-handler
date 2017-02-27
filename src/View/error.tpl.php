@@ -3,8 +3,8 @@
     <?= $style ?>
 </style>
 <div class="error_box" style="font-size: <?= $fontSize ?>px">
-    <div class="<?= $cssName ?> error_header">
-        <?= '['.$code.'] '.$name ?>
+    <div class="<?= $cssType ?> error_header">
+        <?= '['.$code.'] '.$type ?>
         <span class="handler"> (<?= $handler ?>)</span>
     </div>
     <div class="error_text error_content">
