@@ -41,7 +41,7 @@
     }
 </style>
 <div id="error_box_wrapper_button" class="<?= $hideView ?: 'open' ?>">
-    <?= count($callbackData['htmlNotifier']) ?>
+    <?= $count ?>
 </div>
 <div id="error_box_wrapper" class="<?= $hideView ?>">
 <script>
@@ -55,9 +55,8 @@
     })();
 </script>
     <?php
-    /* @var $htmlNotifier \Peraleks\ErrorHandler\Notifiers\HtmlNotifier */
-    foreach ($callbackData['htmlNotifier'] as $htmlNotifier) {
-        $htmlNotifier->view();
-    }
+    foreach ($errors as $error) :
+        echo $error;
+    endforeach;
     ?>
 </div>
