@@ -1,5 +1,5 @@
 <style>
-    div#error_box_wrapper_button {
+    #peraleks_error_box_wrapper_button {
         position: fixed;
         z-index: 11000;
         padding: 15px 10px 15px 32px;
@@ -16,15 +16,15 @@
         box-shadow: inset 0 -7px 30px rgba(0, 0, 0, 0.7), -3px 7px 15px rgba(0, 0, 0, 0.8);
     }
 
-    div#error_box_wrapper_button.open{
-        opacity: 0.2;
+    #peraleks_error_box_wrapper_button.open{
+        opacity: 0.1;
     }
 
-    div#error_box_wrapper_button:hover {
-        opacity: 0.9;
+    #peraleks_error_box_wrapper_button:hover {
+        opacity: 0.6;
     }
 
-    div#error_box_wrapper {
+    #peraleks_error_box_wrapper {
         width: 100%;
         z-index: 9999;
         position: fixed;
@@ -36,18 +36,18 @@
         background-color: #777777;
     }
 
-    div#error_box_wrapper.hidden {
+    #peraleks_error_box_wrapper.hidden {
         display: none;
     }
 </style>
-<div id="error_box_wrapper_button" class="<?= $hideView ?: 'open' ?>">
+<div id="peraleks_error_box_wrapper_button" class="<?= $hideView ?: 'open' ?>">
     <?= $count ?>
 </div>
-<div id="error_box_wrapper" class="<?= $hideView ?>">
+<div id="peraleks_error_box_wrapper" class="<?= $hideView ?>">
 <script>
     (function () {
-        var errorButton = document.getElementById('error_box_wrapper_button');
-        var wrapper = document.getElementById('error_box_wrapper');
+        var errorButton = document.getElementById('peraleks_error_box_wrapper_button');
+        var wrapper = document.getElementById('peraleks_error_box_wrapper');
         errorButton.onclick = function () {
             wrapper.classList.toggle('hidden');
             errorButton.classList.toggle('open');

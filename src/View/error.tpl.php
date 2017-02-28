@@ -1,39 +1,38 @@
-<?php $id = 'wrap'.rand(); ?>
+<?php $id = 'peraleks_wrap'.rand(); ?>
+<br>
 <style>
     <?= $style ?>
 </style>
-<div class="error_box" style="font-size: <?= $fontSize ?>px">
-    <div class="<?= $cssType ?> error_header">
-        <?= '['.$code.'] '.$type ?>
-        <span class="handler"> (<?= $handler ?>)</span>
+<div class="<?= $cssType ?> peraleks_error_box" style="font-size: <?= $fontSize ?>px">
+    <div class="header" title="<?= $handler ?>">
+        <?= $type.' ['.$code.']' ?>
     </div>
-    <div class="error_text error_content">
+    <div class="text">
         <?= $message ?>
     </div>
-    <div id="<?= $id ?>" class="trace_wrap <?= $hidden ?>">
+    <div id="<?= $id ?>" class="peraleks_tw <?= $hidden ?>">
         <?= $trace ?>
     </div>
-    <div class="error_path error_content">
+    <div class="file">
+        <span title="<?= $path ?>"><?= $file ?></span><span class="bracket">(</span><span class="line"><?= $line ?></span><span class="bracket">)</span>
         <?php if ($trace != '') : ?>
-        <div class="but_trace" onclick = "parentNode.previousElementSibling.classList.toggle('hidden')">
-            trace
-        </div>
+            <div class="but_trace" onclick="parentNode.previousElementSibling.classList.toggle('hidden')">
+                trace
+            </div>
         <?php endif; ?>
-        <?= $file ?>
-        <div class="error_path error_content error_line"><?= $line ?></div>
-        <span class="app_dir"><?= $path ?></span>
     </div>
 </div>
 <?php if ($trace != '') : ?>
-<script>
-    (function () {
-        var wrap = document.getElementById('<?= $id ?>');
-        wrap.addEventListener('click', function (e) {
-            var target = e.target.querySelector('.tooltip_wrap');
-            if (null != target) {
-                target.classList.toggle('hidden');
-            }
-        })
-    })();
-</script>
+    <script>
+        (function () {
+            var wrap = document.getElementById('<?= $id ?>');
+            wrap.addEventListener('click', function (e) {
+                 var target = e.target.querySelector('.tooltip_wrap');
+                if (null != target) {
+                    target.classList.toggle('hidden');
+                }
+            })
+        })();
+    </script>
 <?php endif; ?>
+<br>

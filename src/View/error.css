@@ -1,120 +1,88 @@
-
-div.error_box div.WARNING, div.USER_WARNING, div.CORE_WARNING, div.COMPILE_WARNING
-{
+.peraleks_error_box.WARNING, .peraleks_error_box.USER_WARNING,
+.peraleks_error_box.CORE_WARNING, .peraleks_error_box.COMPILE_WARNING {
     background-color: #ffaa00;
 }
 
-div.error_box div.ERROR, div.CORE_ERROR, div.COMPILE_ERROR, div.USER_ERROR, div.RECOVERABLE_ERROR,
-div.unknown
+.peraleks_error_box.ERROR, .peraleks_error_box.CORE_ERROR, .peraleks_error_box.COMPILE_ERROR,
+.peraleks_error_box.USER_ERROR, .peraleks_error_box.RECOVERABLE_ERROR, .peraleks_error_box.unknown
 {
-    background-color: #ff0000;
+    background-color: #e02828;
 }
 
-div.error_box .ParseError
+.peraleks_error_box.ParseError
 {
-    background-color: #fa00ff;
+    background-color: #ba59bf;
 }
 
-div.error_box div.NOTICE, div.USER_NOTICE
+.peraleks_error_box.NOTICE, .peraleks_error_box.USER_NOTICE
 {
-    background-color: #ffff99 !important;
-    color: #888 !important;
-    border-left: 1px solid #ddd;
-    border-top: 1px solid #ddd;
-    border-right: 1px solid #ddd;
+    background-color: #d8d800;
 }
 
-div.error_box div.STRICT
+.peraleks_error_box.STRICT
 {
     background-color: #8892BF;
 }
 
-div.error_box div.DEPRECATED, div.USER_DEPRECATED
+.peraleks_error_box.DEPRECATED, .peraleks_error_box.USER_DEPRECATED
 {
     background-color: #c48c00;
 }
 
-div.error_box div.Micro_Exception
-{
-    background-color: #00bc09;
-}
-
-div.error_box {
+.peraleks_error_box {
     font-family: Consolas, monospace;
-    margin: 5px 2px;
-    min-width: 99.5%;
+    text-align: left;
+    padding: 0.2em;
+    margin-left: 3px;
     display: inline-block;
     position: relative;
     z-index: 10000;
 }
 
-div.error_box div.error_header {
-    font-size: 110%;
-    font-weight: 500;
-    padding: 5px;
-    color: #fff;
+.peraleks_error_box .header {
+    padding: 0.15em 0.7em;
+    color: rgba(255, 255, 255, 0.8);
 }
 
-div.error_box div.error_header span.handler {
-    font-size: 75%;
-}
-
-div.error_box div.error_content {
-    padding: 8px 15px;
-}
-
-div.error_box div.error_text {
-    font-size: 115%;
-    background-color: #aaa;
+.peraleks_error_box .text {
+    padding: 0.35em 0.65em;
+    font-size: 105%;
+    background-color: rgba(0, 0, 0, 0.4);
     color: #fff;
     text-shadow: 2px 2px 7px rgba(0, 0, 0, 0.4), 0 0 1px #555;
 }
 
-div.error_box div.error_path {
-    font-weight: 600;
-    font-size: 110%;
-    color: #444;
-    background-color: #ddd;
-    text-shadow: 0 0 1px rgba(255, 255, 255, 0.7);
+.peraleks_error_box .file {
+    padding: 0.35em 0.65em;
+    background-color: rgba(0, 0, 0, 0.4);
+    color: #a6dbdb;
+    text-shadow: 2px 2px 7px rgba(0, 0, 0, 0.4), 0 0 1px #555;
 }
 
-div.error_box div.error_line {
-    display: inline-block;
-    font-size: 100%;
-    font-weight: 500;
-    border-radius: 3px;
-    color: #ffff7b;
-    background-color: #bbb;
-    padding: 0.05em 0.4em 0.1em;
-    text-shadow: 2px 2px 7px rgba(0, 0, 0, 0.5);
+.peraleks_error_box .bracket {
+    color: rgba(166, 219, 219, 0.3);
 }
 
-
-div.error_box div.error_text span.error {
-    padding: 2px 5px;
-    background-color: #9b9b9b;
-    border-radius: 4px;
-    color: #ffff88;
-}
-
-div.error_box div.error_text span.warning {
-    color: #ffff88;
-}
-
-div.error_box  div.but_trace {
+.peraleks_error_box  .but_trace {
     font-weight: 500;
     display: inline-block;
-    border-radius: 3px;
-    color: #fff;
-    background-color: #cdcdcd;
+    border-radius: 1em;
+    color: rgba(255, 255, 255, 0.4);
+    background-color: rgba(0, 0, 0, 0.15);
     padding: 0.05em 0.4em 0.2em;
     text-shadow: 2px 2px 7px rgba(0, 0, 0, 0.5);
 }
 
-div.error_box  div.but_trace:hover {
+.peraleks_error_box  .but_trace:hover {
+    background-color: rgba(0, 0, 0, 0.4);
+    color: #fff;
     cursor: pointer;
 }
 
-div.error_box div.error_content span.app_dir{
-    font-size: 75%;
+.peraleks_error_box .hidden {
+    display: none !important;
+}
+
+.peraleks_tw {
+    min-width: 100%;
 }

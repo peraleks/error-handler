@@ -1,4 +1,4 @@
-div.trace_wrap>table {
+.peraleks_tw > table {
     font-size: 80%;
     background-color: #444;
     border-spacing: 0;
@@ -6,68 +6,64 @@ div.trace_wrap>table {
     width: 100%;
 }
 
-div.trace_wrap tr:hover {
+.peraleks_tw tr:hover {
     background-color: #222 !important;
 }
 
-div.trace_wrap {
-    min-width: 100%;
-}
-
-div.trace_wrap tr, div.trace_wrap td{
+.peraleks_tw tr, .peraleks_tw td {
     line-height: 1.8em;
     border: 0;
     font-size: 100%;
     vertical-align: baseline;
 }
 
-div.trace_wrap tr:nth-child(2n){
-    background-color: #4d4d4d;
-}
-
-div.trace_wrap td {
+.peraleks_tw td {
     white-space: nowrap;
     text-align: center;
     padding: 1px;
 }
 
-div.trace_wrap td.trace_path {
-    text-align: right;
-    padding-left: 3px;
-    color: #00BABA;
+.peraleks_tw tr:nth-child(2n) {
+    background-color: #4d4d4d;
 }
 
-div.trace_wrap td.trace_file {
+.peraleks_tw .trace_path {
+    text-align: right;
+    padding-left: 3px;
+    color: #00baba;
+}
+
+.peraleks_tw .trace_file {
     text-align: left;
     color: #a6dbdb;
     text-shadow: 2px 2px 7px rgba(0, 0, 0, 0.5);
 }
 
-div.trace_wrap td.trace_line {
-    color: #ffff7b;
+.peraleks_tw .trace_line {
+    color: #a6dbdb;
     padding-left: 7px;
     padding-right: 7px;
 }
 
-div.trace_wrap td.trace_class, span.trace_class {
+.peraleks_tw .trace_class {
     text-align: left;
     color: #fff;
     font-weight: 100;
     text-shadow: 2px 2px 7px rgba(0, 0, 0, 0.4), 0 0 1px #000;
 }
 
-div.trace_wrap td.trace_call_type {
+.peraleks_tw .trace_call_type {
     color: #aaa;
 }
 
-div.trace_wrap td.trace_name_space, span.trace_name_space {
+.peraleks_tw .trace_name_space {
     text-align: right;
     padding-left: 5px;
     padding-right: 7px;
     color: #dbdbad;
 }
 
-div.trace_wrap td.trace_function {
+.peraleks_tw .trace_function {
     padding-left: 5px;
     padding-right: 5px;
     color: #ffdb70;
@@ -75,61 +71,59 @@ div.trace_wrap td.trace_function {
     text-align: right;
 }
 
-div.trace_wrap td.trace_args {
+.peraleks_tw .trace_args {
     border-left: 1px solid #393939;
     padding-left: 3px;
     padding-right: 3px;
     color: #f9f9ca;
 }
 
-div.trace_wrap td.trace_args.object {
+.peraleks_tw .trace_args.object {
     color: #9cea9a;
 }
 
-div.trace_wrap td.trace_args.resource {
+.peraleks_tw .trace_args.resource {
     color: #7e65ff;
     font-style: italic;
+    cursor: pointer;
 }
 
-div.trace_wrap td.trace_args.array {
+.peraleks_tw .trace_args.array {
     color: #bbcc00;
     font-style: italic;
+    cursor: pointer;
 }
 
-div.trace_wrap td.trace_args.numeric {
+.peraleks_tw .trace_args.numeric {
     color: #68ace0;
 }
 
-div.trace_wrap td.trace_args.string, td.trace_args.string div.string{
-    color: #81DF73;
+.peraleks_tw .string {
+    color: #81df73;
 }
 
-div.trace_wrap .string>span, .trace_function_params{
+.peraleks_tw .string > span, .trace_function_params {
     color: #888;
     font-weight: bold;
 }
 
-div.trace_wrap td.trace_args.callable {
+.peraleks_tw .trace_args.callable {
     color: #fff26b;
     font-style: italic;
 }
 
-div.trace_wrap td.trace_args.bool {
-    color: #FC9A46;
+.peraleks_tw .trace_args.bool {
+    color: #fc9a46;
     font-weight: bold;
     font-style: italic;
 }
 
-div.trace_wrap td.trace_args .etc {
+.peraleks_tw .trace_args .etc {
     color: #f55;
 }
 
-div.error_box .hidden {
-    display: none !important;
-}
-
 /******************************************************************* tooltip */
-div.trace_wrap div.tooltip_wrap  {
+.peraleks_tw .tooltip_wrap {
     font-family: Consolas, monospace;
     border: 1px solid #666;
     background-color: #4d4d4d;
@@ -138,7 +132,7 @@ div.trace_wrap div.tooltip_wrap  {
     text-align: left;
 }
 
-div.tooltip_wrap table {
+.peraleks_tw .tooltip_wrap table {
     font-size: 100%;
     font-style: normal;
     border-spacing: 0;
@@ -147,25 +141,25 @@ div.tooltip_wrap table {
     box-shadow: none;
 }
 
-div.trace_wrap .tooltip_wrap.string {
-    max-width: 580px;
+.peraleks_tw .tooltip_wrap.string {
+    max-width: 50em;
 }
 
-div.trace_wrap .tooltip_wrap.string:hover {
+.peraleks_tw .tooltip_wrap.string:hover {
     background-color: #222;
 }
 
-div.trace_wrap .tooltip_wrap table tr:nth-child(2n){
+.peraleks_tw .tooltip_wrap table tr:nth-child(2n) {
     background-color: #444;
 }
 
-div.trace_wrap .tooltip_wrap td:nth-child(1) {
+.peraleks_tw .tooltip_wrap td:nth-child(1) {
     color: #c18ddd;
     padding: 0 5px 0 10px;
     text-align: right;
 }
 
-div.trace_wrap .tooltip_wrap td:nth-child(2){
+.peraleks_tw .tooltip_wrap td:nth-child(2) {
     font-size: 100%;
     padding: 0 10px 0 5px;
     text-align: left;
