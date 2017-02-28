@@ -43,25 +43,15 @@ abstract class AbstractTraceHandler
             $arr['args'] = [];
             $args =& $arr['args'];
             foreach ($dbt['args'] as $arg) {
-                if (is_string($arg)) {
-                    $args[] = $this->stringArg($arg);
-                } elseif (is_numeric($arg)) {
-                    $args[] = $this->numericArg($arg);
-                } elseif (is_array($arg)) {
-                    $args[] = $this->arrayArg($arg);
-                } elseif (is_bool($arg)) {
-                    $args[] = $this->boolArg($arg);
-                } elseif (is_null($arg)) {
-                    $args[] = $this->nullArg();
-                } elseif ($arg instanceof \Closure) {
-                    $args[] = $this->callableArg($arg);
-                } elseif (is_object($arg)) {
-                    $args[] = $this->objectArg($arg);
-                } elseif (is_resource($arg)) {
-                    $args[] = $this->resourceArg($arg);
-                } else {
-                    $args[] = $this->otherArg($arg);
-                }
+                if (is_string($arg))       $args[] = $this->stringArg($arg);
+                elseif (is_numeric($arg))  $args[] = $this->numericArg($arg);
+                elseif (is_array($arg))    $args[] = $this->arrayArg($arg);
+                elseif (is_bool($arg))     $args[] = $this->boolArg($arg);
+                elseif (is_null($arg))     $args[] = $this->nullArg();
+                elseif ($arg instanceof \Closure) $args[] = $this->callableArg($arg);
+                elseif (is_object($arg))   $args[] = $this->objectArg($arg);
+                elseif (is_resource($arg)) $args[] = $this->resourceArg($arg);
+                else $args[] = $this->otherArg($arg);
             }
             /* подсчёт наибольшего количеста аргументов */
             $cnt = count($arr['args']);
