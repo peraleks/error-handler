@@ -128,6 +128,6 @@ class CliTraceHandler extends AbstractTraceHandler
             }
             $trace .= "\n".sprintf(static::FUNC, $this->space(')', 3))."\n";
         }
-        return $trace .= sprintf(self::TRACE, '<<< trace_end')."\n";
+        return $trace .= sprintf(self::TRACE, '<<< trace_end');
     }
 }
