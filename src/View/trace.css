@@ -71,6 +71,12 @@
     text-align: right;
 }
 
+.peraleks_tw .trace_function_params {
+    color: #888;
+    font-weight: bold;
+    padding-right: 5px;
+}
+
 .peraleks_tw .trace_args {
     border-left: 1px solid #393939;
     padding-left: 3px;
@@ -102,7 +108,7 @@
     color: #81df73;
 }
 
-.peraleks_tw .string > span, .trace_function_params {
+.peraleks_tw .string > span {
     color: #888;
     font-weight: bold;
 }
