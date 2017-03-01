@@ -25,7 +25,7 @@ class CliTraceHandler extends AbstractTraceHandler
 
     protected function before()
     {
-        //TODO валидация настроек
+        !is_int($length = $this->configObject->get('stringLength')) ?: $this->stringLength = $length;
     }
 
     protected function space(string $string, int $align = null)
