@@ -48,7 +48,7 @@ class HtmlNotifier extends AbstractNotifier
         }
     }
 
-    protected function renderError(string $trace): string
+    protected function ErrorToString(string $trace): string
     {
         $eObj = $this->errorObject;
         $conf = $this->configObject;

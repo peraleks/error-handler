@@ -9,56 +9,11 @@ class CliSimpleTraceHandler extends CliTraceHandler
         return sprintf(static::CLASS_NAME, $class.' '.sprintf(static::TYPE, $type).' ');
     }
 
-    protected function functionName(string $func, string $params): string
+    protected function functionName(string $func, string $param): string
     {
-        $params === '' ?: $params = '{'.$params.'}';
+        $param === '' ?: $param = '{'.$param.'}';
 
-        return sprintf(static::FUNC, $func.$params."\n");
-    }
-
-    protected function objectArg($arg): string
-    {
-        return '';
-    }
-
-    protected function arrayArg($arg): string
-    {
-        return '';
-    }
-
-    protected function stringArg($arg): string
-    {
-        return '';
-    }
-
-    protected function numericArg($arg): string
-    {
-        return '';
-    }
-
-    protected function boolArg($arg): string
-    {
-        return '';
-    }
-
-    protected function nullArg(): string
-    {
-        return '';
-    }
-
-    protected function callableArg($arg): string
-    {
-        return '';
-    }
-
-    protected function resourceArg($arg): string
-    {
-        return '';
-    }
-
-    protected function otherArg($arg): string
-    {
-        return '';
+        return sprintf(static::FUNC, $func.$param."\n");
     }
 
     protected function completion(): string

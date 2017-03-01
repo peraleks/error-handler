@@ -15,7 +15,7 @@ abstract class AbstractNotifier
 
     protected $errorHandler;
 
-    protected $traceHandlerClass;
+    protected $traceHandlerClass = '';
 
     protected $renderedError;
 
@@ -29,17 +29,18 @@ abstract class AbstractNotifier
         $this->configObject = $configObject;
         $this->errorHandler = $errorHandler;
         $this->prepare();
-        $this->renderedError = $this->renderError($this->renderTrace($this->traceHandlerClass));
+        $this->renderedError = $this->ErrorToString($this->TraceToString($this->traceHandlerClass));
     }
 
     abstract protected function prepare();
 
     abstract public function notify();
 
-    abstract protected function renderError(string $trace): string;
+    abstract protected function ErrorToString(string $trace): string;
 
-    protected function renderTrace(string $handlerClass): string
+    protected function TraceToString(string $handlerClass): string
     {
+        if ('' == $handlerClass) return '';
         if (0 != ($this->configObject->get('handleTrace') & $this->errorObject->getCode())) {
             $handler = new $handlerClass($this->errorObject->getTrace(), $this->configObject);
             return  $handler->getTrace();

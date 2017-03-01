@@ -20,9 +20,7 @@ class CliNotifier extends AbstractNotifier
 
     protected $codeColor;
 
-    protected $preparedNotice;
-
-    public function __construct(ErrorObject $errorObject, ConfigInterface $configObject, $errorHandler)
+    protected function prepare()
     {
         $this->codeColor = [
             E_ERROR             => static::ERROR,
@@ -45,12 +43,6 @@ class CliNotifier extends AbstractNotifier
             E_DEPRECATED      => static::DEPRECATED,
             E_USER_DEPRECATED => static::DEPRECATED,
         ];
-
-        parent::__construct($errorObject, $configObject, $errorHandler);
-    }
-
-    protected function prepare()
-    {
         $this->traceHandlerClass = $this->configObject->get('simpleTrace')
             ? CliSimpleTraceHandler::class
             : CliTraceHandler::class;
@@ -61,7 +53,7 @@ class CliNotifier extends AbstractNotifier
         echo "\n".$this->renderedError."\n";
     }
 
-    protected function renderError(string $trace): string
+    protected function ErrorToString(string $trace): string
     {
         $code    = $this->errorObject->getCode();
         $eName   = $this->errorObject->getType();

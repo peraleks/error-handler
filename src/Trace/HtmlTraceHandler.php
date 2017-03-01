@@ -63,11 +63,11 @@ class HtmlTraceHandler extends AbstractTraceHandler
 
     protected function before()
     {
-        $sets = $this->configObject;
+        $conf = $this->configObject;
 
-        !is_int($level  = $sets->get('arrayLevel')) ?: $this->arrayLevel = $level;
-        !is_int($length = $sets->get('stringLength')) ?: $this->stringLength = $length;
-        !is_int($length = $sets->get('tooltipLength')) ?: $this->tooltipLength = $length;
+        !is_int($level  = $conf->get('arrayLevel')) ?: $this->arrayLevel = $level;
+        !is_int($length = $conf->get('stringLength')) ?: $this->stringLength = $length;
+        !is_int($length = $conf->get('tooltipLength')) ?: $this->tooltipLength = $length;
     }
 
     protected function file(string $file): string

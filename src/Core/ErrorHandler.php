@@ -57,7 +57,7 @@ class ErrorHandler implements ShutdownCallbackInterface
         if ($this->errorCallbacks) {
             $this->invokeCallbacks($this->helper, $this->errorCallbacks, $this->callbackData);
         }
-//        \d::m();
+        \d::m();
     }
 
     private function invokeCallbacks($handlerObj, $callbacks, $data = null)
