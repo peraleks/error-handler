@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Peraleks\ErrorHandler\Core;
 
@@ -9,15 +9,10 @@ class ConfigObject implements ConfigInterface
 {
     private $config = [
         'ERROR_REPORTING' => E_ALL,
-        'DEVELOPMENT_MODE_CONSTANT' => '',
-        'DEV'         => [],
-        'PROD'        => [],
-        'CLI'         => [],
+        'NOTIFIERS'       => [],
     ];
 
     private $currentNotifier;
-
-    private $mode = 'PROD';
 
     public function __construct($file)
     {
@@ -27,7 +22,7 @@ class ConfigObject implements ConfigInterface
             );
         } elseif (!file_exists($file)) {
             throw new ErrorHandlerException(
-                'File not exist: ErrorHandler::instance('.$file.')'
+                'Configuration file not exist: ErrorHandler::instance('.$file.')'
             );
         } elseif (!is_array($arr = include $file)) {
             throw new ErrorHandlerException(
@@ -35,17 +30,7 @@ class ConfigObject implements ConfigInterface
             );
         }
         $this->config = array_merge($this->config, $arr);
-        $this->setMode();
         $this->appDirValidate();
-    }
-
-    private function setMode()
-    {
-        if (PHP_SAPI === 'cli') {
-            $this->mode = 'CLI';
-        } else {
-            $this->productionMode() ?: $this->mode = 'DEV';
-        }
     }
 
     private function appDirValidate()
@@ -63,17 +48,7 @@ class ConfigObject implements ConfigInterface
 
     public function getNotifiers(): array
     {
-        return $this->config[$this->mode];
-    }
-
-    public function productionMode(): bool
-    {
-        if (defined($this->config['DEVELOPMENT_MODE_CONSTANT'])
-            && true === constant($this->config['DEVELOPMENT_MODE_CONSTANT'])
-        ) {
-            return false;
-        }
-        return true;
+        return $this->config['NOTIFIERS'];
     }
 
     public function getErrorReporting(): int
@@ -83,10 +58,7 @@ class ConfigObject implements ConfigInterface
 
     public function get(string $param)
     {
-        if (!isset($this->config[$this->mode][$this->currentNotifier][$param])) {
-            return null;
-        }
-        return $this->config[$this->mode][$this->currentNotifier][$param];
+        return $this->config['NOTIFIERS'][$this->currentNotifier][$param] ?? null;
     }
 
     public function appDir(): string
