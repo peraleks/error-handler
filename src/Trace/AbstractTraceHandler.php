@@ -29,63 +29,76 @@ abstract class AbstractTraceHandler
         for ($i = 0; $i < count($dBTrace); ++$i) {
             $arr =& $this->arr[$i];
             $dbt =& $dBTrace[$i];
+
             /* обработка имени файла */
             $arr['file'] = $this->file($dbt['file'] ?? '');
+
             /* обработка номера строки */
             $arr['line'] = $this->line($dbt['line'] ?? 0);
+
             /* обработка имени класса */
             $arr['class'] = $this->className($dbt['class'] ?? '', $dbt['type'] ?? '');
+
             /* обработка имени функции */
             isset($dbt['args']) ?: $dbt['args'] = [];
             $func = $dbt['function'] ?? '';
-            $arr['function'] = $this->functionName($func, $this->params($func, $dbt['class'] ?? '', count($dbt['args'])));
-            /* обработка аргументов */
-            $arr['args'] = [];
-            $args =& $arr['args'];
-            foreach ($dbt['args'] as $arg) {
-                if (is_string($arg))       $args[] = $this->stringArg($arg);
-                elseif (is_numeric($arg))  $args[] = $this->numericArg($arg);
-                elseif (is_array($arg))    $args[] = $this->arrayArg($arg);
-                elseif (is_bool($arg))     $args[] = $this->boolArg($arg);
-                elseif (is_null($arg))     $args[] = $this->nullArg();
-                elseif ($arg instanceof \Closure) $args[] = $this->callableArg($arg);
-                elseif (is_object($arg))   $args[] = $this->objectArg($arg);
-                elseif (is_resource($arg)) $args[] = $this->resourceArg($arg);
-                else $args[] = $this->otherArg($arg);
+            $arr['function'] = $this->functionName(
+                $func,
+                $this->params($func, $dbt['class'] ?? '', count($dbt['args']))
+            );
+            if (!$this->configObject->get('simpleTrace')) {
+                /* обработка аргументов */
+                $arr['args'] = [];
+                $args =& $arr['args'];
+                foreach ($dbt['args'] as $arg) {
+                    if (is_string($arg)) $args[] = $this->stringArg($arg);
+                    elseif (is_numeric($arg)) $args[] = $this->numericArg($arg);
+                    elseif (is_array($arg)) $args[] = $this->arrayArg($arg);
+                    elseif (is_bool($arg)) $args[] = $this->boolArg($arg);
+                    elseif (is_null($arg)) $args[] = $this->nullArg();
+                    elseif ($arg instanceof \Closure) $args[] = $this->callableArg($arg);
+                    elseif (is_object($arg)) $args[] = $this->objectArg($arg);
+                    elseif (is_resource($arg)) $args[] = $this->resourceArg($arg);
+                    else $args[] = $this->otherArg($arg);
+                }
+                /* подсчёт наибольшего количеста аргументов */
+                $cnt = count($arr['args']);
+                $this->maxNumberOfArgs > $cnt ?: $this->maxNumberOfArgs = $cnt;
             }
-            /* подсчёт наибольшего количеста аргументов */
-            $cnt = count($arr['args']);
-            $this->maxNumberOfArgs > $cnt ?: $this->maxNumberOfArgs = $cnt;
         }
         /* завершающяя обработка (формирование строки) */
         $this->traceResult = $this->completion();
     }
 
-    abstract protected function file(string $file): string;
+    protected function file(string $file): string { return $file; }
 
-    abstract protected function line(int $line): string;
+    protected function line(int $line): string { return (string)$line; }
 
-    abstract protected function className(string $class, string $type): string;
+    protected function className(string $class, string $type): string { return $class.' '.$type; }
 
-    abstract protected function functionName(string $function, string $param): string;
+    protected function functionName(string $function, string $param): string
+    {
+        $param === '' ?: $param = '{'.$param.'}';
+        return $function.$param;
+    }
 
-    abstract protected function stringArg($arg): string;
+    protected function stringArg($arg): string {\d::d($arg); return ''; }
 
-    abstract protected function numericArg($arg): string;
+    protected function numericArg($arg): string { return ''; }
 
-    abstract protected function arrayArg($arg): string ;
+    protected function arrayArg($arg): string { return ''; }
 
-    abstract protected function nullArg(): string;
+    protected function nullArg(): string { return ''; }
 
-    abstract protected function boolArg($arg): string;
+    protected function boolArg($arg): string { return ''; }
 
-    abstract protected function callableArg($arg): string;
+    protected function callableArg($arg): string { return ''; }
 
-    abstract protected function objectArg($arg): string;
+    protected function objectArg($arg): string { return ''; }
 
-    abstract protected function resourceArg($arg): string ;
+    protected function resourceArg($arg): string { return ''; }
 
-    abstract protected function completion(): string ;
+    protected function completion(): string { return ''; }
 
     protected function otherArg($arg): string
     {
