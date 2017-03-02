@@ -16,10 +16,11 @@ return [
     ],
 
     \Peraleks\ErrorHandler\Notifiers\BrowserConsoleNotifier::class => [
-        'enabled'     => E_ALL,
-        'handleTrace' => $trace,
-        'simpleTrace' => true,
-        'console'     => 'log',
+        'enabled'      => E_ALL,
+        'deferredView' => true,
+        'handleTrace'  => $trace,
+        'simpleTrace'  => true,
+        'console'      => 'log',
     ],
 
     \Peraleks\ErrorHandler\Notifiers\TailNotifier::class => [

@@ -25,9 +25,18 @@ class BrowserConsoleNotifier extends AbstractNotifier
 
     const MESSAGE = "console.%s('%s');";
 
-    const FILE = "console.%s('%s %s', 'color: #00aaaa');";
+    const FILE = "console.%s('%s %s', 'color: #00aaaa; padding-left: 1em');";
+
+    const END = "console.%s('%s %s',"
+                    ."'background: %s;"
+                    ."color: #fff;"
+                    ."padding: 0.2em 0.5em 0.2em 0;"
+                    ."line-height: 1.2em;"
+                    ."border-radius: 1em');";
 
     protected $codeColor;
+
+    protected static $count;
 
     protected $console = 'log';
 
@@ -65,7 +74,22 @@ class BrowserConsoleNotifier extends AbstractNotifier
 
     public function notify()
     {
-        echo $this->renderedError;
+        $conf = $this->configObject;
+
+        if (!$conf->get('deferredView')) {
+            echo $this->finalStringError;
+            return;
+        }
+        $this->errorHandler->addErrorCallbackData(__CLASS__, $this->finalStringError);
+        if (!static::$count) {
+            $this->errorHandler->addErrorCallback(function ($callbackData) {
+                $errors = $callbackData[__CLASS__];
+                foreach ($errors as $error) {
+                    echo $error;
+                }
+            });
+            ++static::$count;
+        }
     }
 
     protected function ErrorToString(string $trace): string
@@ -83,11 +107,11 @@ class BrowserConsoleNotifier extends AbstractNotifier
 
         $string .= sprintf(static::MESSAGE, $cons, addslashes($message));
 
-        $string .= sprintf(static::FILE, $cons, '%c', addslashes($file), $color[$code]);
+        $string .= sprintf(static::FILE, $cons, '%c', $file, $color[$code]);
 
         '' == $trace ?: $string .= sprintf(static::MESSAGE, $cons, $trace);
 
-        $string .= sprintf(static::HEADER, $cons, '%c', '^', $color[$code]);
+        $string .= sprintf(static::END, $cons, '%c', '^', $color[$code]);
 
         return sprintf(static::SCRIPT, $string);
     }
