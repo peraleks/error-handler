@@ -17,7 +17,7 @@ abstract class AbstractNotifier
 
     protected $traceHandlerClass = '';
 
-    protected $renderedError;
+    protected $finalStringError;
 
     public function __construct(
         ErrorObject $errorObject,
@@ -29,7 +29,7 @@ abstract class AbstractNotifier
         $this->configObject = $configObject;
         $this->errorHandler = $errorHandler;
         $this->prepare();
-        $this->renderedError = $this->ErrorToString($this->TraceToString($this->traceHandlerClass));
+        $this->finalStringError = $this->ErrorToString($this->TraceToString($this->traceHandlerClass));
     }
 
     abstract protected function prepare();

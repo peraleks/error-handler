@@ -25,7 +25,7 @@ class TailNotifier extends CliNotifier
 
     public function notify()
     {
-        $notice =& $this->renderedError;
+        $notice =& $this->finalStringError;
 
         $file = $this->configObject->get('file');
         $fileRepeat = $file.'.repeat';

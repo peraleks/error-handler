@@ -32,10 +32,10 @@ class HtmlNotifier extends AbstractNotifier
         $conf = $this->configObject;
 
         if (!$conf->get('deferredView')) {
-            echo $this->renderedError;
+            echo $this->finalStringError;
             return;
         }
-        $this->errorHandler->addErrorCallbackData(__CLASS__, $this->renderedError);
+        $this->errorHandler->addErrorCallbackData(__CLASS__, $this->finalStringError);
         if (!static::$count) {
             $this->errorHandler->addErrorCallback(function ($callbackData) use ($conf) {
                 $conf->setNotifierClass(__CLASS__);

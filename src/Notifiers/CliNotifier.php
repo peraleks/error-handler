@@ -50,7 +50,7 @@ class CliNotifier extends AbstractNotifier
 
     public function notify()
     {
-        echo "\n".$this->renderedError."\n";
+        echo "\n".$this->finalStringError."\n";
     }
 
     protected function ErrorToString(string $trace): string
