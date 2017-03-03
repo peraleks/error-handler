@@ -10,6 +10,7 @@ class ConfigObject implements ConfigInterface
     private $config = [
         'ERROR_REPORTING' => E_ALL,
         'NOTIFIERS'       => [],
+        'APP_DIR'         => '',
     ];
 
     private $currentNotifier;
@@ -30,15 +31,13 @@ class ConfigObject implements ConfigInterface
             );
         }
         $this->config = array_merge($this->config, $arr);
-        $this->appDirValidate();
+        $this->appDirValidate($this->config['APP_DIR']);
     }
 
-    private function appDirValidate()
+    private function appDirValidate(&$appDir)
     {
-        $ad =& $this->config['APP_DIR'];
-        $ad = is_string($ad) ? $ad : null;
-        $ad = $ad ?? dirname($_SERVER['DOCUMENT_ROOT'] ?? '');
-        $ad = str_replace('\\', '/', $ad);
+        if (is_string($appDir)) return;
+        $appDir = str_replace('\\', '/', dirname($_SERVER['DOCUMENT_ROOT'] ?? ''));
     }
 
     public function setNotifierClass(string $notifierClass)
