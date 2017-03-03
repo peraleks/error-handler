@@ -40,9 +40,16 @@ abstract class AbstractNotifier
 
     protected function TraceToString(string $handlerClass): string
     {
+        $err = $this->errorObject;
+        $con = $this->configObject;
+
         if ('' == $handlerClass) return '';
-        if (0 != ($this->configObject->get('handleTrace') & $this->errorObject->getCode())) {
-            $handler = new $handlerClass($this->errorObject->getTrace(), $this->configObject);
+
+        if (0 != ($con->get('handleTrace') & $err->getCode())) {
+
+            if ($con->get('phpNativeTrace')) return $err->getTraceAsString();
+
+            $handler = new $handlerClass($err->getTrace(), $con);
             return  $handler->getTrace();
         }
         return '';

@@ -103,6 +103,11 @@ class BrowserConsoleNotifier extends AbstractNotifier
         $message  = $eObj->getMessage();
         $file     = $eObj->getFile().' ( '.$eObj->getLine().' )';
 
+        if ('' != $trace && $this->configObject->get('phpNativeTrace'))  {
+            $trace = addslashes($trace);
+            $trace = preg_replace("/\n/", '\n', $trace);
+        }
+
         $string = sprintf(static::HEADER, $cons, '%c', $type.' ['.$code.']', $color[$code]);
 
         $string .= sprintf(static::MESSAGE, $cons, addslashes($message));
