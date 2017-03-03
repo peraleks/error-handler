@@ -11,6 +11,8 @@ class Helper
 
     private $errorHandler;
 
+    private $exit;
+
     public function __construct($configFile, $errorHandler)
     {
         $this->errorHandler = $errorHandler;
@@ -48,6 +50,7 @@ class Helper
 
     private function notify(ErrorObject $obj, ConfigInterface $config, $errorHandler)
     {
+        $exit = null;
         try {
             set_error_handler([$this, 'error']);
             foreach ($config->getNotifiers() as $notifierClass => ${0}) {
@@ -60,12 +63,21 @@ class Helper
 
                 /* @var $notifier AbstractNotifier */
                 $notifier = new $notifierClass($obj, $config, $errorHandler);
-                $notifier->notify();
+                $exit = $notifier->notify();
             }
             restore_error_handler();
         } catch (\Throwable $e) {
             $this->exception($e);
         }
+        if ($exit) {
+            $this->exit = true;
+            exit;
+        }
+    }
+
+    public function exitStatus()
+    {
+        return $this->exit;
     }
 
     public function error($code, $message, $file, $line)
