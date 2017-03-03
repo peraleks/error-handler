@@ -28,6 +28,7 @@ return [
         'handleTrace'  => $trace,
         'simpleTrace'  => true,
         'stringLength' => 80,
+        'timeFormat'   => 'H:i:s',
         'file'         => $_SERVER['DOCUMENT_ROOT'].'/tail_error.log',
     ],
 
