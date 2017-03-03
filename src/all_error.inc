@@ -66,16 +66,16 @@
 try {
 /***************** Не прерывающие выполнение скрипта (NONFATAL) *********************/
 /** [2]---------------- E_WARNING --------------- error_handler */
-//    $i = 2 / 0;
+    $i = 2 / 0;
 
 /** [8]---------------- E_NOTICE ---------------- error_handler */
-// echo $undefined_var;
+ echo $undefined_var;
 
 /** [32]--------------- E_CORE_WARNING ---------- shutdown_function */
 //
 
 /** [128]-------------- E_COMPILE_WARNING ------- shutdown_function */
-// declare(foo='bar');
+ declare(foo='bar');
 
 /** [512]-------------- E_USER_WARNING ---------- error_handler */
 // trigger_error("E_USER_WARNING", E_USER_WARNING);
@@ -92,7 +92,7 @@ try {
 // class a { function b(){} }; a::b();
 
 /** [16384]------------ E_USER_DEPRECATED ------- error_handler */
-// trigger_error("E_USER_DEPRECATED", E_USER_DEPRECATED);
+ trigger_error("E_USER_DEPRECATED", E_USER_DEPRECATED);
 
 
 

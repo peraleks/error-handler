@@ -25,7 +25,7 @@ class TailNotifier extends CliNotifier
 
     public function notify()
     {
-        $notice =& $this->finalStringError;
+        $string =& $this->finalStringError;
 
         $file = $this->configObject->get('file');
         $fileRepeat = $file.'.repeat';
@@ -38,17 +38,17 @@ class TailNotifier extends CliNotifier
             return;
         }
 
-        $a = crc32($notice);
+        $a = crc32($string);
         $b = (int)fread($fileRepeatRes, 12);
         if ($a == $b) {
-            $notice = $this->time().sprintf(static::REPEAT, '>>repeat ');
+            $string = $this->time().sprintf(static::REPEAT, '>>repeat ');
         } else {
             $fileRepeatRes = fopen($fileRepeat, 'wb');
             if (!$fileRepeatRes) {
                 return;
             }
-            fwrite($fileRepeatRes, (string)crc32($notice));
-            $notice = "\n".$this->time().' '.$notice."\n";
+            fwrite($fileRepeatRes, (string)crc32($string));
+            $string = "\n".$this->time().' '.$string."\n";
         }
         fclose($fileRepeatRes);
 
@@ -56,7 +56,7 @@ class TailNotifier extends CliNotifier
         if (!$fileRes) {
             return;
         }
-        fwrite($fileRes, $notice);
+        fwrite($fileRes, $string);
         fclose($fileRes);
     }
 

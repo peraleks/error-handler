@@ -45,7 +45,7 @@ class CliTraceHandler extends AbstractTraceHandler
 
     protected function className(string $class, string $type): string
     {
-        return sprintf(static::CLASS_NAME, $class."\n".$type);
+        return sprintf(static::CLASS_NAME, $class."\n".sprintf(static::TYPE, $type));
     }
 
     protected function functionName(string $func, string $params): string
