@@ -11,6 +11,8 @@ class TailNotifier extends CliNotifier
     const REPEAT = "\033[1;30m%s\033[0m";
     const DATE   = "\033[33m%s\033[0";
 
+    protected $timeFormat = 'H:i:s';
+
     protected function prepare()
     {
         if (!$file = $this->configObject->get('file')) {
@@ -19,6 +21,7 @@ class TailNotifier extends CliNotifier
         if (!is_string($file)) {
             throw new PropertyTypeException($file, 'file', 'string');
         }
+        !is_string($t= $this->configObject->get('timeFormat')) ?: $this->timeFormat = $t;
         parent::prepare();
     }
 
@@ -62,6 +65,6 @@ class TailNotifier extends CliNotifier
 
     protected function time(): string
     {
-        return sprintf(static::DATE, date('H:i:s'));
+        return sprintf(static::DATE, date($this->timeFormat));
     }
 }
