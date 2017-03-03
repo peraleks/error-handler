@@ -19,6 +19,7 @@ class ErrorHandler implements ShutdownCallbackInterface
 
     private function __construct($configFile = null)
     {
+        ini_set('display_errors', 'Off');
         set_error_handler([$this, 'error']);
         set_exception_handler([$this, 'exception']);
         register_shutdown_function([$this, 'shutdown']);
@@ -47,6 +48,9 @@ class ErrorHandler implements ShutdownCallbackInterface
         if ($this->userCallbacks) {
             $this->invokeCallbacks($this, $this->userCallbacks);
         }
+        if ($this->helper) {
+            !$this->helper->exitStatus() ?: exit;
+        }
 
         if ($e = error_get_last()) {
             $this->exception(
@@ -57,7 +61,6 @@ class ErrorHandler implements ShutdownCallbackInterface
         if ($this->errorCallbacks) {
             $this->invokeCallbacks($this->helper, $this->errorCallbacks, $this->callbackData);
         }
-        \d::m();
     }
 
     private function invokeCallbacks($handlerObj, $callbacks, $data = null)
