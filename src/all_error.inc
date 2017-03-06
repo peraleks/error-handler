@@ -4,7 +4,7 @@
  * Все исключения (catchable exceptions) прерывают выполнение скрипта (FATAL) */
 
 /** [1]----------------  Error ------------------ exception_handler */
- undefined_function();
+// undefined_function();
 
 /** [1]---------------- ArithmeticError --------- exception_handler */
 // intdiv(PHP_INT_MIN, -1);
@@ -66,16 +66,16 @@
 try {
 /***************** Не прерывающие выполнение скрипта (NONFATAL) *********************/
 /** [2]---------------- E_WARNING --------------- error_handler */
-    $i = 2 / 0;
+//    $i = 2 / 0;
 
 /** [8]---------------- E_NOTICE ---------------- error_handler */
- echo $undefined_var;
+// echo $undefined_var;
 
 /** [32]--------------- E_CORE_WARNING ---------- shutdown_function */
 //
 
 /** [128]-------------- E_COMPILE_WARNING ------- shutdown_function */
- declare(foo='bar');
+// declare(foo='bar');
 
 /** [512]-------------- E_USER_WARNING ---------- error_handler */
 // trigger_error("E_USER_WARNING", E_USER_WARNING);
@@ -92,11 +92,14 @@ try {
 // class a { function b(){} }; a::b();
 
 /** [16384]------------ E_USER_DEPRECATED ------- error_handler */
- trigger_error("E_USER_DEPRECATED", E_USER_DEPRECATED);
+// trigger_error("E_USER_DEPRECATED", E_USER_DEPRECATED);
 
 
 
 /******************** Прерывающие выполнение скрипта (FATAL) ***********************/
+/** [1]---------------- E_ERROR ----------------- shutdown_function */
+// interface x { function y(); } class v implements x{} function n(x $x) {}(new v);
+
 /** [16]--------------- E_CORE_ERROR ------------ shutdown_function */
 // class a implements Traversable {}
 
@@ -107,17 +110,17 @@ try {
 
 /** [256]-------------- E_USER_ERROR ------------ error_handler
  * Если зарегистрирована error_handler, выполнение скрипта не будет прервано.
- * Micro-error-handler, являясь глобальным обработчиком,
+ * peraleks/error-handler, являясь глобальным обработчиком,
  * прервёт скрипт после оповещения. */
-// trigger_error("E_USER_ERROR", E_USER_ERROR)
+// trigger_error("E_USER_ERROR", E_USER_ERROR);
 
 /** [4096]-------------- E_RECOVERABLE_ERROR ---- error_handler
  * Если зарегистрирована error_handler, выполнение скрипта не будет прервано.
- * Micro-error-handler, являясь глобальным обработчиком,
+ * peraleks/error-handler, являясь глобальным обработчиком,
  * прервёт скрипт после оповещения. */
 // class A{} echo new A();
 
 } catch (Throwable $e) {
-    echo "\n перехвачено | caught -- \n".$e;
+    echo "\n перехвачено | caught -- \n<pre>".$e.'</pre>';
 }
 echo "\nВыполнение скрипта не прервано | Script execution is not interrupted \n";
