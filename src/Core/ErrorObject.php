@@ -5,7 +5,7 @@ namespace Peraleks\ErrorHandler\Core;
 
 final class ErrorObject
 {
-    protected $throwable;
+    protected $e;
 
     protected $code;
 
@@ -15,7 +15,7 @@ final class ErrorObject
 
     protected $handler = '';
 
-    public static $codeName = [
+    protected  $codeName = [
         E_ERROR             => 'ERROR',
         E_WARNING           => 'WARNING',
         E_PARSE             => 'PARSE',
@@ -33,17 +33,16 @@ final class ErrorObject
         E_USER_DEPRECATED   => 'USER_DEPRECATED',
     ];
 
-    /* @var $throwable \Throwable */
-    public function __construct($throwable, string $handler)
+    public function __construct(\Throwable $e, string $handler)
     {
         $this->handler = $handler;
-        $this->throwable = $throwable;
-        $this->code = $this->throwable->getCode();
-        if ($this->throwable instanceof \ErrorException) {
-            $this->type = self::$codeName[$this->code] ?? "unknown";
+        $this->e = $e;
+        $this->code = $this->e->getCode();
+        if ($this->e instanceof \ErrorException) {
+            $this->type = $this->codeName[$this->code] ?? "unknown";
         } else {
-            $this->throwable instanceof \ParseError ? $this->code = E_PARSE : $this->code = E_ERROR;
-            $this->type = get_class($this->throwable);
+            $this->e instanceof \ParseError ? $this->code = E_PARSE : $this->code = E_ERROR;
+            $this->type = get_class($this->e);
         }
     }
 
@@ -64,44 +63,44 @@ final class ErrorObject
 
     public function getMessage(): string
     {
-        return $this->throwable->getMessage();
+        return $this->e->getMessage();
     }
 
     public function getFile(): string
     {
-        return str_replace('\\', '/', $this->throwable->getFile());
+        return str_replace('\\', '/', $this->e->getFile());
     }
 
     public function getLine(): int
     {
-        return $this->throwable->getLine();
+        return $this->e->getLine();
     }
 
     public function getTrace(): array
     {
         if ($this->trace) {
             return $this->trace;
-        } elseif ($this->throwable instanceof \ErrorException) {
-            $this->trace = $this->throwable->getTrace();
+        } elseif ($this->e instanceof \ErrorException) {
+            $this->trace = $this->e->getTrace();
             array_shift($this->trace);
             return $this->trace;
         } else {
-            return $this->throwable->getTrace();
+            return $this->e->getTrace();
         }
     }
 
     public function getTraceAsString(): string
     {
-        return $this->throwable->getTraceAsString();
+        return $this->e->getTraceAsString();
     }
 
     public function getPrevious(): \Throwable
     {
-        return $this->throwable->getPrevious();
+        return $this->e->getPrevious();
     }
 
     public function __toString(): string
     {
-        return (string)$this->throwable;
+        return (string)$this->e;
     }
 }
