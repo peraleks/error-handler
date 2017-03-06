@@ -13,10 +13,16 @@ class ServerErrorNotifier extends AbstractNotifier
     protected function prepare()
     {
         !is_string($header = $this->configObject->get('header')) ?: $this->header = $header;
-        $this->includeFile = $this->validateTemplate($this->configObject->get('includeFile'));
+        $this->includeFile = $this->validateIncludeFile($this->configObject->get('includeFile'));
     }
 
-    protected function validateTemplate($file): string
+    protected function getTraceHandlerClass(): string
+    {
+        return '';
+    }
+
+
+    protected function validateIncludeFile($file): string
     {
         $default = dirname(__DIR__).'/View/serverError500.php';
 

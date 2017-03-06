@@ -24,8 +24,13 @@ class HtmlNotifier extends AbstractNotifier
         $this->traceCss   = $dir.'/trace.css';
         $this->errorTpl   = $dir.'/error.tpl.php';
         $this->wrapperTpl = $dir.'/wrapper.tpl.php';
-        $this->traceHandlerClass = HtmlTraceHandler::class;
     }
+
+    protected function getTraceHandlerClass(): string
+    {
+        return HtmlTraceHandler::class;
+    }
+
 
     public function notify()
     {
@@ -56,7 +61,7 @@ class HtmlNotifier extends AbstractNotifier
         $code     = $eObj->getCode();
         $type     = $eObj->getType();
         $message  = $eObj->getMessage();
-        $path     = $conf->appDir();
+        $path     = $conf->getAppDir();
         $file     = preg_replace('#^'.$path.'#', '', $eObj->getFile());
         $line     = $eObj->getLine();
         $fontSize = $conf->get('fontSize');

@@ -64,13 +64,18 @@ class BrowserConsoleNotifier extends AbstractNotifier
             E_USER_DEPRECATED => static::DEPRECATED,
         ];
 
-        $this->traceHandlerClass = BrowserConsoleTraceHandler::class;
 
         if ($v = $this->configObject->get('console')) {
             !preg_match('/^error$|^warn$|^info$|^log$|^debug$/', $v, $matches)
                 ?: $this->console = $matches[0];
         }
     }
+
+    protected function getTraceHandlerClass(): string
+    {
+        return BrowserConsoleTraceHandler::class;
+    }
+
 
     public function notify()
     {

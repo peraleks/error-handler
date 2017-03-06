@@ -43,10 +43,15 @@ class CliNotifier extends AbstractNotifier
             E_DEPRECATED      => static::DEPRECATED,
             E_USER_DEPRECATED => static::DEPRECATED,
         ];
-        $this->traceHandlerClass = $this->configObject->get('simpleTrace')
+    }
+
+    protected function getTraceHandlerClass(): string
+    {
+        return $this->configObject->get('simpleTrace')
             ? CliSimpleTraceHandler::class
             : CliTraceHandler::class;
     }
+
 
     public function notify()
     {

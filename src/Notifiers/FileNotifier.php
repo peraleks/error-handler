@@ -14,9 +14,14 @@ class FileNotifier extends AbstractNotifier
 
     protected function prepare()
     {
-        $this->traceHandlerClass = FileTraceHandler::class;
         !is_string($t= $this->configObject->get('timeFormat')) ?: $this->timeFormat = $t;
     }
+
+    protected function getTraceHandlerClass(): string
+    {
+        return FileTraceHandler::class;
+    }
+
 
     public function notify()
     {
