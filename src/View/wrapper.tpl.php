@@ -1,7 +1,7 @@
 <style>
     #peraleks_error_box_wrapper_button {
         position: fixed;
-        z-index: 11000;
+        z-index: 100000;
         padding: 15px 10px 15px 32px;
         top: 45%;
         left: -30px;
@@ -26,7 +26,7 @@
 
     #peraleks_error_box_wrapper {
         width: 100%;
-        z-index: 9999;
+        z-index: 99999;
         position: fixed;
         overflow: auto;
         top: 0;
