@@ -76,7 +76,7 @@ class HtmlTraceHandler extends AbstractTraceHandler
         //получаем имя файла без пути
         $file = sprintf(static::FILE, '/'.array_pop($parts));
         //получаем путь (уже без имени файла) относительно корня приложения для экономии пространства в таблице
-        $path = preg_replace('#^'.$this->configObject->appDir().'#', '', implode('/', $parts));
+        $path = preg_replace('#^'.$this->configObject->getAppDir().'#', '', implode('/', $parts));
         $path = sprintf(static::PATH, $path);
 
         return $path.$file;

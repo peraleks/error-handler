@@ -11,5 +11,5 @@ interface ConfigInterface
 
     public function get(string $param);
 
-    public function appDir(): string ;
+    public function getAppDir(): string ;
 }
