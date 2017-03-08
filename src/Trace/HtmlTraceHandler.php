@@ -72,6 +72,7 @@ class HtmlTraceHandler extends AbstractTraceHandler
 
     protected function file(string $file): string
     {
+        if ('' === $file) return sprintf(static::PATH, $file).sprintf(static::FILE, '');
         $parts = explode(DIRECTORY_SEPARATOR, $file);
         //получаем имя файла без пути
         $file = sprintf(static::FILE, '/'.array_pop($parts));
@@ -84,6 +85,7 @@ class HtmlTraceHandler extends AbstractTraceHandler
 
     protected function line(int $line): string
     {
+        $line !== 0 ?: $line = '';
         return sprintf(static::LINE, $line);
     }
 
