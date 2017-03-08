@@ -125,7 +125,7 @@ abstract class AbstractTraceHandler
 
     protected function params(string $func, string $class, int $cntArgs): string
     {
-        if ('' != $class && '{closure}' != $func) {
+        if ('' != $class && (1 !== preg_match('/^.*{closure}.*$/', $func))) {
             $ref = new \ReflectionMethod($class, $func);
         } elseif (function_exists($func)) {
             $ref = new \ReflectionFunction($func);
