@@ -118,7 +118,7 @@ try {
  * Если зарегистрирована error_handler, выполнение скрипта не будет прервано.
  * peraleks/error-handler, являясь глобальным обработчиком,
  * прервёт скрипт после оповещения. */
-// class A{} echo new A();
+// class R{} echo new R();
 
 } catch (Throwable $e) {
     echo "\n перехвачено | caught -- \n<pre>".$e.'</pre>';
