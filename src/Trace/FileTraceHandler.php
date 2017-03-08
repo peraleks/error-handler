@@ -10,11 +10,15 @@ class FileTraceHandler extends AbstractTraceHandler
 
     protected function completion(): string
     {
+        $path = $this->configObject->getAppDir();
         $trace = '';
-        $trCount = count($this->arr);
+        $trCount = 0;
+        $cnt = count($this->arr) - 2;
         foreach ($this->arr as $v) {
-            $trace .= '#'.--$trCount.' '.$v['file'].'('.$v['line'].'): '.$v['class'].' '.$v['function'];
-            0 == $trCount ?: $trace .= "\n";
+            $file = preg_replace('#^'.$path.'#', '', $v['file']);
+            $trace .= '#'.$trCount.' '.$file.'('.$v['line'].'): '.$v['class'].' '.$v['function'];
+            $cnt < $trCount ?: $trace .= "\n";
+            ++$trCount;
         }
         return $trace;
     }

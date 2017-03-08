@@ -12,8 +12,16 @@ class FileNotifier extends AbstractNotifier
 {
     protected $timeFormat = 'd-M-o H:i:s O';
 
+    protected $file;
+
     protected function prepare()
     {
+        if (!$this->file = $this->configObject->get('file')) {
+            throw new PropertyMustBeDefinedException('file');
+        }
+        if (!is_string($this->file)) {
+            throw new PropertyTypeException($this->file, 'file', 'string');
+        }
         !is_string($t= $this->configObject->get('timeFormat')) ?: $this->timeFormat = $t;
     }
 
@@ -22,16 +30,9 @@ class FileNotifier extends AbstractNotifier
         return FileTraceHandler::class;
     }
 
-
     public function notify()
     {
-        if (!$file = $this->configObject->get('file')) {
-            throw new PropertyMustBeDefinedException('file');
-        }
-        if (!is_string($file)) {
-            throw new PropertyTypeException($file, 'file', 'string');
-        }
-        $fileRes = fopen($this->configObject->get('file'), 'ab');
+        $fileRes = fopen($this->file, 'ab');
         if (!$fileRes) {
             return;
         }
@@ -41,12 +42,22 @@ class FileNotifier extends AbstractNotifier
 
     protected function ErrorToString(string $trace): string
     {
-        $e = $this->errorObject;
-        '' == $trace ?: $trace = "\nStack trace:\n".$trace;
+        $eObj = $this->errorObject;
+
+        if ($trace) {
+            $dir = '';
+            if (!$this->configObject->get('phpNativeTrace')) {
+                $appDir = $this->configObject->getAppDir();
+                $fullFile = $eObj->getFile();
+                $file = preg_replace('#^'.$appDir.'#', '', $fullFile);
+                $dir = $fullFile === $file ? '' : "\n(".$appDir.')';
+            }
+            $trace = "Stack trace:".$dir."\n".$trace."\n";
+        }
 
         return
-        "\n[".$this->time().'] ['.$e->getCode().'] '.$e->getType().':  '.$e->getMessage()
-        .' in '.$e->getFile().' ('.$e->getLine().')'.$trace;
+        "\n[".$this->time().'] ['.$eObj->getCode().'] '.$eObj->getType().':  '.$eObj->getMessage()
+        .' in '.$eObj->getFile().' ('.$eObj->getLine().')'."\n".$trace;
     }
 
     protected function time()
