@@ -10,10 +10,13 @@ class BrowserConsoleTraceHandler extends AbstractTraceHandler
 
     protected function completion(): string
     {
+        $path = $this->configObject->getAppDir();
         $trace = '';
-        $trCount = count($this->arr);
+        $trCount = 0;
         foreach ($this->arr as $v) {
-            $trace .= '#'.--$trCount.' '.$v['file'].' ( '.$v['line'].' ) '.$v['class'].' '.$v['function'].'\n';
+            $file = preg_replace('#^'.$path.'#', '', $v['file']);
+            $trace .= '#'.$trCount.' '.$file.' ( '.$v['line'].' ) '.$v['class'].' '.$v['function'].'\n';
+            ++$trCount;
         }
         return $trace;
     }

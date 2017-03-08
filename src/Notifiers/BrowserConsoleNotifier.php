@@ -119,7 +119,15 @@ class BrowserConsoleNotifier extends AbstractNotifier
 
         $string .= sprintf(static::FILE, $cons, '%c', $file, $color[$code]);
 
-        '' == $trace ?: $string .= sprintf(static::MESSAGE, $cons, $trace);
+        if ('' !== $trace) {
+            if (!$this->configObject->get('phpNativeTrace')) {
+                $appDir = $this->configObject->getAppDir();
+                $fullFile = $eObj->getFile();
+                $file = preg_replace('#^'.$appDir.'#', '', $fullFile);
+                $string .= $fullFile === $file ? '' : sprintf(static::MESSAGE, $cons, '('.$appDir.')');
+            }
+            $string .= sprintf(static::MESSAGE, $cons, $trace);
+        }
 
         $string .= sprintf(static::END, $cons, '%c', '^', $color[$code]);
 
