@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace Peraleks\ErrorHandler\Notifiers;
 
 use Peraleks\ErrorHandler\Core\ConfigInterface;
+use Peraleks\ErrorHandler\Core\ErrorHandler;
 use Peraleks\ErrorHandler\Core\ErrorObject;
-use Peraleks\ErrorHandler\Core\ShutdownCallbackInterface;
 
 abstract class AbstractNotifier
 {
@@ -20,7 +20,7 @@ abstract class AbstractNotifier
     public function __construct(
         ErrorObject $errorObject,
         ConfigInterface $configObject,
-        ShutdownCallbackInterface $errorHandler
+        ErrorHandler $errorHandler
     ) {
     
         $this->errorObject = $errorObject;
