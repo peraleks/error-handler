@@ -17,7 +17,7 @@
         <span title="<?= $path ?>"><?= $file ?></span><span class="bracket">(</span><span class="line"><?= $line ?></span><span class="bracket">)</span>
         <?php if ($trace != '') : ?>
             <div class="but_trace" onclick="parentNode.previousElementSibling.classList.toggle('hidden')">
-                trace
+                trace <?= $traceCount ?>
             </div>
         <?php endif; ?>
     </div>
