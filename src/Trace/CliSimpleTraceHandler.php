@@ -19,12 +19,12 @@ class CliSimpleTraceHandler extends CliTraceHandler
     protected function completion(): string
     {
         $trace = '';
-        $trace .= sprintf(self::TRACE, 'trace >>>')."\n";
-        $trCount = count($this->arr);
+        $trCount = 0;
         foreach ($this->arr as $v) {
-            $trace .= sprintf(static::TRACE_CNT, '#'.--$trCount).$v['file'].$v['line']." ".$v['class'];
+            $trace .= sprintf(static::TRACE_CNT, '#'.$trCount).$v['file'].$v['line']." ".$v['class'];
             $trace .= $v['function'];
+            ++$trCount;
         }
-        return $trace .= sprintf(self::TRACE, '<<< trace_end')."\n";
+        return $trace;
     }
 }

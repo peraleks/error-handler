@@ -17,6 +17,7 @@ class CliNotifier extends AbstractNotifier
     const DEPRECATED = "\033[30;47m%s\033[0m";
     const FILE       = "\033[0;36m%s\033[0m";
     const MESSAGE    = "\033[37m%s\033[0m";
+    const TRACE      = "\033[1;35m%s\033[0m";
 
     protected $codeColor;
 
@@ -60,17 +61,28 @@ class CliNotifier extends AbstractNotifier
 
     protected function ErrorToString(string $trace): string
     {
-        $code    = $this->errorObject->getCode();
-        $eName   = $this->errorObject->getType();
-        $file    = $this->errorObject->getFile();
-        $line    = $this->errorObject->getLine();
-        $message = $this->errorObject->getMessage();
+        $eObj = $this->errorObject;
 
-        $error = sprintf($this->codeColor[$code], "[$code] $eName ")
+        $code    = $eObj->getCode();
+        $eName   = $eObj->getType();
+        $file    = $eObj->getFile();
+        $line    = $eObj->getLine();
+        $message = $eObj->getMessage();
+
+        if ('' !== $trace) {
+            $str = "\n".sprintf(self::TRACE, 'trace >>>')."\n";
+            $appDir = $this->configObject->getAppDir();
+            $fullFile = $eObj->getFile();
+            $file = preg_replace('#^'.$appDir.'#', '', $fullFile);
+            $str .= $fullFile === $file ? '' : sprintf(static::FILE, '('.$appDir.")\n");
+            $str .= sprintf(static::MESSAGE, $trace);
+            $trace = $str.sprintf(self::TRACE, '<<< trace_end');
+        }
+
+        return
+            sprintf($this->codeColor[$code], "[$code] $eName ")
             .sprintf(static::FILE, " $file($line) ")."\n"
-            .sprintf(static::MESSAGE, $message);
-        $n = $trace == '' ? '' : "\n";
-
-        return $error.$n.$trace;
+            .sprintf(static::MESSAGE, $message)
+            .$trace;
     }
 }

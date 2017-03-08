@@ -16,7 +16,6 @@ class CliTraceHandler extends AbstractTraceHandler
     const TRIM       = "\033[1;30m%s\033[0m";
     const NUM        = "\033[1;34m%s\033[0m";
     const BOOL       = "\033[31m%s\033[0m";
-    const TRACE      = "\033[1;35m%s\033[0m";
     const TRACE_CNT  = "\033[1;30m%s\033[0m";
 
     protected $align = 15;
@@ -35,7 +34,7 @@ class CliTraceHandler extends AbstractTraceHandler
 
     protected function file(string $file): string
     {
-        return sprintf(static::FILE, $file);
+        return sprintf(static::FILE, preg_replace('#^'.$this->configObject->getAppDir().'#', '', $file));
     }
 
     protected function line(int $line): string
@@ -117,17 +116,16 @@ class CliTraceHandler extends AbstractTraceHandler
     protected function completion(): string
     {
         $trace = '';
-        $trace .= sprintf(self::TRACE, 'trace >>>')."\n";
-        $trCount = count($this->arr);
+        $trCount = 0;
         foreach ($this->arr as $v) {
-            $trace .= sprintf(static::TRACE_CNT, '#'.--$trCount).$v['file'].$v['line']." ".$v['class'];
+            $trace .= sprintf(static::TRACE_CNT, '#'.$trCount).$v['file'].$v['line']." ".$v['class'];
             $trace .= $v['function'];
-
+            ++$trCount;
             foreach ($v['args'] as $arg) {
                 $trace .= "\n".$arg;
             }
             $trace .= "\n".sprintf(static::FUNC, $this->space(')', 3))."\n";
         }
-        return $trace .= sprintf(self::TRACE, '<<< trace_end');
+        return $trace;
     }
 }
