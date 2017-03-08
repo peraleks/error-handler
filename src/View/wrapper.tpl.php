@@ -25,6 +25,7 @@
     }
 
     #peraleks_error_box_wrapper {
+        all: initial;
         width: 100%;
         z-index: 99999;
         position: fixed;

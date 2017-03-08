@@ -5,11 +5,13 @@
     }
 
     body, html {
+        all: initial;
         height: 100%;
         overflow: hidden;
     }
 
     .container {
+        all: initial;
         display: flex;
         align-items: center;
         justify-content: center;
