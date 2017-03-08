@@ -7,39 +7,76 @@ use Peraleks\ErrorHandler\Notifiers\AbstractNotifier;
 
 class Helper
 {
+    /**
+     * @var ConfigObject
+     */
     private $configObject;
 
+    /**
+     * @var ErrorHandler
+     */
     private $errorHandler;
 
+    /**
+     * @var SelfErrorHandler
+     */
     private $selfErrorHandler;
 
-    private $exit;
+    /**
+     * Флаг означает, что фатальная ошибка
+     * произошла внутри обработчика.
+     *
+     * @var bool
+     */
+    private $innerShutdownFatal = false;
 
-    private $innerShutdownFatal;
-
-    public function __construct($configFile, $errorHandler)
+    /**
+     * Helper constructor.
+     *
+     * @param string $configFile
+     * @param ErrorHandler $errorHandler
+     */
+    public function __construct(string $configFile, ErrorHandler $errorHandler)
     {
         $this->errorHandler = $errorHandler;
+        $this->configFile = $configFile;
+    }
 
+    /**
+     * Инстанцирует ConfigObject
+     *
+     * Вызов должен производится извне, а не из конструктора, так как
+     * фатальная ошибка в конфигурационном файле приведёт к тому,
+     * что Helper не будет инстанцирован.
+     */
+    public function createConfigObject()
+    {
+        $this->innerShutdownFatal = true;
         try {
             set_error_handler([$this, 'error']);
-            $this->configObject = new ConfigObject($configFile);
-            restore_error_handler();
+
+            $this->configObject = new ConfigObject($this->configFile);
+
         } catch (\Throwable $e) {
             $this->exception($e);
+        } finally {
+            restore_error_handler();
         }
+        $this->innerShutdownFatal = false;
     }
 
     public function handle(\Throwable $e, string $handler)
     {
+        $eObj = new ErrorObject($e, $handler);
+
         if (!$this->configObject) {
+            $this->exception($eObj);
             return;
         }
-        $eObj = new ErrorObject($e, $handler);
 
         $code = $eObj->getCode();
 
-        /* обработка параметра ERROR_REPORTING (файла настроек) */
+        /* обработка параметра ERROR_REPORTING (файл конфигурации) */
         if (0 == ($code & $this->configObject->getErrorReporting())) {
             return;
         }
@@ -81,6 +118,7 @@ class Helper
                 $exit = $notifier->notify();
 
             } catch (\Throwable $e) {
+                $this->exception($eObj);
                 $this->exception($e);
             } finally {
                 restore_error_handler();
@@ -98,18 +136,13 @@ class Helper
         return $this->innerShutdownFatal;
     }
 
-    public function exitStatus()
-    {
-        return $this->exit;
-    }
-
     public function error($code, $message, $file, $line)
     {
         $this->exception(new \ErrorException($message, $code, $code, $file, $line));
         return true;
     }
 
-    public function exception(\Throwable $e)
+    public function exception($e)
     {
         $this->selfErrorHandler
             ?: $this->selfErrorHandler = new SelfErrorHandler($this->configObject);
