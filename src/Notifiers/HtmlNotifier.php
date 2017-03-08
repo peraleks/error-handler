@@ -70,6 +70,7 @@ class HtmlNotifier extends AbstractNotifier
         $conf->get('hideTrace') ? $hidden = 'hidden' : $hidden = '';
         $style    = file_get_contents($this->errorCss);
         $trace == '' ?: $style .= file_get_contents($this->traceCss);
+        $traceCount = count($eObj->getTrace());
 
         ob_start();
         include($this->errorTpl);
