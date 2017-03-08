@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Peraleks\ErrorHandler\Core;
 
-class ErrorHandler implements ShutdownCallbackInterface
+class ErrorHandler
 {
     /**
      * @var \Peraleks\ErrorHandler\Core\ErrorHandler
@@ -16,7 +16,7 @@ class ErrorHandler implements ShutdownCallbackInterface
     private $helper;
 
     /**
-     * Путь к файлу конфигурации
+     * Путь к файлу конфигурации.
      *
      * @var string
      */
@@ -24,7 +24,7 @@ class ErrorHandler implements ShutdownCallbackInterface
 
     /**
      * Сюда будем складывать ошибки для
-     * отложенного вывода при помощи callback функций
+     * отложенного вывода при помощи callback функций.
      *
      * @var array
      */
@@ -32,7 +32,7 @@ class ErrorHandler implements ShutdownCallbackInterface
 
     /**
      * Callback функции для отложенной
-     * обработки и вывода ошибок,
+     * обработки и вывода ошибок.
      *
      * @var array
      */
@@ -40,16 +40,23 @@ class ErrorHandler implements ShutdownCallbackInterface
 
     /**
      * Любые пользовательские функции,
-     * которые требуется выполнить в shutdown function
+     * которые требуется выполнить в shutdown function.
      *
      * @var array
      */
     private $userCallbacks = [];
 
     /**
+     * Последняя ошибка полученная $this->exception().
+     *
+     * @var \Throwable
+     */
+    private $lastError;
+
+    /**
      * ErrorHandler constructor.
      *
-     * Регистрирует функции-обработчики ошибок
+     * Регистрирует функции-обработчики ошибок.
      *
      * @param null $configFile
      */
@@ -63,7 +70,7 @@ class ErrorHandler implements ShutdownCallbackInterface
     }
 
     /**
-     * Singleton
+     * Singleton.
      *
      * @param null $configFile string Путь к файлу конфигурации
      * @return ErrorHandler
@@ -74,10 +81,10 @@ class ErrorHandler implements ShutdownCallbackInterface
     }
 
     /**
-     * Обработчик ошибок
+     * Обработчик ошибок.
      *
      * Конвертирует полученную ошибку в объект исключения
-     * и передаёт обработчик исключений
+     * и передаёт в обработчик исключений.
      *
      * @param $code int код уровня ошибки
      * @param $message string сообщение ошибки
@@ -92,10 +99,10 @@ class ErrorHandler implements ShutdownCallbackInterface
     }
 
     /**
-     * Обработчик исключений
+     * Обработчик исключений.
      *
      * Инстанцирует помощника и передаёт ему объект ошибки
-     * для дальнейшей обработки
+     * для дальнейшей обработки.
      *
      * @param \Throwable $e объект ошибки
      * @param string $handler название функции обработчика ('error handler' |
@@ -103,57 +110,69 @@ class ErrorHandler implements ShutdownCallbackInterface
      */
     public function exception(\Throwable $e, string $handler = 'exception handler')
     {
-        $this->helper ?: $this->helper = new Helper($this->configFile, $this);
+        $this->lastError = $e;
+        if (!$this->helper) {
+            $this->helper = new Helper($this->configFile, $this);
+            $this->helper->createConfigObject();
+        }
         $this->helper->handle($e, $handler);
 
     }
 
     /**
-     * Shutdown function
+     * Shutdown function.
      *
      * Вылавливает из буфера последнюю фатальную ошибку,
      * котвертирует в исключение и передаёт в обработчик исключений
      * Инициирует выполнение пользовательских callbacks,
-     * и callbacks отложенного вывода ошибок
+     * и callbacks отложенного вывода ошибок.
      */
     public function shutdown()
     {
-        if ($this->userCallbacks) {
-            $this->invokeCallbacks($this, $this->userCallbacks);
-        }
-        if ($this->helper) {
-            !$this->helper->exitStatus() ?: exit;
-
-            /* $innerShutdownFatal - флаг указывающий,
-             * что фатальная ошибка произошла внутри обработчика */
-            !$this->helper->getInnerShutdownFatal() ?: $innerShutdownFatal = true;
-        }
-
         if ($el = error_get_last()) {
             $e = new \ErrorException($el['message'], $el['type'], $el['type'], $el['file'], $el['line']);
 
-            /* передаём внутренние фатальные ошибки в
-             * в отдельный обработчик, для вывода и логирования*/
-            !isset($innerShutdownFatal) ?: $this->helper->exception($e);
-
-            $this->exception($e, 'shutdown function');
+            /* передаём внутренние фатальные ошибки в отдельный обработчик,
+             * для вывода и логирования, также предварительно передаём последнюю ошибку,
+             * чтобы не потерять её, так как скорее всего она не была обработана
+             * из-за фатальной ошибки */
+            if ($this->helper && $this->helper->getInnerShutdownFatal()) {
+                $this->helper->exception($this->lastError);
+                $this->helper->exception($e);
+            } else {
+                $this->exception($e, 'shutdown function');
+            }
         }
-        /* выводим все саккумулированные за время выполнения ошибки*/
+        if ($this->userCallbacks) {
+            $this->invokeCallbacks($this, $this->userCallbacks);
+        }
+        $this->invokeDeferred();
+    }
+
+    /**
+     * Выводит все саккумулированные за время выполнения ошибки.
+     *
+     * Если используется fastcgi_finish_request() для завершения
+     * обработки запроса, можно предварительно вызвать данный метод
+     * для вывода в браузер информации из errorCallbacks.
+     */
+    public function invokeDeferred()
+    {
         if ($this->errorCallbacks) {
             $this->invokeCallbacks($this->helper, $this->errorCallbacks, $this->callbackData);
         }
     }
 
     /**
-     * Выполняет  callbacks
+     * Выполняет  callbacks.
      *
      * Так как обработчики зарегистрированные в ErrorHandler не работают
      * в shutdown function, для безапасного выполнения callbacks регистрируется
-     * новый обработчик, исключения тоже перенаправляются в новый обработчик
+     * новый обработчик ошибок, исключения тоже перенаправляются в новый обработчик.
      *
      * @param $handlerObj ErrorHandler | Helper
      * @param $callbacks array callbacks
-     * @param null $data array сфккумулированные данные ошибок
+     * @param null $data array саккумулированные данные ошибок
      */
     private function invokeCallbacks($handlerObj, array $callbacks, $data = null)
     {
@@ -171,11 +190,31 @@ class ErrorHandler implements ShutdownCallbackInterface
         }
     }
 
+    /**
+     * Сохраняет данные ошибок в двумерный массив [$key][0 => $value]
+     *
+     * Данные будут переданы в callback в shutdown function.
+     * Ключи $key лучше задавать по названию класса уведомителя,
+     * используя переменную __CLASS__
+     *
+     * @param string $key
+     * @param $value  mixed данные ошибок
+     * @return void
+     */
     public function addErrorCallbackData(string $key, $value)
     {
         $this->callbackData[$key][] = $value;
     }
 
+    /**
+     * Регистрирует callback функцию для отложенной обработки ошибок.
+     *
+     * Метод будет вызван в shutdown function. Аргументом будет передан
+     * массив данных, сохранённых при помощи addErrorCallbackData()
+     *
+     * @param callable $callback функция для обработки и вывода ошибок
+     * @return void
+     */
     public function addErrorCallback(callable $callback)
     {
         $this->errorCallbacks[] = $callback;
@@ -183,7 +222,10 @@ class ErrorHandler implements ShutdownCallbackInterface
 
     /**
      * Регистрирует пользовательский callback, чтобы
-     * позже он был выполен в shutdown function
+     * позже он был выполен в shutdown function.
+     * Фатальные ошибки в этом callback не могут быть
+     * обработаны данным обработчиком, так как выполняются
+     * в shutdown function.
      *
      * @param callable $callback callback
      */
