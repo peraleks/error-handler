@@ -9,7 +9,7 @@ return [
         'handleTrace'    => $trace,
 //        'phpNativeTrace' => true,
         'timeFormat'     => 'd-M-o H:i:s O',
-        'file'           => $_SERVER['DOCUMENT_ROOT'].'/error.log',
+        'file'           => $_SERVER['DOCUMENT_ROOT'].'/error_php.log',
     ],
 
     \Peraleks\ErrorHandler\Notifiers\ServerErrorNotifier::class => [
