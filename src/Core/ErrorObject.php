@@ -1,20 +1,68 @@
 <?php
+/**
+ *  @copyright 2017 Aleksey Perevoshchikov <aleksey.perevoshchikov.n@gmail.com>
+ *   @license   http://www.opensource.org/licenses/mit-license.php MIT
+ *   @link      https://github.com/peraleks/error-handler
+ *
+ */
+
 declare(strict_types=1);
 
 namespace Peraleks\ErrorHandler\Core;
 
-final class ErrorObject
+/**
+ * Class ErrorObject
+ *
+ * Объект ошибки. Является обёрткой над объектом \Throwable
+ * и полностью повторяет его интерфейс. По средствам дополнителных методов
+ * предоставляет название ошибки из её кода, а так же название функции-обработчика
+ * через которую ошибка пришла. Производит сопоставление всех исключений с кодом E_ERROR,
+ * а ParseError c E_PARSE для более удобного управления при помощи битовой маски.
+ *
+ * @package Peraleks\ErrorHandler
+ */
+class ErrorObject
 {
+    /**
+     * @var \Throwable
+     */
     protected $e;
 
+    /**
+     * Код ошибки (severity)
+     *
+     * @var int
+     */
     protected $code;
 
+    /**
+     * Тип ошибки полученный из $this->codeName для
+     * стандартных ошибок и при помощи get_type() для исключений
+     *
+     * @var string
+     */
     protected $type = '';
 
+    /**
+     * Кеш массива стека вызовов с удалённым первым элементом
+     *
+     * @var null | array
+     */
     protected $trace;
 
+    /**
+     * Назване функции обработчика
+     * ('error handler' | 'exception handler' | 'shutdown function')
+     *
+     * @var string
+     */
     protected $handler = '';
 
+    /**
+     * Соответствие кодов ошибок их названиям
+     *
+     * @var array
+     */
     protected  $codeName = [
         E_ERROR             => 'ERROR',
         E_WARNING           => 'WARNING',
@@ -33,6 +81,19 @@ final class ErrorObject
         E_USER_DEPRECATED   => 'USER_DEPRECATED',
     ];
 
+    /**
+     * ErrorObject constructor.
+     *
+     * Определяет код ошибки (из соображения универсальности
+     * управления ошибками для исключения \ParseError - E_PARSE, для остальных
+     * исключений - E_ERROR)
+     * Также определяет тип(название) ошибки из $this->codeName для
+     * стандартных ошибок и при помощи get_type() для исключений.
+     *
+     * @param \Throwable $e
+     * @param string $handler 'error handler' | 'exception handler' | 'shutdown function'
+     * название функции обработчика
+     */
     public function __construct(\Throwable $e, string $handler)
     {
         $this->handler = $handler;
@@ -46,41 +107,79 @@ final class ErrorObject
         }
     }
 
+    /**
+     * Возвращает тип (название) ошибки.
+     *
+     * @return string
+     */
     public function getType(): string
     {
         return $this->type;
     }
 
+    /**
+     * Возвращает название функции обработчика.
+     *
+     * @return string 'error handler' | 'exception handler' | 'shutdown function'
+     */
     public function getHandler(): string
     {
         return $this->handler;
     }
 
+    /**
+     * Возвращает код ошибки (severity).
+     *
+     * @return int
+     */
     public function getCode(): int
     {
         return $this->code;
     }
 
+    /**
+     * Возвращает текст ошибки.
+     *
+     * @return string
+     */
     public function getMessage(): string
     {
         return $this->e->getMessage();
     }
 
+    /**
+     * Возвращает полное имя файла, где произошла ошибка.
+     * с нормализованными слешами.
+     *
+     * @return string
+     */
     public function getFile(): string
     {
         return str_replace('\\', '/', $this->e->getFile());
     }
 
+    /**
+     * Возврашает номер строки, где произошла ошибка.
+     *
+     * @return int
+     */
     public function getLine(): int
     {
         return $this->e->getLine();
     }
 
+    /**
+     * Возвращает массив со стеком вызовов.
+     *
+     * @return array
+     */
     public function getTrace(): array
     {
         if ($this->trace) {
             return $this->trace;
         } elseif ($this->e instanceof \ErrorException) {
+        /* для \ErrorException удаляем первый лишний элемент
+         * и кешируем, чтобы не повторять операцию сдвига массива */
             $this->trace = $this->e->getTrace();
             array_shift($this->trace);
             return $this->trace;
@@ -89,16 +188,32 @@ final class ErrorObject
         }
     }
 
+    /**
+     * Возвращает стек вызовов ввиде строки.
+     *
+     * @return string
+     */
     public function getTraceAsString(): string
     {
         return $this->e->getTraceAsString();
     }
 
+    /**
+     * Возвращает предыдущую ошибку.
+     *
+     * @return \Throwable
+     */
     public function getPrevious(): \Throwable
     {
         return $this->e->getPrevious();
     }
 
+    /**
+     * Возвращает полную информацию об ошибке
+     * со стеком вызовов ввиде строки.
+     *
+     * @return string
+     */
     public function __toString(): string
     {
         return (string)$this->e;

@@ -1,12 +1,33 @@
 <?php
-declare(strict_types = 1);
+/**
+ *  @copyright 2017 Aleksey Perevoshchikov <aleksey.perevoshchikov.n@gmail.com>
+ *   @license   http://www.opensource.org/licenses/mit-license.php MIT
+ *   @link      https://github.com/peraleks/error-handler
+ *
+ */
+
+declare(strict_types=1);
 
 namespace Peraleks\ErrorHandler\Core;
 
 use Peraleks\ErrorHandler\Exception\ErrorHandlerException;
 
-class ConfigObject implements ConfigInterface, ConfigSelfErrorInterface
+/**
+ * Class ConfigObject
+ *
+ * Валидирует конфигурационный файл.
+ * Предоставляет остальным классам доступ к параметрам конфигурации.
+ *
+ * @package Peraleks\ErrorHandler
+ */
+class ConfigObject
 {
+    /**
+     * Начальная конфигураця для слияния
+     * с пользовательской конфигурацией.
+     *
+     * @var array
+     */
     private $config = [
         'SELF_LOG_FILE'   => '',
         'ERROR_REPORTING' => E_ALL,
@@ -15,8 +36,24 @@ class ConfigObject implements ConfigInterface, ConfigSelfErrorInterface
         'MODE'            => 'prod',
     ];
 
+    /**
+     * Имя класса уведомителя.
+     *
+     * get() будет искать значения в масиве конфигурации
+     * по этому имени и переданному ключу
+     *
+     * @var string
+     */
     private $currentNotifier;
 
+    /**
+     * ConfigObject constructor.
+     *
+     * Выполняет валидацию файла конфигурации.
+     *
+     * @param $file string полное имя вайла конфигурации
+     * @throws ErrorHandlerException
+     */
     public function __construct($file)
     {
         if (!is_string($file)) {
@@ -40,16 +77,37 @@ class ConfigObject implements ConfigInterface, ConfigSelfErrorInterface
         $this->modeValidate($this->config['MODE']);
     }
 
+    /**
+     * Валидация параметра конфигурации 'SELF_LOG_FILE'.
+     *
+     * Значение по умолчанию: пустая строка
+     *
+     * @param $selfLogFile
+     */
     private function validateSelfLogFile(&$selfLogFile)
     {
         is_string($selfLogFile) ?: $selfLogFile = '';
     }
 
+    /**
+     * Валидация параметра конфигурации 'ERROR_REPORTING'.
+     *
+     * Значение по умолчанию: E_ALL
+     *
+     * @param $eReporting
+     */
     private function errorReportingValidate(&$eReporting)
     {
         is_int($eReporting) ?: $eReporting = E_ALL;
     }
 
+    /**
+     * Валидация параметра конфигурации 'NOTIFIERS'.
+     *
+     * Значение по умолчанию: array
+     *
+     * @param $notifiers
+     */
     private function notifiersValidate(&$notifiers)
     {
         if (!is_array($notifiers)) {
@@ -62,50 +120,115 @@ class ConfigObject implements ConfigInterface, ConfigSelfErrorInterface
         }
     }
 
+    /**
+     * Валидация параметра конфигурации 'APP_DIR'.
+     *
+     * Данный параметр нужен только для сокращённого отображения
+     * пути файлов, и на логику обработчика ни как не влияет.
+     * Значение по умолчанию: пустая строка для CLI,
+     * и dirname($_SERVER['DOCUMENT_ROOT']) для остальных режимов.
+     *
+     * @param $appDir
+     */
     private function appDirValidate(&$appDir)
     {
         if (!is_string($appDir) || 'default' === $appDir) {
+            /* нормализуем обратный слеш в обычный так же, как это делает PHP в $_SERVER*/
             $appDir = str_replace('\\', '/', dirname($_SERVER['DOCUMENT_ROOT'] ?? ''));
         } else {
             $appDir = str_replace('\\', '/', $appDir);
         }
     }
 
+    /**
+     * Валидация параметра конфигурации 'MODE'.
+     *
+     * Значение по умолчанию: 'prod'
+     *
+     * @param $mode
+     */
     private function modeValidate(&$mode)
     {
         if ('dev' !== $mode) $mode = 'prod';
     }
 
+    /**
+     * Устанавливает имя текущего уведомителя
+     *
+     * get() будет искать значения в масиве конфигурации
+     * по этому имени и переданному ей ключу
+     *
+     * @param string $notifierClass имя класса уведомителя
+     */
     public function setNotifierClass(string $notifierClass)
     {
         $this->currentNotifier = $notifierClass;
     }
 
+    /**
+     * Возвращает массив уведомителей.
+     *
+     * @return array массив уведомителей
+     */
     public function getNotifiers(): array
     {
         return $this->config['NOTIFIERS'];
     }
 
+    /**
+     * Возвращает значение конфигурации 'ERROR_REPORTING'.
+     *
+     * @return int
+     */
     public function getErrorReporting(): int
     {
         return $this->config['ERROR_REPORTING'];
     }
 
+    /**
+     * Возвращает значение из конфигурационного массива по переданному ключу.
+     *
+     * Ищет значенияе в масиве конфигурации по двум ключам: по переданному,
+     * и по имени умедомителя из $this->currentNotifier,
+     * предварительно установленного setNotifierClass().
+     * В случае неудачи возвращает null.
+     *
+     * @param string $param ключ массива конфигурации
+     * @return null | string
+     */
     public function get(string $param)
     {
         return $this->config['NOTIFIERS'][$this->currentNotifier][$param] ?? null;
     }
 
+    /**
+     * Вщзвращает значение конфигурации 'APP_DIR'.
+     *
+     * @return string
+     */
     public function getAppDir(): string
     {
         return $this->config['APP_DIR'];
     }
 
+    /**
+     * Вщзвращает значение конфигурации 'MODE'.
+     *
+     * Не определяет режим CLI. Для этого воспользуйтесь
+     * на месте выражением if (PHP_SAPI === 'cli')
+     *
+     * @return string 'prod' | 'dev'
+     */
     public function getMode(): string
     {
         return $this->config['MODE'];
     }
-    
+
+    /**
+     * Вщзвращает значение конфигурации 'SELF_LOG_FILE'.
+     *
+     * @return string если не задано, то пустая строка
+     */
     public function getSelfLogFile(): string
     {
         return $this->config['SELF_LOG_FILE'];

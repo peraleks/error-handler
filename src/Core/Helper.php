@@ -1,10 +1,28 @@
 <?php
+/**
+ *  @copyright 2017 Aleksey Perevoshchikov <aleksey.perevoshchikov.n@gmail.com>
+ *   @license   http://www.opensource.org/licenses/mit-license.php MIT
+ *   @link      https://github.com/peraleks/error-handler
+ *
+ */
+
 declare(strict_types=1);
 
 namespace Peraleks\ErrorHandler\Core;
 
 use Peraleks\ErrorHandler\Notifiers\AbstractNotifier;
 
+/**
+ * Class Helper
+ *
+ * Помощник.
+ * Здесь находится весь остальной функционал контроллера обработки ощибок,
+ * который оказалось возможным вынести из ErrorHandler, для снижения оверхэда.
+ * Регистрирует функции для обработки внутренних ошибок.
+ *
+ *
+ * @package Peraleks\ErrorHandler
+ */
 class Helper
 {
     /**
@@ -65,33 +83,62 @@ class Helper
         $this->innerShutdownFatal = false;
     }
 
+    /**
+     * Запускает обработку ошибки
+     *
+     * Оборачивает объект ошибки в ErrorObject.
+     * Если не было ошибки в конфигурационном файле
+     * запускает механизм уведомления, иначе передает
+     * ErrorObject во внутренний обработчик ошибок.
+     *
+     * @param \Throwable $e объект ошибки
+     * @param string $handler 'error handler' | 'exception handler' | 'shutdown function'
+     * название функции обработчика
+     */
     public function handle(\Throwable $e, string $handler)
     {
-        $eObj = new ErrorObject($e, $handler);
+        $errorObject = new ErrorObject($e, $handler);
 
+        /* отсутствие объекта конфигурации говорит о том,
+         * что в конфигурационном файле произошла ошибка.
+         * Поэтому отправляем ошибку во внутренний обработчик
+         * и завершаем процесс обработки */
         if (!$this->configObject) {
-            $this->exception($eObj);
+            $this->exception($errorObject);
             return;
         }
 
-        $code = $eObj->getCode();
+        $code = $errorObject->getCode();
 
         /* обработка параметра ERROR_REPORTING (файл конфигурации) */
         if (0 == ($code & $this->configObject->getErrorReporting())) {
             return;
         }
 
-        $this->notify($eObj, $this->configObject, $this->errorHandler);
+        $this->notify($errorObject, $this->configObject, $this->errorHandler);
 
         /* воспроизводим стандартное поведение PHP для ошибок
-         * E_RECOVERABLE_ERROR,  E_USER_ERROR (скрипт должен быть остановлен,
+         * E_RECOVERABLE_ERROR, E_USER_ERROR (выполнение скрипта будет прервано,
          * если пользовательский обработчик не был определён)*/
         if ($code & (E_RECOVERABLE_ERROR | E_USER_ERROR)) {
             exit;
         }
     }
 
-    private function notify(ErrorObject $eObj, ConfigInterface $configObject, $errorHandler)
+    /**
+     * Реализует механизм уведомления
+     *
+     * Инстанцирует классы уведомителей, которые определены в конфигурационных файлах.
+     * Класс уведомителя должен расширять AbstractNotifier.
+     * Выполняет метод notify() каждого уведомителя и, в случае ошибки,
+     * отправляет текущий errorObject и саму ошибку во внутренний обработчик.
+     * Прекращает выполнение скрипта если уведомитель вернул true.
+     *
+     * @param ErrorObject $errorObject
+     * @param ConfigObject $configObject
+     * @param ErrorHandler $errorHandler
+     */
+    private function notify(ErrorObject $errorObject, ConfigObject $configObject, ErrorHandler $errorHandler)
     {
         $this->innerShutdownFatal = true;
         $exit = null;
@@ -101,12 +148,11 @@ class Helper
                 $configObject->setNotifierClass($notifierClass);
 
                 /* проверяем для конкретного Notifier надо ли обрабатывать ошибку */
-                if (0 == ($configObject->get('enabled') & $eObj->getCode())) {
+                if (0 == ($configObject->get('enabled') & $errorObject->getCode())) {
                     continue;
                 }
 
-                /* @var $notifier AbstractNotifier */
-                $notifier = new $notifierClass($eObj, $configObject, $errorHandler);
+                $notifier = new $notifierClass($errorObject, $configObject, $errorHandler);
 
                 if (!$notifier instanceof AbstractNotifier) {
                     trigger_error(
@@ -115,33 +161,60 @@ class Helper
                     );
                     continue;
                 }
+
                 $exit = $notifier->notify();
 
             } catch (\Throwable $e) {
-                $this->exception($eObj);
+                $this->exception($errorObject);
                 $this->exception($e);
             } finally {
                 restore_error_handler();
             }
         }
         $this->innerShutdownFatal = false;
-        if ($exit) {
-            $this->exit = true;
-            exit;
-        }
+
+        /* завершаем выполнение скрипта если уведомитель вернул true.
+         * В частности используется в ServerErrorNotifier для возможности
+         * прерывания скрипта при нефаталных ошибках*/
+        if ($exit) exit;
     }
 
-    public function getInnerShutdownFatal()
+    /**
+     * Возвращает значение флага внутренней фатальной ошибки.
+     *
+     * Если true - значит фатальная ошибка произошла внутри обработчика.
+     *
+     * @return bool
+     */
+    public function getInnerShutdownFatal(): bool
     {
         return $this->innerShutdownFatal;
     }
 
+    /**
+     * Обрабатывает внутренние ошибки.
+     *
+     * Конвертирует ошибку в исключение и передает в $this->exception().
+     *
+     * @param $code int
+     * @param $message string
+     * @param $file string
+     * @param $line int
+     * @return bool true
+     */
     public function error($code, $message, $file, $line)
     {
         $this->exception(new \ErrorException($message, $code, $code, $file, $line));
         return true;
     }
 
+    /**
+     * Обрабатывает внутренние исключения.
+     *
+     * Инстанцирует внутренний обработчик ошибок и передаёт ему ошибку.
+     *
+     * @param $e \Throwable | ErrorObject
+     */
     public function exception($e)
     {
         $this->selfErrorHandler

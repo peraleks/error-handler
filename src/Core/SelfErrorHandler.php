@@ -1,11 +1,32 @@
 <?php
+/**
+ *  @copyright 2017 Aleksey Perevoshchikov <aleksey.perevoshchikov.n@gmail.com>
+ *   @license   http://www.opensource.org/licenses/mit-license.php MIT
+ *   @link      https://github.com/peraleks/error-handler
+ *
+ */
+
 declare(strict_types=1);
 
 namespace Peraleks\ErrorHandler\Core;
 
-
+/**
+ * Class SelfErrorHandler
+ *
+ * Обработчик внутренних ошибок обработчика.
+ * Реализует логирование и отображение внутренних ошибок и
+ * неудачно обработанных ошибок клиентской части кода. Так же посылает
+ * код состояния 500 в случае фатальной ошибки.
+ *
+ * @package Peraleks\ErrorHandler
+ */
 class SelfErrorHandler
 {
+    /**
+     * Соответствие кодов ошибок их названиям.
+     *
+     * @var array
+     */
     private  $codeName = [
         E_ERROR             => 'ERROR',
         E_WARNING           => 'WARNING',
@@ -24,17 +45,52 @@ class SelfErrorHandler
         E_USER_DEPRECATED   => 'USER_DEPRECATED',
     ];
 
+    /**
+     * Полное имя файла лога внутренних ошибок.
+     *
+     * @var string
+     */
     private $selfLogFile;
 
+    /**
+     * Флаг development режима.
+     *
+     * @var bool
+     */
     private $devMode;
 
+    /**
+     * Код ошибки (severity).
+     *
+     * @var int
+     */
     private $code;
 
+    /**
+     * Маска ошибок, для которых
+     * надо показать стек вызовов.
+     *
+     * @var int
+     */
     private $traceEnabled = E_ERROR | E_RECOVERABLE_ERROR;
 
+    /**
+     * Маска ошибок, для которых  надо прервать скрипт
+     * и отправить состояние 'HTTP/1.1 500 Internal Server Error'.
+     *
+     * @var int
+     */
     private $error500 = E_ERROR | E_PARSE | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR;
 
-    public function __construct(ConfigSelfErrorInterface $configObject = null)
+    /**
+     * SelfErrorHandler constructor.
+     *
+     * Валидирует имя файла собственного лога ошибок.
+     * И определяет dev | prod режимы
+     *
+     * @param ConfigObject|null $configObject
+     */
+    public function __construct(ConfigObject $configObject = null)
     {
         if ($configObject && ('' !== $configObject->getSelfLogFile())) {
             $this->selfLogFile = $configObject->getSelfLogFile();
@@ -45,9 +101,15 @@ class SelfErrorHandler
         $this->devMode = $configObject && ('dev' === $configObject->getMode());
     }
 
+    /**
+     * Запускает обработку ошибки.
+     *
+     * @param $e \Throwable | ErrorObject
+     */
     public function report($e)
     {
-
+        /* Определяем код ошибки для исключения \ParseError - E_PARSE,
+        для остальных исключений - E_ERROR */
         if (!$e instanceof \ErrorException && !$e instanceof ErrorObject) {
             $this->code = $e instanceof \ParseError ? E_PARSE : E_ERROR;
         } else {
@@ -66,11 +128,21 @@ class SelfErrorHandler
         }
     }
 
+    /**
+     * Выводит сообщение ошибки в CLI режиме.
+     *
+     * @param $e \Throwable | ErrorObject
+     */
     private function cliReport($e)
     {
         echo "\n\033[32m".$this->getStringError($e)."\033[0m\n";
     }
 
+    /**
+     * Выводит сообщение ошибки в браузер.
+     *
+     * @param $e \Throwable | ErrorObject
+     */
     private function htmlReport($e)
     {
         $type    = $this->getType($e);
@@ -82,6 +154,14 @@ class SelfErrorHandler
         include dirname(__DIR__).'/View/selfError.tpl.php';
     }
 
+    /**
+     * Пишет ошибку в файл и, если требуется,
+     * отправляет состояние 500 с последующим
+     * прерыванием выполнения скрипта.
+     *
+     * @param $e \Throwable | ErrorObject
+     * @param string $file
+     */
     private function fileReport($e, string $file)
     {
         if ($r = fopen($file, 'ab')) {
@@ -89,7 +169,7 @@ class SelfErrorHandler
             fclose($r);
         }
 
-        /* Если $e->getCode() вернёт 0 (\Throwable), значит ошибка сгенерирована
+        /* Если $e->getCode() вернёт 0 (\Throwable $e), значит ошибка сгенерирована
          * внутри обработчика и была перехвачена - поэтому скрипт не останавливаем
          * и не посылаем состояние 500.
          * Если $e является экземпляром ErrorObject, значит ошибка была в клиентской
@@ -105,12 +185,21 @@ class SelfErrorHandler
         }
     }
 
+    /**
+     * Удаляет буферы вывода.
+     */
     private function clean()
     {
         ob_end_clean();
         if (0 < ob_get_level()) $this->clean();
     }
 
+    /**
+     *  Возвращает тип (название) ошибки.
+     *
+     * @param $e \Throwable | ErrorObject
+     * @return string
+     */
     private function getType($e): string
     {
         if ($e instanceof \ErrorException) {
@@ -119,6 +208,13 @@ class SelfErrorHandler
         return get_class($e);
     }
 
+    /**
+     * Возвращает конечную строку ошибки
+     * со стеком вызовов или без.
+     *
+     * @param $e \Throwable | ErrorObject
+     * @return string
+     */
     private function getStringError($e): string
     {
         if (!($this->code & $this->traceEnabled)) {

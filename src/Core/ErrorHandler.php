@@ -1,17 +1,35 @@
 <?php
+/**
+ *  @copyright 2017 Aleksey Perevoshchikov <aleksey.perevoshchikov.n@gmail.com>
+ *   @license   http://www.opensource.org/licenses/mit-license.php MIT
+ *   @link      https://github.com/peraleks/error-handler
+ *
+ */
+
 declare(strict_types=1);
 
 namespace Peraleks\ErrorHandler\Core;
 
+/**
+ * Class ErrorHandler
+ *
+ * Является контроллером обработки ошибок.
+ * Регистрирует функции error_handler, exception_handler, shutdown_function.
+ * Инстанцирует помощника Helper и передаёт ему ошибки для дальнейшей обработки.
+ * Производит отложенный вывод ошибок, а также запуск полльзовательских
+ * функций обратного вызова в shutdown_function.
+ *
+ * @package Peraleks\ErrorHandler
+ */
 class ErrorHandler
 {
     /**
-     * @var \Peraleks\ErrorHandler\Core\ErrorHandler
+     * @var ErrorHandler
      */
     static private $instance;
 
     /**
-     * @var \Peraleks\ErrorHandler\Core\Helper
+     * @var Helper
      */
     private $helper;
 
@@ -224,8 +242,7 @@ class ErrorHandler
      * Регистрирует пользовательский callback, чтобы
      * позже он был выполен в shutdown function.
      * Фатальные ошибки в этом callback не могут быть
-     * обработаны данным обработчиком, так как выполняются
-     * в shutdown function.
+     * обработаны.
      *
      * @param callable $callback callback
      */
@@ -234,3 +251,4 @@ class ErrorHandler
         $this->userCallbacks[] = $callback;
     }
 }
+
