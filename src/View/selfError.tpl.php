@@ -8,7 +8,6 @@
         position: relative;
         z-index: 10000;
         background-color: #3c8c3c;
-        margin: 3px 0;
     }
 
     .peralex_self_error_box .error_header {
@@ -35,6 +34,7 @@
         color: rgba(255, 255, 255, 0.9);
     }
 </style>
+<br>
 <div class="peralex_self_error_box">
     <div class="error_header"><span><?= $type ?></span> <?= $file.' ('.$line ?>)</div>
     <div></div>
@@ -43,3 +43,4 @@
         <?= $trace ?>
     </div>
 </div>
+<br>
