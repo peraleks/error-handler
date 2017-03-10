@@ -1,4 +1,13 @@
 <?php
+/**
+ * PHP error handler and debugger.
+ *
+ * @package   Peraleks\ErrorHandler
+ * @copyright 2017 Aleksey Perevoshchikov <aleksey.perevoshchikov.n@gmail.com>
+ * @license   https://github.com/peraleks/error-handler/blob/master/LICENSE.md MIT
+ * @link      https://github.com/peraleks/error-handler
+ */
+
 declare(strict_types=1);
 
 namespace Peraleks\ErrorHandler\Notifiers;
@@ -6,6 +15,11 @@ namespace Peraleks\ErrorHandler\Notifiers;
 
 use Peraleks\ErrorHandler\Trace\BrowserConsoleTraceHandler;
 
+/**
+ * Class BrowserConsoleNotifier
+ *
+ * Форматирует и выводит ошибку в консоль браузера.
+ */
 class BrowserConsoleNotifier extends AbstractNotifier
 {
     const ERROR      = "#e02828";
@@ -34,12 +48,34 @@ class BrowserConsoleNotifier extends AbstractNotifier
                     ."line-height: 1.2em;"
                     ."border-radius: 1em');";
 
+    /**
+     * Соответствие кодов ошибок и цвета.
+     *
+     * @var array
+     */
     protected $codeColor;
 
+    /**
+     * Счётчик callbacks для отложенного показа ошибок.
+     * Используется для того, чтобы не регистрировать callback повторно.
+     *
+     * @var null | int
+     */
     protected static $count;
 
+    /**
+     * Категория в консоли браузера.
+     *
+     * @var string
+     */
     protected $console = 'log';
 
+    /**
+     * Инициализирует массив соответствия кодов ошибок и цвета.
+     * Валидирует параметр конфигурации - 'console'.
+     *
+     * @return void
+     */
     protected function prepare()
     {
         $this->codeColor = [
@@ -64,39 +100,29 @@ class BrowserConsoleNotifier extends AbstractNotifier
             E_USER_DEPRECATED => static::DEPRECATED,
         ];
 
-
+        /* определяем в какую категорию консоли отправлять ошибки */
         if ($v = $this->configObject->get('console')) {
             !preg_match('/^error$|^warn$|^info$|^log$|^debug$/', $v, $matches)
                 ?: $this->console = $matches[0];
         }
     }
 
+    /**
+     * Возвращает имя класса обработчика стека вызовов.
+     *
+     * @return string BrowserConsoleTraceHandler::class
+     */
     protected function getTraceHandlerClass(): string
     {
         return BrowserConsoleTraceHandler::class;
     }
 
-
-    public function notify()
-    {
-        $conf = $this->configObject;
-
-        if (!$conf->get('deferredView')) {
-            echo $this->finalStringError;
-            return;
-        }
-        $this->errorHandler->addErrorCallbackData(__CLASS__, $this->finalStringError);
-        if (!static::$count) {
-            $this->errorHandler->addErrorCallback(function ($callbackData) {
-                $errors = $callbackData[__CLASS__];
-                foreach ($errors as $error) {
-                    echo $error;
-                }
-            });
-            ++static::$count;
-        }
-    }
-
+    /**
+     * Форматирует ошибку для вывода в консоль браузера.
+     *
+     * @param string $trace стек вызовов
+     * @return string ошибка
+     */
     protected function ErrorToString(string $trace): string
     {
         $eObj  = $this->errorObject;
@@ -132,5 +158,33 @@ class BrowserConsoleNotifier extends AbstractNotifier
         $string .= sprintf(static::END, $cons, '%c', '^', $color[$code]);
 
         return sprintf(static::SCRIPT, $string);
+    }
+
+
+    /**
+     * В зависимости от параметра 'deferredView' выводит сразу
+     * ошибку в браузер, или регистрирует callback для отложенного
+     * вывода.
+     *
+     * @return void
+     */
+    public function notify()
+    {
+        $conf = $this->configObject;
+
+        if (!$conf->get('deferredView')) {
+            echo $this->finalStringError;
+            return;
+        }
+        $this->errorHandler->addErrorCallbackData(__CLASS__, $this->finalStringError);
+        if (!static::$count) {
+            $this->errorHandler->addErrorCallback(function ($callbackData) {
+                $errors = $callbackData[__CLASS__];
+                foreach ($errors as $error) {
+                    echo $error;
+                }
+            });
+            ++static::$count;
+        }
     }
 }

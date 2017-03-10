@@ -1,22 +1,67 @@
 <?php
+/**
+ * PHP error handler and debugger.
+ *
+ * @package   Peraleks\ErrorHandler
+ * @copyright 2017 Aleksey Perevoshchikov <aleksey.perevoshchikov.n@gmail.com>
+ * @license   https://github.com/peraleks/error-handler/blob/master/LICENSE.md MIT
+ * @link      https://github.com/peraleks/error-handler
+ */
+
 declare(strict_types=1);
 
 namespace Peraleks\ErrorHandler\Notifiers;
 
 use Peraleks\ErrorHandler\Trace\HtmlTraceHandler;
 
+/**
+ * Class HtmlNotifier
+ *
+ * Форматирует и выводит ошибку в браузер ввиде HTML.
+ */
 class HtmlNotifier extends AbstractNotifier
 {
+    /**
+     * Полное имя файла стилей для html-шаблона ошибки.
+     *
+     * @var string
+     */
     protected $errorCss;
 
+    /**
+     * Полное имя файла стилей для стека вызовов.
+     *
+     * @var string
+     */
     protected $traceCss;
 
+    /**
+     * Полное имя файла html-шаблона ошибки.
+     *
+     * @var string
+     */
     protected $errorTpl;
 
+    /**
+     * Полное имя файла html-шаблона обёртки для отложенного показа ошибок.
+     *
+     * @var string
+     */
     protected $wrapperTpl;
 
+    /**
+     * Счётчик callbacks для отложенного показа ошибок.
+     * Используется для того, чтобы не регистрировать callback повторно.
+     *
+     * @var null | int
+     */
     protected static $count;
 
+    /**
+     * Задаёт файлы шаблонов и css.
+     *
+     * @return void
+     */
     protected function prepare()
     {
         $dir = dirname(__DIR__).'/View';
@@ -26,33 +71,22 @@ class HtmlNotifier extends AbstractNotifier
         $this->wrapperTpl = $dir.'/wrapper.tpl.php';
     }
 
+    /**
+     * Возвращает имя класса обработчика стека вызовов.
+     *
+     * @return string HtmlTraceHandler::class
+     */
     protected function getTraceHandlerClass(): string
     {
         return HtmlTraceHandler::class;
     }
 
-
-    public function notify()
-    {
-        $conf = $this->configObject;
-
-        if (!$conf->get('deferredView')) {
-            echo $this->finalStringError;
-            return;
-        }
-        $this->errorHandler->addErrorCallbackData(__CLASS__, $this->finalStringError);
-        if (!static::$count) {
-            $this->errorHandler->addErrorCallback(function ($callbackData) use ($conf) {
-                $conf->setNotifierClass(__CLASS__);
-                $hideView = $conf->get('hideView') ? 'hidden' : '';
-                $errors = $callbackData[__CLASS__];
-                $count = count($errors);
-                include($this->wrapperTpl);
-            });
-            ++static::$count;
-        }
-    }
-
+    /**
+     * Форматирует ошибку в HTML.
+     *
+     * @param string $trace стек вызовов
+     * @return string ошибка в формате HTML
+     */
     protected function ErrorToString(string $trace): string
     {
         $eObj = $this->errorObject;
@@ -75,5 +109,33 @@ class HtmlNotifier extends AbstractNotifier
         ob_start();
         include($this->errorTpl);
         return ob_get_clean();
+    }
+
+    /**
+     * В зависимости от параметра 'deferredView' выводит сразу
+     * ошибку в браузер, или регистрирует callback для отложенного
+     * вывода.
+     *
+     * @return void
+     */
+    public function notify()
+    {
+        $conf = $this->configObject;
+
+        if (!$conf->get('deferredView')) {
+            echo $this->finalStringError;
+            return;
+        }
+        $this->errorHandler->addErrorCallbackData(__CLASS__, $this->finalStringError);
+        if (!static::$count) {
+            $this->errorHandler->addErrorCallback(function ($callbackData) use ($conf) {
+                $conf->setNotifierClass(__CLASS__);
+                $hideView = $conf->get('hideView') ? 'hidden' : '';
+                $errors = $callbackData[__CLASS__];
+                $count = count($errors);
+                include($this->wrapperTpl);
+            });
+            ++static::$count;
+        }
     }
 }

@@ -1,9 +1,11 @@
 <?php
 /**
- *  @copyright 2017 Aleksey Perevoshchikov <aleksey.perevoshchikov.n@gmail.com>
- *   @license   http://www.opensource.org/licenses/mit-license.php MIT
- *   @link      https://github.com/peraleks/error-handler
+ * PHP error handler and debugger.
  *
+ * @package   Peraleks\ErrorHandler
+ * @copyright 2017 Aleksey Perevoshchikov <aleksey.perevoshchikov.n@gmail.com>
+ * @license   https://github.com/peraleks/error-handler/blob/master/LICENSE.md MIT
+ * @link      https://github.com/peraleks/error-handler
  */
 
 declare(strict_types=1);
@@ -16,56 +18,54 @@ namespace Peraleks\ErrorHandler\Core;
  * Является контроллером обработки ошибок.
  * Регистрирует функции error_handler, exception_handler, shutdown_function.
  * Инстанцирует помощника Helper и передаёт ему ошибки для дальнейшей обработки.
- * Производит отложенный вывод ошибок, а также запуск полльзовательских
- * функций обратного вызова в shutdown_function.
- *
- * @package Peraleks\ErrorHandler
+ * Производит отложенный вывод ошибок, и запуск пользовательских
+ * функций обратного вызова в shutdown().
  */
 class ErrorHandler
 {
     /**
+     * Singleton.
+     *
      * @var ErrorHandler
      */
     static private $instance;
 
     /**
+     * Помощник (вторая часть контроллера).
+     *
      * @var Helper
      */
     private $helper;
 
-    /**
-     * Путь к файлу конфигурации.
+    /** Путь к файлу конфигурации.
      *
      * @var string
      */
     private $configFile;
 
     /**
-     * Сюда будем складывать ошибки для
-     * отложенного вывода при помощи callback функций.
+     * Данные ошибок для отложенного вывода.
      *
      * @var array
      */
     private $callbackData = [];
 
     /**
-     * Callback функции для отложенной
-     * обработки и вывода ошибок.
+     * Callbacks для отложенной обработки и вывода ошибок.
      *
      * @var array
      */
     private $errorCallbacks = [];
 
     /**
-     * Любые пользовательские функции,
-     * которые требуется выполнить в shutdown function.
+     * Пользовательские Callbacks
      *
      * @var array
      */
     private $userCallbacks = [];
 
     /**
-     * Последняя ошибка полученная $this->exception().
+     * Последняя ошибка.
      *
      * @var \Throwable
      */
@@ -90,7 +90,7 @@ class ErrorHandler
     /**
      * Singleton.
      *
-     * @param null $configFile string Путь к файлу конфигурации
+     * @param null $configFile string полное имя файла конфигурации
      * @return ErrorHandler
      */
     public static function instance($configFile = null)
@@ -119,7 +119,7 @@ class ErrorHandler
     /**
      * Обработчик исключений.
      *
-     * Инстанцирует помощника и передаёт ему объект ошибки
+     * Инстанцирует помощника (Helper) и передаёт ему объект ошибки
      * для дальнейшей обработки.
      *
      * @param \Throwable $e объект ошибки
@@ -141,7 +141,7 @@ class ErrorHandler
      * Shutdown function.
      *
      * Вылавливает из буфера последнюю фатальную ошибку,
-     * котвертирует в исключение и передаёт в обработчик исключений
+     * конвертирует в исключение и передаёт в обработчик исключений
      * Инициирует выполнение пользовательских callbacks,
      * и callbacks отложенного вывода ошибок.
      */

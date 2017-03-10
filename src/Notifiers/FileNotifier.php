@@ -1,4 +1,13 @@
 <?php
+/**
+ * PHP error handler and debugger.
+ *
+ * @package   Peraleks\ErrorHandler
+ * @copyright 2017 Aleksey Perevoshchikov <aleksey.perevoshchikov.n@gmail.com>
+ * @license   https://github.com/peraleks/error-handler/blob/master/LICENSE.md MIT
+ * @link      https://github.com/peraleks/error-handler
+ */
+
 declare(strict_types=1);
 
 namespace Peraleks\ErrorHandler\Notifiers;
@@ -8,12 +17,33 @@ use Peraleks\ErrorHandler\Exception\PropertyMustBeDefinedException;
 use Peraleks\ErrorHandler\Exception\PropertyTypeException;
 use Peraleks\ErrorHandler\Trace\FileTraceHandler;
 
+/**
+ * Class FileNotifier
+ *
+ * Форматирует и выводит ошибку в файл (логирует).
+ */
 class FileNotifier extends AbstractNotifier
 {
+    /**
+     * Формат времени для PHP date().
+     *
+     * @var string
+     */
     protected $timeFormat = 'd-M-o H:i:s O';
 
+    /**
+     * Полное имя файла лога.
+     *
+     * @var string
+     */
     protected $file;
 
+    /**
+     * Валидирует параметры конфигурации - 'file' и 'timeFormat'.
+     *
+     * @throws PropertyMustBeDefinedException
+     * @throws PropertyTypeException
+     */
     protected function prepare()
     {
         if (!$this->file = $this->configObject->get('file')) {
@@ -22,24 +52,25 @@ class FileNotifier extends AbstractNotifier
         if (!is_string($this->file)) {
             throw new PropertyTypeException($this->file, 'file', 'string');
         }
-        !is_string($t= $this->configObject->get('timeFormat')) ?: $this->timeFormat = $t;
+        !is_string($t = $this->configObject->get('timeFormat')) ?: $this->timeFormat = $t;
     }
 
+    /**
+     * Возвращает имя класса обработчика стека вызовов.
+     *
+     * @return string FileTraceHandler::class
+     */
     protected function getTraceHandlerClass(): string
     {
         return FileTraceHandler::class;
     }
 
-    public function notify()
-    {
-        $fileRes = fopen($this->file, 'ab');
-        if (!$fileRes) {
-            return;
-        }
-        fwrite($fileRes, $this->finalStringError);
-        fclose($fileRes);
-    }
-
+    /**
+     * Форматирует ошибку для записи в файл ввиде строки.
+     *
+     * @param string $trace стек вызовов
+     * @return string ошибка в формате строки
+     */
     protected function ErrorToString(string $trace): string
     {
         $eObj = $this->errorObject;
@@ -60,6 +91,27 @@ class FileNotifier extends AbstractNotifier
         .' in '.$eObj->getFile().' ('.$eObj->getLine().')'."\n".$trace;
     }
 
+    /**
+     * Пишет ошибку в файл.
+     *
+     * @return void
+     */
+    public function notify()
+    {
+        $fileRes = fopen($this->file, 'ab');
+        if (!$fileRes) {
+            return;
+        }
+        fwrite($fileRes, $this->finalStringError);
+        fclose($fileRes);
+    }
+
+    /**
+     * Возвращает текущее время в формате,
+     * заданном в файле конфигурации ('timeFormat')
+     *
+     * @return false|string
+     */
     protected function time()
     {
         return date($this->timeFormat);

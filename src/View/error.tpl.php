@@ -1,4 +1,14 @@
-<?php $id = 'peraleks_wrap'.rand(); ?>
+<?php
+/**
+ * PHP error handler and debugger.
+ *
+ * @package   Peraleks\ErrorHandler
+ * @copyright 2017 Aleksey Perevoshchikov <aleksey.perevoshchikov.n@gmail.com>
+ * @license   https://github.com/peraleks/error-handler/blob/master/LICENSE.md MIT
+ * @link      https://github.com/peraleks/error-handler
+ */
+
+$id = 'peraleks_wrap'.rand(); ?>
 <br>
 <style>
     <?= $style ?>

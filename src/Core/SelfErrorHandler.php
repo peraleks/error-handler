@@ -1,9 +1,11 @@
 <?php
 /**
- *  @copyright 2017 Aleksey Perevoshchikov <aleksey.perevoshchikov.n@gmail.com>
- *   @license   http://www.opensource.org/licenses/mit-license.php MIT
- *   @link      https://github.com/peraleks/error-handler
+ * PHP error handler and debugger.
  *
+ * @package   Peraleks\ErrorHandler
+ * @copyright 2017 Aleksey Perevoshchikov <aleksey.perevoshchikov.n@gmail.com>
+ * @license   https://github.com/peraleks/error-handler/blob/master/LICENSE.md MIT
+ * @link      https://github.com/peraleks/error-handler
  */
 
 declare(strict_types=1);
@@ -13,12 +15,10 @@ namespace Peraleks\ErrorHandler\Core;
 /**
  * Class SelfErrorHandler
  *
- * Обработчик внутренних ошибок обработчика.
+ * Обработчик внутренних ошибок.
  * Реализует логирование и отображение внутренних ошибок и
  * неудачно обработанных ошибок клиентской части кода. Так же посылает
  * код состояния 500 в случае фатальной ошибки.
- *
- * @package Peraleks\ErrorHandler
  */
 class SelfErrorHandler
 {
@@ -86,9 +86,9 @@ class SelfErrorHandler
      * SelfErrorHandler constructor.
      *
      * Валидирует имя файла собственного лога ошибок.
-     * И определяет dev | prod режимы
+     * И определяет dev | prod режимы.
      *
-     * @param ConfigObject|null $configObject
+     * @param ConfigObject|null $configObject объект конфигурации
      */
     public function __construct(ConfigObject $configObject = null)
     {
@@ -104,7 +104,7 @@ class SelfErrorHandler
     /**
      * Запускает обработку ошибки.
      *
-     * @param $e \Throwable | ErrorObject
+     * @param $e \Throwable | ErrorObject объект ошибки
      */
     public function report($e)
     {
@@ -131,7 +131,7 @@ class SelfErrorHandler
     /**
      * Выводит сообщение ошибки в CLI режиме.
      *
-     * @param $e \Throwable | ErrorObject
+     * @param $e \Throwable | ErrorObject объект ошибки
      */
     private function cliReport($e)
     {
@@ -141,7 +141,7 @@ class SelfErrorHandler
     /**
      * Выводит сообщение ошибки в браузер.
      *
-     * @param $e \Throwable | ErrorObject
+     * @param $e \Throwable | ErrorObject объект ошибки
      */
     private function htmlReport($e)
     {
@@ -159,8 +159,8 @@ class SelfErrorHandler
      * отправляет состояние 500 с последующим
      * прерыванием выполнения скрипта.
      *
-     * @param $e \Throwable | ErrorObject
-     * @param string $file
+     * @param $e \Throwable | ErrorObject объект ошибки
+     * @param string $file полное имя вайла лога внутренних ошибок
      */
     private function fileReport($e, string $file)
     {
@@ -197,8 +197,8 @@ class SelfErrorHandler
     /**
      *  Возвращает тип (название) ошибки.
      *
-     * @param $e \Throwable | ErrorObject
-     * @return string
+     * @param $e \Throwable | ErrorObject объект ошибки
+     * @return string тип (название) ошибки
      */
     private function getType($e): string
     {
@@ -212,8 +212,8 @@ class SelfErrorHandler
      * Возвращает конечную строку ошибки
      * со стеком вызовов или без.
      *
-     * @param $e \Throwable | ErrorObject
-     * @return string
+     * @param $e \Throwable | ErrorObject объект ошибки
+     * @return string ошибку в текстовом виде
      */
     private function getStringError($e): string
     {

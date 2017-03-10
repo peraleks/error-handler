@@ -1,9 +1,11 @@
 <?php
 /**
- *  @copyright 2017 Aleksey Perevoshchikov <aleksey.perevoshchikov.n@gmail.com>
- *   @license   http://www.opensource.org/licenses/mit-license.php MIT
- *   @link      https://github.com/peraleks/error-handler
+ * PHP error handler and debugger.
  *
+ * @package   Peraleks\ErrorHandler
+ * @copyright 2017 Aleksey Perevoshchikov <aleksey.perevoshchikov.n@gmail.com>
+ * @license   https://github.com/peraleks/error-handler/blob/master/LICENSE.md MIT
+ * @link      https://github.com/peraleks/error-handler
  */
 
 declare(strict_types=1);
@@ -17,8 +19,6 @@ use Peraleks\ErrorHandler\Exception\ErrorHandlerException;
  *
  * Валидирует конфигурационный файл.
  * Предоставляет остальным классам доступ к параметрам конфигурации.
- *
- * @package Peraleks\ErrorHandler
  */
 class ConfigObject
 {
@@ -37,9 +37,9 @@ class ConfigObject
     ];
 
     /**
-     * Имя класса уведомителя.
+     * Имя класса-уведомителя.
      *
-     * get() будет искать значения в масиве конфигурации
+     * $this->get() будет искать значения в масиве конфигурации
      * по этому имени и переданному ключу
      *
      * @var string
@@ -51,7 +51,7 @@ class ConfigObject
      *
      * Выполняет валидацию файла конфигурации.
      *
-     * @param $file string полное имя вайла конфигурации
+     * @param $file string полное имя файла конфигурации
      * @throws ErrorHandlerException
      */
     public function __construct($file)

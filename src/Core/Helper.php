@@ -1,9 +1,11 @@
 <?php
 /**
- *  @copyright 2017 Aleksey Perevoshchikov <aleksey.perevoshchikov.n@gmail.com>
- *   @license   http://www.opensource.org/licenses/mit-license.php MIT
- *   @link      https://github.com/peraleks/error-handler
+ * PHP error handler and debugger.
  *
+ * @package   Peraleks\ErrorHandler
+ * @copyright 2017 Aleksey Perevoshchikov <aleksey.perevoshchikov.n@gmail.com>
+ * @license   https://github.com/peraleks/error-handler/blob/master/LICENSE.md MIT
+ * @link      https://github.com/peraleks/error-handler
  */
 
 declare(strict_types=1);
@@ -16,26 +18,29 @@ use Peraleks\ErrorHandler\Notifiers\AbstractNotifier;
  * Class Helper
  *
  * Помощник.
- * Здесь находится весь остальной функционал контроллера обработки ощибок,
- * который оказалось возможным вынести из ErrorHandler, для снижения оверхэда.
+ * Здесь находится весь остальной функционал контроллера обработки ошибок,
+ * который оказалось возможным вынести из ErrorHandler, для снижения оверхэда.<br>
  * Регистрирует функции для обработки внутренних ошибок.
- *
- *
- * @package Peraleks\ErrorHandler
  */
 class Helper
 {
     /**
+     * Объект конфигурации.
+     *
      * @var ConfigObject
      */
     private $configObject;
 
     /**
+     * Объект основного контроллера обработки ошибок.
+     *
      * @var ErrorHandler
      */
     private $errorHandler;
 
     /**
+     * Объект внутреннего обработчика ошибок.
+     *
      * @var SelfErrorHandler
      */
     private $selfErrorHandler;
@@ -51,8 +56,8 @@ class Helper
     /**
      * Helper constructor.
      *
-     * @param string $configFile
-     * @param ErrorHandler $errorHandler
+     * @param string $configFile полное имя файла конфигурации
+     * @param ErrorHandler $errorHandler объект основного контроллера обработки ошибок
      */
     public function __construct(string $configFile, ErrorHandler $errorHandler)
     {
@@ -61,7 +66,7 @@ class Helper
     }
 
     /**
-     * Инстанцирует ConfigObject
+     * Инстанцирует ConfigObject.
      *
      * Вызов должен производится извне, а не из конструктора, так как
      * фатальная ошибка в конфигурационном файле приведёт к тому,
@@ -84,7 +89,7 @@ class Helper
     }
 
     /**
-     * Запускает обработку ошибки
+     * Запускает обработку ошибки.
      *
      * Оборачивает объект ошибки в ErrorObject.
      * Если не было ошибки в конфигурационном файле
@@ -126,17 +131,17 @@ class Helper
     }
 
     /**
-     * Реализует механизм уведомления
+     * Реализует механизм уведомления.
      *
-     * Инстанцирует классы уведомителей, которые определены в конфигурационных файлах.
-     * Класс уведомителя должен расширять AbstractNotifier.
+     * Инстанцирует классы уведомителей, которые определены в конфигурационных файлах.<br>
+     * Класс уведомителя должен расширять AbstractNotifier.<br>
      * Выполняет метод notify() каждого уведомителя и, в случае ошибки,
-     * отправляет текущий errorObject и саму ошибку во внутренний обработчик.
+     * отправляет текущий errorObject и саму ошибку во внутренний обработчик.<br>
      * Прекращает выполнение скрипта если уведомитель вернул true.
      *
-     * @param ErrorObject $errorObject
-     * @param ConfigObject $configObject
-     * @param ErrorHandler $errorHandler
+     * @param ErrorObject $errorObject объект ошибки (wrapper)
+     * @param ConfigObject $configObject объект конфигурации
+     * @param ErrorHandler $errorHandler объект основного контроллера обработки ошибок
      */
     private function notify(ErrorObject $errorObject, ConfigObject $configObject, ErrorHandler $errorHandler)
     {
@@ -196,10 +201,10 @@ class Helper
      *
      * Конвертирует ошибку в исключение и передает в $this->exception().
      *
-     * @param $code int
-     * @param $message string
-     * @param $file string
-     * @param $line int
+     * @param $code int сод ошибки
+     * @param $message string сообщение ошибки
+     * @param $file string полное имя файла ошибки
+     * @param $line int номер строки
      * @return bool true
      */
     public function error($code, $message, $file, $line)
@@ -213,7 +218,7 @@ class Helper
      *
      * Инстанцирует внутренний обработчик ошибок и передаёт ему ошибку.
      *
-     * @param $e \Throwable | ErrorObject
+     * @param $e \Throwable | ErrorObject объект ошибки
      */
     public function exception($e)
     {

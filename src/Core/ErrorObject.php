@@ -1,9 +1,11 @@
 <?php
 /**
- *  @copyright 2017 Aleksey Perevoshchikov <aleksey.perevoshchikov.n@gmail.com>
- *   @license   http://www.opensource.org/licenses/mit-license.php MIT
- *   @link      https://github.com/peraleks/error-handler
+ * PHP error handler and debugger.
  *
+ * @package   Peraleks\ErrorHandler
+ * @copyright 2017 Aleksey Perevoshchikov <aleksey.perevoshchikov.n@gmail.com>
+ * @license   https://github.com/peraleks/error-handler/blob/master/LICENSE.md MIT
+ * @link      https://github.com/peraleks/error-handler
  */
 
 declare(strict_types=1);
@@ -18,12 +20,12 @@ namespace Peraleks\ErrorHandler\Core;
  * предоставляет название ошибки из её кода, а так же название функции-обработчика
  * через которую ошибка пришла. Производит сопоставление всех исключений с кодом E_ERROR,
  * а ParseError c E_PARSE для более удобного управления при помощи битовой маски.
- *
- * @package Peraleks\ErrorHandler
  */
 class ErrorObject
 {
     /**
+     * Объект ошибки клиентской части скрипта.
+     *
      * @var \Throwable
      */
     protected $e;
@@ -37,29 +39,29 @@ class ErrorObject
 
     /**
      * Тип ошибки полученный из $this->codeName для
-     * стандартных ошибок и при помощи get_type() для исключений
+     * стандартных ошибок и при помощи get_type() для исключений.
      *
      * @var string
      */
     protected $type = '';
 
     /**
-     * Кеш массива стека вызовов с удалённым первым элементом
+     * Кеш массива стека вызовов с удалённым первым элементом.
      *
      * @var null | array
      */
     protected $trace;
 
     /**
-     * Назване функции обработчика
-     * ('error handler' | 'exception handler' | 'shutdown function')
+     * Название функции обработчика
+     * ('error handler' | 'exception handler' | 'shutdown function').
      *
      * @var string
      */
     protected $handler = '';
 
     /**
-     * Соответствие кодов ошибок их названиям
+     * Соответствие кодов ошибок их названиям.
      *
      * @var array
      */
@@ -86,11 +88,11 @@ class ErrorObject
      *
      * Определяет код ошибки (из соображения универсальности
      * управления ошибками для исключения \ParseError - E_PARSE, для остальных
-     * исключений - E_ERROR)
+     * исключений - E_ERROR).<br>
      * Также определяет тип(название) ошибки из $this->codeName для
      * стандартных ошибок и при помощи get_type() для исключений.
      *
-     * @param \Throwable $e
+     * @param \Throwable $e объект ошибки клиентской части скрипта
      * @param string $handler 'error handler' | 'exception handler' | 'shutdown function'
      * название функции обработчика
      */
@@ -102,7 +104,7 @@ class ErrorObject
         if ($this->e instanceof \ErrorException) {
             $this->type = $this->codeName[$this->code] ?? "unknown";
         } else {
-            $this->e instanceof \ParseError ? $this->code = E_PARSE : $this->code = E_ERROR;
+            $this->code = $this->e instanceof \ParseError ? E_PARSE : E_ERROR;
             $this->type = get_class($this->e);
         }
     }
@@ -148,7 +150,7 @@ class ErrorObject
     }
 
     /**
-     * Возвращает полное имя файла, где произошла ошибка.
+     * Возвращает полное имя файла, где произошла ошибка
      * с нормализованными слешами.
      *
      * @return string

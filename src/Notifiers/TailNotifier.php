@@ -1,4 +1,13 @@
 <?php
+/**
+ * PHP error handler and debugger.
+ *
+ * @package   Peraleks\ErrorHandler
+ * @copyright 2017 Aleksey Perevoshchikov <aleksey.perevoshchikov.n@gmail.com>
+ * @license   https://github.com/peraleks/error-handler/blob/master/LICENSE.md MIT
+ * @link      https://github.com/peraleks/error-handler
+ */
+
 declare(strict_types=1);
 
 namespace Peraleks\ErrorHandler\Notifiers;
@@ -6,13 +15,30 @@ namespace Peraleks\ErrorHandler\Notifiers;
 use Peraleks\ErrorHandler\Exception\PropertyMustBeDefinedException;
 use Peraleks\ErrorHandler\Exception\PropertyTypeException;
 
+/**
+ * Class TailNotifier
+ *
+ * Форматирует в цвете и выводит результат в файл.
+ * Для просмотра в терминале используйте команду tail -f
+ */
 class TailNotifier extends CliNotifier
 {
     const REPEAT = "\033[1;30m%s\033[0m";
     const DATE   = "\033[33m%s\033[0";
 
+    /**
+     * Формат времени для PHP date().
+     *
+     * @var string
+     */
     protected $timeFormat = 'H:i:s';
 
+    /**
+     * Валидирует параметры конфигурации - 'file' и 'timeFormat'.
+     *
+     * @throws PropertyMustBeDefinedException
+     * @throws PropertyTypeException
+     */
     protected function prepare()
     {
         if (!$file = $this->configObject->get('file')) {
@@ -25,7 +51,14 @@ class TailNotifier extends CliNotifier
         parent::prepare();
     }
 
-
+    /**
+     * Выполняет вывод подготовленной ошибки в файл.
+     *
+     * Создаёт дополнительный файл, где хранит crc32 хеш
+     * последней ошибки для отслеживания повторов.
+     *
+     * @return void
+     */
     public function notify()
     {
         $string =& $this->finalStringError;
@@ -36,33 +69,39 @@ class TailNotifier extends CliNotifier
         if (!file_exists($fileRepeat)) {
             file_put_contents($fileRepeat, '');
         }
-        $fileRepeatRes = fopen($fileRepeat, 'rb');
-        if (!$fileRepeatRes) {
+        $fileRepeatResource = fopen($fileRepeat, 'rb');
+        if (!$fileRepeatResource) {
             return;
         }
 
         $a = crc32($string);
-        $b = (int)fread($fileRepeatRes, 12);
+        $b = (int)fread($fileRepeatResource, 12);
         if ($a == $b) {
             $string = $this->time().sprintf(static::REPEAT, '>>repeat ');
         } else {
-            $fileRepeatRes = fopen($fileRepeat, 'wb');
-            if (!$fileRepeatRes) {
+            $fileRepeatResource = fopen($fileRepeat, 'wb');
+            if (!$fileRepeatResource) {
                 return;
             }
-            fwrite($fileRepeatRes, (string)crc32($string));
+            fwrite($fileRepeatResource, (string)crc32($string));
             $string = "\n".$this->time().' '.$string."\n";
         }
-        fclose($fileRepeatRes);
+        fclose($fileRepeatResource);
 
-        $fileRes = fopen($file, 'ab');
-        if (!$fileRes) {
+        $fileResource = fopen($file, 'ab');
+        if (!$fileResource) {
             return;
         }
-        fwrite($fileRes, $string);
-        fclose($fileRes);
+        fwrite($fileResource, $string);
+        fclose($fileResource);
     }
 
+    /**
+     * Возвращает текущее время в формате,
+     * заданном в файле конфигурации ('timeFormat')
+     *
+     * @return false|string
+     */
     protected function time(): string
     {
         return sprintf(static::DATE, date($this->timeFormat));

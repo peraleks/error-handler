@@ -1,11 +1,24 @@
 <?php
+/**
+ * PHP error handler and debugger.
+ *
+ * @package   Peraleks\ErrorHandler
+ * @copyright 2017 Aleksey Perevoshchikov <aleksey.perevoshchikov.n@gmail.com>
+ * @license   https://github.com/peraleks/error-handler/blob/master/LICENSE.md MIT
+ * @link      https://github.com/peraleks/error-handler
+ */
 
 namespace Peraleks\ErrorHandler\Autoload;
 
+/**
+ * Class ClassLoader.
+ *
+ * Автозагрузчик классов для Peraleks\ErrorHandler.
+ */
 class ClassLoader
 {
     /**
-     * Корневая директория пакета
+     * Корневая директория пакета.
      *
      * @var string
      */
@@ -15,7 +28,7 @@ class ClassLoader
      * ClassLoader constructor.
      *
      * Регистрация автозагрузчика,
-     * определение корневой директории пакета
+     * определение корневой директории пакета.
      */
     public function __construct()
     {
@@ -24,9 +37,9 @@ class ClassLoader
     }
 
     /**
-     * Подключает требуемый класс
+     * Подключает требуемый класс.
      *
-     * @param  string $className    полное имя класса
+     * @param  string $className полное имя класса
      * @return void
      */
     private function loader($className)
