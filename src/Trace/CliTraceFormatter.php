@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 namespace Peraleks\ErrorHandler\Trace;
 
-class CliTraceHandler extends AbstractTraceHandler
+class CliTraceFormatter extends AbstractTraceFormatter
 {
     const FILE       = "\033[0;36m%s\033[0m";
     const LINE       = "\033[0;36m%s\033[0m";
@@ -20,6 +20,7 @@ class CliTraceHandler extends AbstractTraceHandler
     const FUNC       = "\033[33m%s\033[0m";
     const TYPE       = "\033[1;30m%s\033[0m";
     const OBJ        = "\033[1;30m%s\033[0m";
+    const CALL       = "\033[0;34m%s\033[0m";
     const ARR        = "\033[35m%s\033[0m";
     const STRING     = "\033[32m%s\033[0m";
     const TRIM       = "\033[1;30m%s\033[0m";
@@ -48,19 +49,21 @@ class CliTraceHandler extends AbstractTraceHandler
 
     protected function line(int $line): string
     {
-        return sprintf(static::LINE, '('.(string)$line.')');
+        $line = 0 === $line ? '[internal function] ' : '('.(string)$line.') ';
+        return sprintf(static::LINE, $line);
     }
 
     protected function className(string $class, string $type): string
     {
+        '' !== $type ?: $type = '  ';
         return sprintf(static::CLASS_NAME, $class."\n".sprintf(static::TYPE, $type));
     }
 
-    protected function functionName(string $func, string $params): string
+    protected function functionName(string $func, string $param, string $doc): string
     {
-        $params === '' ?: $params = '{'.$params.'}';
+        $param === '' ?: $param = '{'.$param.'}';
 
-        return sprintf(static::FUNC, $func.$params.'(');
+        return sprintf(static::FUNC, $func.$param.'(');
     }
 
     protected function objectArg($arg): string
@@ -109,12 +112,38 @@ class CliTraceHandler extends AbstractTraceHandler
 
     protected function callableArg($arg): string
     {
-        return sprintf(static::TYPE, $this->space('callable'));
+        $r = new \ReflectionFunction($arg);
+        $start = $r->getStartLine();
+        $fileName = $r->getFileName();
+        $code = implode(array_slice(file($fileName), $start - 1, 1));
+        $code = str_replace("\n", '', $code);
+        $thisCl = $r->getClosureThis();
+        if (is_object($thisCl)) {
+            $thisCl = get_class($thisCl);
+        }
+        return sprintf(static::TYPE, $this->space('callable'))
+            .sprintf(static::CALL, 'this: '.$thisCl)
+            .sprintf(static::CALL, ' '.$fileName.'('.$start.')')
+            .sprintf(static::CALL, mb_substr("\n".$code, 0, $this->stringLength + 15));
     }
 
     protected function resourceArg($arg): string
     {
-        return sprintf(static::TYPE, $this->space('resource'));
+        $res = 'resource';
+        ob_start();
+        echo $arg;
+        if (preg_match('/^Resource id (\#\d+)$/', ob_get_clean(), $arr)) {
+            $res .= $arr[1];
+        }
+        $s = stream_get_meta_data($arg);
+        $mData = 'wr_type: '.$s['wrapper_type'].', mode: '.$s['mode'].', uri: '.$s['uri'];
+        return sprintf(static::TYPE, $this->space($res))
+            .sprintf(static::TYPE, $mData);
+    }
+
+    protected function closedResourceArg(string $string): string
+    {
+        return sprintf(static::TYPE, $this->space($string));
     }
 
     protected function otherArg($arg): string
@@ -122,14 +151,13 @@ class CliTraceHandler extends AbstractTraceHandler
         return sprintf(static::TYPE, $this->space($this->isClosedResource($arg)));
     }
 
-    protected function completion(): string
+    protected function completion(array $traceArray): string
     {
         $trace = '';
-        $trCount = 0;
-        foreach ($this->arr as $v) {
-            $trace .= sprintf(static::TRACE_CNT, '#'.$trCount).$v['file'].$v['line']." ".$v['class'];
-            $trace .= $v['function'];
-            ++$trCount;
+        for ($i = 0, $c = count($traceArray); $i < $c; ++$i) {
+            $v =& $traceArray[$i];
+            $trace .= sprintf(static::TRACE_CNT, '#'.$i).$v['file'].$v['line'].$v['class'].$v['function'];
+
             foreach ($v['args'] as $arg) {
                 $trace .= "\n".$arg;
             }
