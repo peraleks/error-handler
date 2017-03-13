@@ -13,8 +13,9 @@ return [
     ],
 
     \Peraleks\ErrorHandler\Notifiers\ServerErrorNotifier::class => [
-        'enabled'     => $error500,
-        'header'      => 'HTTP/1.1 500 Internal Server Error',
-        'includeFile' => '',
+        'enabled'       => $error500,
+        'ignoreLogType' => true,
+        'header'        => 'HTTP/1.1 500 Internal Server Error',
+        'includeFile'   => '',
     ],
 ];
