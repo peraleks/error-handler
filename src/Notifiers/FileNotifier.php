@@ -15,7 +15,7 @@ namespace Peraleks\ErrorHandler\Notifiers;
 
 use Peraleks\ErrorHandler\Exception\PropertyMustBeDefinedException;
 use Peraleks\ErrorHandler\Exception\PropertyTypeException;
-use Peraleks\ErrorHandler\Trace\FileTraceHandler;
+use Peraleks\ErrorHandler\Trace\FileTraceFormatter;
 
 /**
  * Class FileNotifier
@@ -60,9 +60,9 @@ class FileNotifier extends AbstractNotifier
      *
      * @return string FileTraceHandler::class
      */
-    protected function getTraceHandlerClass(): string
+    protected function traceFormatterClass(): string
     {
-        return FileTraceHandler::class;
+        return FileTraceFormatter::class;
     }
 
     /**
@@ -94,15 +94,16 @@ class FileNotifier extends AbstractNotifier
     /**
      * Пишет ошибку в файл.
      *
+     * @param string $error форматированная ошибка
      * @return void
      */
-    public function notify()
+    protected function notify(string $error)
     {
         $fileRes = fopen($this->file, 'ab');
         if (!$fileRes) {
             return;
         }
-        fwrite($fileRes, $this->finalStringError);
+        fwrite($fileRes, $error);
         fclose($fileRes);
     }
 

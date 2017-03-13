@@ -62,7 +62,7 @@ class ServerErrorNotifier extends AbstractNotifier
      *
      * @return string ''
      */
-    protected function getTraceHandlerClass(): string
+    protected function traceFormatterClass(): string
     {
         return '';
     }
@@ -86,13 +86,15 @@ class ServerErrorNotifier extends AbstractNotifier
     }
 
     /**
-     * Подключает файл, выводяший страницу ошибки.
+     * Подключает файл, выводящий страницу ошибки.
+     * В нём будет доступен объект ошибки $errorObject.
      *
      * @param string $trace пустая строка
      * @return string страница ошибки сервера
      */
     protected function ErrorToString(string $trace): string
     {
+        $errorObject = $this->errorObject;
         ob_start();
         try {
             include $this->includeFile;
@@ -107,13 +109,14 @@ class ServerErrorNotifier extends AbstractNotifier
     /**
      * Отсылает заголовки и страницу ошибки сервера в браузер.
      *
+     * @param string $error форматированная ошибка
      * @return true
      */
-    public function notify()
+    protected function notify(string $error)
     {
         $this->clean();
         headers_sent() ?: header($this->header);
-        echo $this->finalStringError;
+        echo $error;
         return true;
     }
 

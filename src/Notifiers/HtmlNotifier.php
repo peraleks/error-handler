@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 namespace Peraleks\ErrorHandler\Notifiers;
 
-use Peraleks\ErrorHandler\Trace\HtmlTraceHandler;
+use Peraleks\ErrorHandler\Trace\HtmlTraceFormatter;
 
 /**
  * Class HtmlNotifier
@@ -76,9 +76,9 @@ class HtmlNotifier extends AbstractNotifier
      *
      * @return string HtmlTraceHandler::class
      */
-    protected function getTraceHandlerClass(): string
+    protected function traceFormatterClass(): string
     {
-        return HtmlTraceHandler::class;
+        return HtmlTraceFormatter::class;
     }
 
     /**
@@ -102,7 +102,7 @@ class HtmlNotifier extends AbstractNotifier
         $handler  = $eObj->getHandler();
         $code == E_ERROR ? $cssType = 'ERROR' : $cssType = $type;
         $conf->get('hideTrace') ? $hidden = 'hidden' : $hidden = '';
-        $style    = file_get_contents($this->errorCss);
+        $style = file_get_contents($this->errorCss);
         $trace == '' ?: $style .= file_get_contents($this->traceCss);
         $traceCount = count($eObj->getTrace());
 
@@ -116,17 +116,18 @@ class HtmlNotifier extends AbstractNotifier
      * ошибку в браузер, или регистрирует callback для отложенного
      * вывода.
      *
+     * @param string $error форматированная ошибка
      * @return void
      */
-    public function notify()
+    protected function notify(string $error)
     {
         $conf = $this->configObject;
 
         if (!$conf->get('deferredView')) {
-            echo $this->finalStringError;
+            echo $error;
             return;
         }
-        $this->errorHandler->addErrorCallbackData(__CLASS__, $this->finalStringError);
+        $this->errorHandler->addErrorCallbackData(__CLASS__, $error);
         if (!static::$count) {
             $this->errorHandler->addErrorCallback(function ($callbackData) use ($conf) {
                 $conf->setNotifierClass(__CLASS__);

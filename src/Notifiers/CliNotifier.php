@@ -12,10 +12,8 @@ declare(strict_types=1);
 
 namespace Peraleks\ErrorHandler\Notifiers;
 
-use Peraleks\ErrorHandler\Core\ErrorObject;
-use Peraleks\ErrorHandler\Core\ConfigInterface;
-use Peraleks\ErrorHandler\Trace\CliSimpleTraceHandler;
-use Peraleks\ErrorHandler\Trace\CliTraceHandler;
+use Peraleks\ErrorHandler\Trace\CliSimpleTraceFormatter;
+use Peraleks\ErrorHandler\Trace\CliTraceFormatter;
 
 /**
  * Class CliNotifier
@@ -75,11 +73,11 @@ class CliNotifier extends AbstractNotifier
      *
      * @return string CliSimpleTraceHandler::class | CliTraceHandler::class
      */
-    protected function getTraceHandlerClass(): string
+    protected function traceFormatterClass(): string
     {
         return $this->configObject->get('simpleTrace')
-            ? CliSimpleTraceHandler::class
-            : CliTraceHandler::class;
+            ? CliSimpleTraceFormatter::class
+            : CliTraceFormatter::class;
     }
 
     /**
@@ -118,10 +116,11 @@ class CliNotifier extends AbstractNotifier
     /**
      * Выводит ошибку на стандартный вывод
      *
+     * @param string $error форматированная ошибка
      * @return void
      */
-    public function notify()
+    protected function notify(string $error)
     {
-        echo "\n".$this->finalStringError."\n";
+        echo "\n".$error."\n";
     }
 }

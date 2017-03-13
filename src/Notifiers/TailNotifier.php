@@ -57,12 +57,11 @@ class TailNotifier extends CliNotifier
      * Создаёт дополнительный файл, где хранит crc32 хеш
      * последней ошибки для отслеживания повторов.
      *
+     * @param string $error форматированная ошибка
      * @return void
      */
-    public function notify()
+    protected function notify(string $error)
     {
-        $string =& $this->finalStringError;
-
         $file = $this->configObject->get('file');
         $fileRepeat = $file.'.repeat';
 
@@ -74,17 +73,17 @@ class TailNotifier extends CliNotifier
             return;
         }
 
-        $a = crc32($string);
+        $a = crc32($error);
         $b = (int)fread($fileRepeatResource, 12);
         if ($a == $b) {
-            $string = $this->time().sprintf(static::REPEAT, '>>repeat ');
+            $error = $this->time().sprintf(static::REPEAT, '>>repeat ');
         } else {
             $fileRepeatResource = fopen($fileRepeat, 'wb');
             if (!$fileRepeatResource) {
                 return;
             }
-            fwrite($fileRepeatResource, (string)crc32($string));
-            $string = "\n".$this->time().' '.$string."\n";
+            fwrite($fileRepeatResource, (string)crc32($error));
+            $error = "\n".$this->time().' '.$error."\n";
         }
         fclose($fileRepeatResource);
 
@@ -92,7 +91,7 @@ class TailNotifier extends CliNotifier
         if (!$fileResource) {
             return;
         }
-        fwrite($fileResource, $string);
+        fwrite($fileResource, $error);
         fclose($fileResource);
     }
 

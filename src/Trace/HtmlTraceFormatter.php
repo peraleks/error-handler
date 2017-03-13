@@ -259,7 +259,7 @@ class HtmlTraceFormatter extends AbstractTraceFormatter
         $fileName = $r->getFileName();
         $arr['code'] = array_slice(file($fileName), $start - 1, $end - $start + 1, true);
         $arr['this'] = $r->getClosureThis();
-        $arr['file name'] = $r->getFileName();
+        $arr['file name'] = $fileName;
 
         return sprintf(static::CALL, $r->getName(), $this->arrayHandler($arr));
     }
