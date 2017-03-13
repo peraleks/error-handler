@@ -36,12 +36,16 @@
     margin-left: 3px;
     display: inline-block;
     position: relative;
-    z-index: 10000;
 }
 
 .peraleks_error_box .header {
     padding: 0.15em 0.7em;
     color: rgba(255, 255, 255, 0.8);
+}
+
+.peraleks_error_box .header span {
+    font-size: 80%;
+    color: rgba(255, 255, 255, 0.6);
 }
 
 .peraleks_error_box .text {

@@ -14,8 +14,9 @@ $id = 'peraleks_wrap'.rand(); ?>
     <?= $style ?>
 </style>
 <div class="<?= $cssType ?> peraleks_error_box" style="font-size: <?= $fontSize ?>px">
-    <div class="header" title="<?= $handler ?>">
-        <?= $type.' ['.$code.']' ?>
+    <div class="header">
+        <?= $type.' ['.$code.'] ' ?>
+        <span><?= $handler ?></span>
     </div>
     <div class="text">
         <?= $message ?>
@@ -24,7 +25,8 @@ $id = 'peraleks_wrap'.rand(); ?>
         <?= $trace ?>
     </div>
     <div class="file">
-        <span title="<?= $path ?>"><?= $file ?></span><span class="bracket">(</span><span class="line"><?= $line ?></span><span class="bracket">)</span>
+        <span title="<?= $path ?>"><?= $file ?></span><span class="bracket">(</span><span
+                class="line"><?= $line ?></span><span class="bracket">)</span>
         <?php if ($trace != '') : ?>
             <div class="but_trace" onclick="parentNode.previousElementSibling.classList.toggle('hidden')">
                 trace <?= $traceCount ?>
@@ -34,14 +36,53 @@ $id = 'peraleks_wrap'.rand(); ?>
 </div>
 <?php if ($trace != '') : ?>
     <script>
+    var resDocText_peraleks_var;
         (function () {
             var wrap = document.getElementById('<?= $id ?>');
+
             wrap.addEventListener('click', function (e) {
-                 var target = e.target.querySelector('.tooltip_wrap');
-                if (null != target) {
+                var target = e.target;
+
+                if (target.classList.contains('doc_wrap')) {
                     target.classList.toggle('hidden');
+                    resDocText_peraleks_var.querySelector('.doc_text').style.height = '';
+                } else {
+                    var children = target.children;
+
+                    for (var i = 0; i < children.length; i++) {
+
+                        if (children[i].classList.contains('doc_wrap')) {
+                            var doc = children[i];
+                            doc.classList.toggle('hidden');
+                            resDocText_peraleks_var = doc;
+                            resize(doc);
+                            break;
+                        }
+                    }
                 }
-            })
+
+                var tooltip = target.querySelector('.tooltip_wrap');
+                if (null != tooltip) {
+                    tooltip.classList.toggle('hidden');
+                }
+            });
+
+        function resize(doc) {
+            var docWindow = doc.querySelector('.doc_window');
+            var docData = doc.querySelector('.doc_data');
+            var docText = doc.querySelector('.doc_text');
+            if (docText.clientHeight > ((doc.clientHeight - docData.clientHeight) * 0.93)) {
+                docText.style.height = ((doc.clientHeight - docData.clientHeight) * 0.90) +'px';
+            }
+        }
+
+        window.onresize = function () {
+            if (null != resDocText_peraleks_var) {
+                resDocText_peraleks_var.querySelector('.doc_text').style.height = '';
+                resize(resDocText_peraleks_var);
+            }
+        }
+
         })();
     </script>
 <?php endif; ?>
