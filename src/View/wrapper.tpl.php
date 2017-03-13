@@ -12,14 +12,14 @@
 <style>
     #peraleks_error_box_wrapper_button {
         position: fixed;
-        z-index: 100000;
+        z-index: 99999999;
         padding: 15px 10px 15px 32px;
         top: 45%;
         left: -30px;
         border-radius: 0 50% 50% 0 ;
         background-color: #12b700;
         font-size: 20px;
-        font-family: monospace;
+        font-family: Consolas, monospace;
         font-weight: bold;
         cursor: hand;
         color: #ff0;
@@ -38,7 +38,7 @@
     #peraleks_error_box_wrapper {
         all: initial;
         width: 100%;
-        z-index: 99999;
+        z-index: 9999999;
         position: fixed;
         overflow: auto;
         top: 0;
