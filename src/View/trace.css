@@ -66,13 +66,56 @@
     padding-right: 5px;
     color: #ffdb70;
     text-shadow: 2px 2px 7px rgba(0, 0, 0, 0.5);
-    text-align: right;
+    text-align: left;
 }
 
 .peraleks_tw .trace_function_params {
     color: #888;
     font-weight: bold;
     padding-right: 5px;
+}
+
+.peraleks_tw .doc_wrap {
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 5;
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.peraleks_tw .doc_window {
+    padding: 1em;
+    background-color: rgba(70, 70, 70, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    max-width: 90%;
+    max-height: 90%;
+}
+
+.peraleks_tw .doc_data {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.5);
+    text-shadow: 2px 2px 7px rgba(0, 0, 0, 0.5), 0 0 1px #000;
+}
+
+.peraleks_tw .doc_text {
+    font-size: 115%;
+    color: #8fc687;
+    text-shadow: 2px 2px 7px rgba(0, 0, 0, 0.5);
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    overflow: auto;
+}
+
+.peraleks_tw span.doc {
+    color: #639b5d;
+    text-shadow: 2px 2px 7px rgba(0, 0, 0, 0.5);
 }
 
 .peraleks_tw .trace_args {
@@ -89,13 +132,11 @@
 .peraleks_tw .trace_args.resource {
     color: #7e65ff;
     font-style: italic;
-    cursor: pointer;
 }
 
 .peraleks_tw .trace_args.array {
     color: #bbcc00;
     font-style: italic;
-    cursor: pointer;
 }
 
 .peraleks_tw .trace_args.numeric {
