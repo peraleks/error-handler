@@ -1,9 +1,18 @@
 <?php
+/**
+ * PHP error handler and debugger.
+ *
+ * @package   Peraleks\ErrorHandler
+ * @copyright 2017 Aleksey Perevoshchikov <aleksey.perevoshchikov.n@gmail.com>
+ * @license   https://github.com/peraleks/error-handler/blob/master/LICENSE.md MIT
+ * @link      https://github.com/peraleks/error-handler
+ */
+
 declare(strict_types=1);
 
 namespace Peraleks\ErrorHandler\Trace;
 
-class HtmlTraceHandler extends AbstractTraceHandler
+class HtmlTraceFormatter extends AbstractTraceFormatter
 {
     const TOOLTIP_ENABLE = 'tooltip_wrap';
 
@@ -23,13 +32,19 @@ class HtmlTraceHandler extends AbstractTraceHandler
 
     const PARAMS     = '<td class="trace_function_params">%s</td>';
 
+    const DOC        = '<span class="doc">*</span><div class="doc_wrap hidden"><div class="doc_window">'
+                       .'<div class="doc_data">%s</div><div class="doc_text">%s</div></div></div>';
+
     const ARGS       = '<td class="trace_args">%s</td>';
+
+    const ARGS_DOC   = '<td class="trace_args">%s<div class="doc hidden">%s</div></td>';
 
     const NUM        = '<td class="trace_args numeric">%s</td>';
 
-    const CALL       = '<td class="trace_args callable">%s</td>';
+    const CALL       = '<td class="trace_args callable">%s<div class="tooltip_wrap hidden">%s</div></td>';
 
-    const STRING     = '<td class="trace_args string tooltip"><span>%s&prime;</span>%s<span>&prime;</span><div class="%s hidden string"><span>&prime;</span>%s<span>&prime;</span></div></td>';
+    const STRING     = '<td class="trace_args string tooltip"><span>%s&prime;</span>%s<span>&prime;</span>'
+                        .'<div class="%s hidden string"><span>&prime;</span>%s<span>&prime;</span></div></td>';
 
     const ARR        = '<td class="trace_args array tooltip">%s<div class="tooltip_wrap hidden">%s</div></td>';
 
@@ -63,19 +78,19 @@ class HtmlTraceHandler extends AbstractTraceHandler
 
     protected function before()
     {
-        $conf = $this->configObject;
-
-        !is_int($level  = $conf->get('arrayLevel')) ?: $this->arrayLevel = $level;
-        !is_int($length = $conf->get('stringLength')) ?: $this->stringLength = $length;
-        !is_int($length = $conf->get('tooltipLength')) ?: $this->tooltipLength = $length;
+        !is_int($level  = $this->configObject->get('arrayLevel')) ?: $this->arrayLevel = $level;
+        !is_int($length = $this->configObject->get('stringLength')) ?: $this->stringLength = $length;
+        !is_int($length = $this->configObject->get('tooltipLength')) ?: $this->tooltipLength = $length;
     }
 
     protected function file(string $file): string
     {
         if ('' === $file) return sprintf(static::PATH, $file).sprintf(static::FILE, '');
         $parts = explode(DIRECTORY_SEPARATOR, $file);
+
         //получаем имя файла без пути
         $file = sprintf(static::FILE, '/'.array_pop($parts));
+
         //получаем путь (уже без имени файла) относительно корня приложения для экономии пространства в таблице
         $path = preg_replace('#^'.$this->configObject->getAppDir().'#', '', implode('/', $parts));
         $path = sprintf(static::PATH, $path);
@@ -91,21 +106,45 @@ class HtmlTraceHandler extends AbstractTraceHandler
 
     protected function className(string $class, string $type): string
     {
-        //получаем имя класса без пространства имён
         $parts = explode('\\', $class);
-        $class = sprintf(static::CLASS_NAME, array_pop($parts));
+
+        //получаем имя класса без пространства имён
+        $className = array_pop($parts);
+
+        if ('' !== $class) {
+            $r = new \ReflectionClass($class);
+            if ($doc = $r->getDocComment()) {
+                $doc = $this->formatDocToHtml($doc);
+                $name = $r->getName();
+                !$doc ?: $className .= sprintf(static::DOC, $name, $doc);
+            }
+        }
+        $class = sprintf(static::CLASS_NAME, $className);
+
         //получаем пространство имён без имени класса
         $parts[] = '';
         $nameSpace = sprintf(static::N_SPACE, implode('\\', $parts));
+
         //тип вызова функции
         $type = sprintf(static::CALL_TYPE, $type);
 
         return $nameSpace.$class.$type;
     }
 
-    protected function functionName(string $func, string $params): string
+    protected function formatDocToHtml(string $doc): string
     {
-        return sprintf(static::FUNC, $func).sprintf(static::PARAMS, $params);
+        $doc = preg_replace('/\n\s*\*/', "\n *", $doc);
+        $doc = htmlentities($doc, ENT_SUBSTITUTE | ENT_COMPAT);
+        $doc = preg_replace('/ /', '&nbsp;', $doc);
+        return str_replace("\n", '<br>', $doc);
+    }
+
+    protected function functionName(string $func, string $param, string $doc): string
+    {
+       if ('' !== $doc) {
+           $func .= sprintf(static::DOC, $func, $this->formatDocToHtml($doc));
+       }
+        return sprintf(static::FUNC, $func).sprintf(static::PARAMS, $param);
     }
 
     protected function stringArg($arg): string
@@ -119,6 +158,7 @@ class HtmlTraceHandler extends AbstractTraceHandler
             $tooltip = mb_substr($arg, 0, $this->tooltipLength);
             $tooltip = htmlentities($tooltip, ENT_SUBSTITUTE | ENT_COMPAT);
             $tooltip = preg_replace('/\s/', '&nbsp;', $tooltip);
+            
             if ($length > $this->tooltipLength) {
                 $tooltip .= static::ETC;
             }
@@ -155,7 +195,7 @@ class HtmlTraceHandler extends AbstractTraceHandler
             $key = preg_replace('/\s/', '&nbsp;', $key);
             $tr .= sprintf(static::TD, $key);
 
-            /* останавливаем рекурсию GLOBALS[] */
+            /* останавливаем рекурсию $GLOBALS */
             if ($value === $GLOBALS) {
                 $tr .= sprintf(static::ARGS, static::ETC);
                 $tr = sprintf(static::TR, $tr);
@@ -185,17 +225,24 @@ class HtmlTraceHandler extends AbstractTraceHandler
         return sprintf(static::BOOL, 'null');
     }
 
-    protected function callableArg($arg): string
-    {
-        return sprintf(static::CALL, 'callable');
-    }
-
     protected function objectArg($arg): string
     {
-        $parts = explode('\\', get_class($arg));
+        $class = get_class($arg);
+        $parts = explode('\\', $class);
+
+        //получаем имя класса без пространства имён
+        $className = array_pop($parts);
+
+        if ('' !== $class) {
+            $r = new \ReflectionClass($class);
+            $doc = str_replace("\n", '<br>', $r->getDocComment());
+            $file = $r->getFileName();
+            $name = $r->getName();
+            !$doc ?: $className .= sprintf(static::DOC, $name, $doc);
+        }
 
         //имя класса без пространства имён
-        $obj = sprintf(static::S_CLASS_NAME, array_pop($parts));
+        $obj = sprintf(static::S_CLASS_NAME, $className);
 
         //пространство имён без имени класса
         $space = sprintf(static::S_N_SPACE, implode('\\', $parts).'\\');
@@ -203,21 +250,45 @@ class HtmlTraceHandler extends AbstractTraceHandler
         return sprintf(static::ARGS, $space.$obj);
     }
 
+    protected function callableArg($arg): string
+    {
+        $r = new \ReflectionFunction($arg);
+        $arr = [];
+        $start = $r->getStartLine();
+        $end = $r->getEndLine();
+        $fileName = $r->getFileName();
+        $arr['code'] = array_slice(file($fileName), $start - 1, $end - $start + 1, true);
+        $arr['this'] = $r->getClosureThis();
+        $arr['file name'] = $r->getFileName();
+
+        return sprintf(static::CALL, $r->getName(), $this->arrayHandler($arr));
+    }
+
     protected function resourceArg($arg): string
     {
-        return sprintf(static::RESOURCE, 'resource', $this->arrayHandler(stream_get_meta_data($arg)));
+        $res = 'resource';
+        ob_start();
+        echo $arg;
+        if (preg_match('/^Resource id (\#\d+)$/', ob_get_clean(), $arr)) {
+            $res .= $arr[1];
+        }
+        return sprintf(static::RESOURCE, $res , $this->arrayHandler(stream_get_meta_data($arg)));
+    }
+
+    protected function closedResourceArg(string $string): string
+    {
+        return sprintf(static::RESOURCE, $string, '');
     }
 
     protected function otherArg($arg): string
     {
-        return sprintf(static::RESOURCE, $this->isClosedResource($arg), '');
+        return sprintf(static::ARGS, gettype($arg));
     }
 
-
-    protected function completion(): string
+    protected function completion(array $traceArray): string
     {
         $trace = '';
-        foreach ($this->arr as $v) {
+        foreach ($traceArray as $v) {
             $tr = $v['file'].$v['line'].$v['class'].$v['function'];
 
             isset($v['args']) ?: $v['args'] = [];
