@@ -15,7 +15,7 @@ namespace Peraleks\ErrorHandler\Core;
 /**
  * Class ErrorHandler
  *
- * Является контроллером обработки ошибок.
+ * Является контроллером обработки ошибок.<br><br><br>
  * Регистрирует функции error_handler, exception_handler, shutdown_function.
  * Инстанцирует помощника Helper и передаёт ему ошибки для дальнейшей обработки.
  * Производит отложенный вывод ошибок, и запуск пользовательских
@@ -37,7 +37,8 @@ class ErrorHandler
      */
     private $helper;
 
-    /** Путь к файлу конфигурации.
+    /**
+     * Путь к файлу конфигурации.
      *
      * @var string
      */
@@ -112,7 +113,7 @@ class ErrorHandler
      */
     public function error($code, $message, $file, $line)
     {
-        $this->exception(new \ErrorException($message, $code, $code, $file, $line), 'error handler');
+        $this->exception(new \ErrorException($message, $code, $code, $file, $line), '', 'error');
         return true;
     }
 
@@ -121,19 +122,34 @@ class ErrorHandler
      *
      * Инстанцирует помощника (Helper) и передаёт ему объект ошибки
      * для дальнейшей обработки.
+     * <br>
+     * Если вторым параметром ($logType) передана непустая строка,
+     * то она будет использована как тип ошибки.
+     * Это означает, что такая ошибка предназначена только для логирования
+     * и будет проигнорирована уведомителями, у которых в конфигурации
+     * присутствует параметр 'ignoreLogType' => true.
+     * По умолчанию данный параметр задан только у ServerErrorNotifier.
+     * Тоесть, если вы поймали исключение в try {} catch () и хотите
+     * продожить скрипт, а ошибку записать в лог, выполните:
+     * <br>
+     * ErrorHandler::instance()->exception($e, 'someType').
+     * <br>
+     * Если не передать второй зараметр ServerErrorNotifier отправит
+     * заголовок 500, покажет страницу ошибки и прервёт вполнение скрипта.
      *
      * @param \Throwable $e объект ошибки
-     * @param string $handler название функции обработчика ('error handler' |
-     * 'exception handler' | 'shutdown function')
+     * @param string $logType тип ошибки
+     * @param string $handler название функции обработчика ('error' |
+     * 'exception' | 'shutdown')
      */
-    public function exception(\Throwable $e, string $handler = 'exception handler')
+    public function exception(\Throwable $e, $logType = '', string $handler = 'exception')
     {
         $this->lastError = $e;
         if (!$this->helper) {
             $this->helper = new Helper($this->configFile, $this);
             $this->helper->createConfigObject();
         }
-        $this->helper->handle($e, $handler);
+        $this->helper->handle($e, $logType, $handler);
 
     }
 
@@ -158,7 +174,7 @@ class ErrorHandler
                 $this->helper->exception($this->lastError);
                 $this->helper->exception($e);
             } else {
-                $this->exception($e, 'shutdown function');
+                $this->exception($e, '', 'shutdown');
             }
         }
         if ($this->userCallbacks) {
@@ -185,7 +201,7 @@ class ErrorHandler
      * Выполняет  callbacks.
      *
      * Так как обработчики зарегистрированные в ErrorHandler не работают
-     * в shutdown function, для безапасного выполнения callbacks регистрируется
+     * в shutdown function, для безопасного выполнения callbacks регистрируется
      * новый обработчик ошибок, исключения тоже перенаправляются в новый обработчик.
      *
      * @param $handlerObj ErrorHandler | Helper

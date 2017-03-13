@@ -46,6 +46,16 @@ class ErrorObject
     protected $type = '';
 
     /**
+     * Лубая строка, заданная пользователем
+     *
+     * Будет трактоваться как тип ошибки в логах и т.д.
+     * Является флагом для ServerErrorNotifier
+     *
+     * @var string
+     */
+    protected $logType;
+
+    /**
      * Кеш массива стека вызовов с удалённым первым элементом.
      *
      * @var null | array
@@ -54,7 +64,7 @@ class ErrorObject
 
     /**
      * Название функции обработчика
-     * ('error handler' | 'exception handler' | 'shutdown function').
+     * ('error' | 'exception' | 'shutdown').
      *
      * @var string
      */
@@ -93,11 +103,15 @@ class ErrorObject
      * стандартных ошибок и при помощи get_type() для исключений.
      *
      * @param \Throwable $e объект ошибки клиентской части скрипта
-     * @param string $handler 'error handler' | 'exception handler' | 'shutdown function'
+     * @param string $logType тип ошибки
+     * @param string $handler 'error' | 'exception' | 'shutdown'
      * название функции обработчика
      */
-    public function __construct(\Throwable $e, string $handler)
+    public function __construct(\Throwable $e, $logType = '', string $handler)
     {
+        if (is_string($logType)) {
+            $this->logType = $logType;
+        }
         $this->handler = $handler;
         $this->e = $e;
         $this->code = $this->e->getCode();
@@ -116,13 +130,27 @@ class ErrorObject
      */
     public function getType(): string
     {
+        if ('' !== $this->logType) return $this->logType;
         return $this->type;
+    }
+
+    /**
+     * Если возвращает true, значит ошибка
+     * только для лога. И тип ошибки задан пользователем
+     * вручную.
+     *
+     * @return bool
+     */
+    public function isLogType(): bool
+    {
+        if ('' !== $this->logType) return true;
+        return false;
     }
 
     /**
      * Возвращает название функции обработчика.
      *
-     * @return string 'error handler' | 'exception handler' | 'shutdown function'
+     * @return string 'error' | 'exception' | 'shutdown'
      */
     public function getHandler(): string
     {

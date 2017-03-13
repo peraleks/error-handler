@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace Peraleks\ErrorHandler\Core;
 
+use Peraleks\ErrorHandler\Exception\ErrorHandlerException;
 use Peraleks\ErrorHandler\Notifiers\AbstractNotifier;
 
 /**
@@ -97,12 +98,13 @@ class Helper
      * ErrorObject во внутренний обработчик ошибок.
      *
      * @param \Throwable $e объект ошибки
-     * @param string $handler 'error handler' | 'exception handler' | 'shutdown function'
+     * @param string $logType тип ошибки
+     * @param string $handler 'error' | 'exception' | 'shutdown'
      * название функции обработчика
      */
-    public function handle(\Throwable $e, string $handler)
+    public function handle(\Throwable $e, $logType = '', string $handler)
     {
-        $errorObject = new ErrorObject($e, $handler);
+        $errorObject = new ErrorObject($e, $logType, $handler);
 
         /* отсутствие объекта конфигурации говорит о том,
          * что в конфигурационном файле произошла ошибка.
@@ -135,7 +137,7 @@ class Helper
      *
      * Инстанцирует классы уведомителей, которые определены в конфигурационных файлах.<br>
      * Класс уведомителя должен расширять AbstractNotifier.<br>
-     * Выполняет метод notify() каждого уведомителя и, в случае ошибки,
+     * Запускает на выполнение каждого уведомителя и, в случае ошибки,
      * отправляет текущий errorObject и саму ошибку во внутренний обработчик.<br>
      * Прекращает выполнение скрипта если уведомитель вернул true.
      *
@@ -150,10 +152,23 @@ class Helper
         foreach ($configObject->getNotifiers() as $notifierClass => ${0}) {
             try {
                 set_error_handler([$this, 'error']);
+
+                if (!is_string($notifierClass)) {
+                    throw new ErrorHandlerException(
+                        'Notifiers name must be a string, '.gettype($notifierClass).' given'
+                    );
+                }
                 $configObject->setNotifierClass($notifierClass);
 
                 /* проверяем для конкретного Notifier надо ли обрабатывать ошибку */
-                if (0 == ($configObject->get('enabled') & $errorObject->getCode())) {
+                if (is_int($enabled = $configObject->get('enabled'))) {
+                    if (0 === ($enabled & $errorObject->getCode())) {
+                        continue;
+                    }
+                }
+
+                /* проверяем игнорирует ли обработчик ошибки типа 'только для лога' */
+                if ($errorObject->isLogType() && $configObject->get('ignoreLogType')) {
                     continue;
                 }
 
@@ -167,7 +182,7 @@ class Helper
                     continue;
                 }
 
-                $exit = $notifier->notify();
+                $exit = $notifier->run();
 
             } catch (\Throwable $e) {
                 $this->exception($errorObject);
