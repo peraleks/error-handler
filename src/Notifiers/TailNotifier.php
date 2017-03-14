@@ -39,7 +39,7 @@ class TailNotifier extends CliNotifier
      * @throws PropertyMustBeDefinedException
      * @throws PropertyTypeException
      */
-    protected function prepare()
+    protected function before()
     {
         if (!$file = $this->configObject->get('file')) {
             throw new PropertyMustBeDefinedException('file');
@@ -48,7 +48,7 @@ class TailNotifier extends CliNotifier
             throw new PropertyTypeException($file, 'file', 'string');
         }
         !is_string($t= $this->configObject->get('timeFormat')) ?: $this->timeFormat = $t;
-        parent::prepare();
+        parent::before();
     }
 
     /**

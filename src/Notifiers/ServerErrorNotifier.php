@@ -50,7 +50,7 @@ class ServerErrorNotifier extends AbstractNotifier
     /**
      * Валидирует параметр конфигурации - 'header'.
      */
-    protected function prepare()
+    protected function before()
     {
         !is_string($header = $this->configObject->get('header')) ?: $this->header = $header;
         $this->defaultIncludeFile = dirname(__DIR__).'/View/serverError500.php';

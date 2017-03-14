@@ -73,7 +73,7 @@ abstract class AbstractNotifier
      */
     final public function run()
     {
-        $this->prepare();
+        $this->before();
         return $this->notify(
             $this->ErrorToString(
                 $this->TraceToString(
@@ -91,7 +91,7 @@ abstract class AbstractNotifier
      *
      * @return void
      */
-    abstract protected function prepare();
+    abstract protected function before();
 
     /**
      * Возвращает полное имя класса обработчика стека вызовов.

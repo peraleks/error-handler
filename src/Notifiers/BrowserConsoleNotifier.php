@@ -75,7 +75,7 @@ class BrowserConsoleNotifier extends AbstractNotifier
      *
      * @return void
      */
-    protected function prepare()
+    protected function before()
     {
         $this->codeColor = [
             E_ERROR             => static::ERROR,

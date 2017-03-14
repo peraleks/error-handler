@@ -15,7 +15,7 @@ namespace Peraleks\ErrorHandler\Core;
 /**
  * Class ErrorHandler
  *
- * Является контроллером обработки ошибок.<br><br><br>
+ * Является контроллером обработки ошибок.
  * Регистрирует функции error_handler, exception_handler, shutdown_function.
  * Инстанцирует помощника Helper и передаёт ему ошибки для дальнейшей обработки.
  * Производит отложенный вывод ошибок, и запуск пользовательских
@@ -198,11 +198,12 @@ class ErrorHandler
     }
 
     /**
-     * Выполняет  callbacks.
+     * Выполняет пользовательские callbacks
+     * и callbacks отложенного уведомления об ошибках.
      *
      * Так как обработчики зарегистрированные в ErrorHandler не работают
-     * в shutdown function, для безопасного выполнения callbacks регистрируется
-     * новый обработчик ошибок, исключения тоже перенаправляются в новый обработчик.
+     * в стеке выше shutdown function, для безопасного выполнения callbacks регистрируется
+     * новый обработчик ошибок (Helper), исключения тоже перенаправляются в новый обработчик.
      *
      * @param $handlerObj ErrorHandler | Helper
      * @param $callbacks array callbacks

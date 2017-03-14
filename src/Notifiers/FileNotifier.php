@@ -44,7 +44,7 @@ class FileNotifier extends AbstractNotifier
      * @throws PropertyMustBeDefinedException
      * @throws PropertyTypeException
      */
-    protected function prepare()
+    protected function before()
     {
         if (!$this->file = $this->configObject->get('file')) {
             throw new PropertyMustBeDefinedException('file');

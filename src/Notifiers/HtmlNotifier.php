@@ -62,7 +62,7 @@ class HtmlNotifier extends AbstractNotifier
      *
      * @return void
      */
-    protected function prepare()
+    protected function before()
     {
         $dir = dirname(__DIR__).'/View';
         $this->errorCss   = $dir.'/error.css';
