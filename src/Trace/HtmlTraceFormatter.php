@@ -63,10 +63,17 @@ class HtmlTraceFormatter extends AbstractTraceFormatter
     const EMPTY_ARGS   = '<td class="trace_args empty"></td>';
 
     const TR           = '<tr>%s</tr>';
-
     const TD           = '<td>%s</td>';
 
     const QUOTES       = '<span class="string_quotes">&prime;</span>';
+
+    const BREAK        = '<span class="string_quotes">%s</span>';
+
+    const DOC_TAG      = '<span class="doc_tag">%s</span>';
+    const DOC_VAR      = '<span class="doc_var">%s</span>';
+    const DOC_TYPE     = '<span class="doc_type">%s</span>';
+
+    const DOC_HREF     = '<a href="%s" class="doc_href" target="_blank">%s</a>';
 
     protected $stringLength = 80;
 
@@ -131,11 +138,26 @@ class HtmlTraceFormatter extends AbstractTraceFormatter
         return $nameSpace.$class.$type;
     }
 
+    /**
+     * @param string $doc
+     * @return void
+     */
     protected function formatDocToHtml(string $doc): string
     {
-        $doc = preg_replace('/\n\s*\*/', "\n *", $doc);
+        $doc = preg_replace('/(\r\n\s*\*)|(\n\s*\*)|(\r\s*\*)/', "\n", $doc);
+        $doc = preg_replace('/(^.*?\/\*\*)|(\/$)/', '', $doc);
         $doc = htmlentities($doc, ENT_SUBSTITUTE | ENT_COMPAT);
-        $doc = preg_replace('/ /', '&nbsp;', $doc);
+        $doc = preg_replace('/ {2}/', ' &nbsp;', $doc);
+
+        $docTypes = 'string|int|integer|bool|boolean|float|doable|array|object|callable|resource|null|mixed|void';
+        $doc = preg_replace('/([@|\$].*? )('.$docTypes.') /i', '$1'.sprintf(static::DOC_TYPE, '$2 '), $doc);
+
+        $doc = preg_replace('/(@.*?) /', sprintf(static::DOC_TAG, '$1 '), $doc);
+
+        $doc = preg_replace('/(@.*?)(\$.*? )/', '$1'.sprintf(static::DOC_VAR, '$2').'$3', $doc);
+
+        $doc = preg_replace('#(http[s]?://.*?)( |&lt;|\n)#', sprintf(static::DOC_HREF, '$1', '$1').'$2', $doc);
+
         return str_replace("\n", '<br>', $doc);
     }
 
@@ -151,13 +173,20 @@ class HtmlTraceFormatter extends AbstractTraceFormatter
     {
         $length = mb_strlen($arg);
         $string = mb_substr($arg, 0, $this->stringLength);
-        $string = preg_replace('/\s/', '&nbsp;', $string);
+        $string = htmlentities($string, ENT_SUBSTITUTE | ENT_COMPAT);
+        $string = preg_replace('/ /', '&nbsp;', $string);
+        $string = str_replace("\r\n",  sprintf(static::BREAK, '\r\n'), $string);
+        $string = str_replace("\n",  sprintf(static::BREAK, '\n'), $string);
+        $string = str_replace("\r",  sprintf(static::BREAK, '\r'), $string);
 
         if ($length > $this->stringLength) {
             // просмотр полной строки, но не длиннее tooltipLength
             $tooltip = mb_substr($arg, 0, $this->tooltipLength);
             $tooltip = htmlentities($tooltip, ENT_SUBSTITUTE | ENT_COMPAT);
-            $tooltip = preg_replace('/\s/', '&nbsp;', $tooltip);
+            $tooltip = preg_replace('/ {2}/', ' &nbsp;', $tooltip);
+            $tooltip = str_replace("\r\n",  sprintf(static::BREAK, '\r\n<br>'), $tooltip);
+            $tooltip = str_replace("\n",  sprintf(static::BREAK, '\n<br>'), $tooltip);
+            $tooltip = str_replace("\r",  sprintf(static::BREAK, '\r<br>'), $tooltip);
             
             if ($length > $this->tooltipLength) {
                 $tooltip .= static::ETC;
@@ -209,7 +238,8 @@ class HtmlTraceFormatter extends AbstractTraceFormatter
             elseif ($value instanceof \Closure) $tr .= $this->callableArg($value);
             elseif (is_object($value))   $tr .= $this->objectArg($value);
             elseif (is_resource($value)) $tr .= $this->resourceArg($value);
-            else $tr .= sprintf(static::TD, gettype($value));
+            elseif ($cr = $this->isClosedResource($value)) $tr .= $this->closedResourceArg($cr);
+            else $tr .= $this->otherArg($value);
             $tr = sprintf(static::TR, $tr);
         }
         return sprintf(static::TABLE, $tr);
@@ -233,10 +263,10 @@ class HtmlTraceFormatter extends AbstractTraceFormatter
         //получаем имя класса без пространства имён
         $className = array_pop($parts);
 
-        if ('' !== $class) {
-            $r = new \ReflectionClass($class);
-            $doc = str_replace("\n", '<br>', $r->getDocComment());
-            $file = $r->getFileName();
+
+        $r = new \ReflectionClass($class);
+        if ($doc = $r->getDocComment()) {
+            $doc = $this->formatDocToHtml($doc);
             $name = $r->getName();
             !$doc ?: $className .= sprintf(static::DOC, $name, $doc);
         }
