@@ -50,6 +50,11 @@ abstract class AbstractTraceFormatter implements FormatterInterface
      */
     protected $maxNumberOfArgs = 0;
 
+    /**
+     * AbstractTraceFormatter constructor.
+     *
+     * Метод закрыт - начинаем с before();
+     */
     final public function __construct() {}
 
     /**
@@ -103,7 +108,7 @@ abstract class AbstractTraceFormatter implements FormatterInterface
             /* обработка имени функции */
             isset($dbt['args']) ?: $dbt['args'] = [];
             $func = $dbt['function'] ?? '';
-            $funcData = $this->params($func, $dbt['class'] ?? '', count($dbt['args']));
+            $funcData = $this->handleFunction($func, $dbt['class'] ?? '', count($dbt['args']));
             $arr['function'] = $this->functionName($func, $funcData['param'], $funcData['doc']);
 
             /* обработка аргументов */
@@ -143,8 +148,10 @@ abstract class AbstractTraceFormatter implements FormatterInterface
         return false;
     }
 
-    protected function params(string $func, string $class, int $cntArgs): array
+    protected function handleFunction(string $func, string $class, int $cntArgs): array
     {
+        /* если функция является методом класса, а не замыканием
+         * и не конструкцией языка (include и т.д.), получаем объект Reflection */
         if ('' != $class && (1 !== preg_match('/^.*{closure}.*$/', $func))) {
             $ref = new \ReflectionMethod($class, $func);
         } elseif (function_exists($func)) {
@@ -155,7 +162,12 @@ abstract class AbstractTraceFormatter implements FormatterInterface
         if (isset($ref)) {
             $param = $ref->getNumberOfParameters();
             $reqParam = $ref->getNumberOfRequiredParameters();
+
+            /* определяем был ли параметр уничтожен в ходе выполнения функции/метода
+             * и показываем это пользователю, так как уничтоженный (unset())
+             * параметр невозможно отличить от непереданного.*/
             $c = $reqParam > $cntArgs ? ' unset '.($reqParam - $cntArgs) : '';
+
             $p = $param.'.'.$reqParam.$c;
             $doc = $ref->getDocComment();
         }
