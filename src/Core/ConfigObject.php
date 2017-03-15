@@ -51,7 +51,7 @@ class ConfigObject
      *
      * Выполняет валидацию файла конфигурации.
      *
-     * @param $file string полное имя файла конфигурации
+     * @param string $file полное имя файла конфигурации
      * @throws ErrorHandlerException
      */
     public function __construct($file)
@@ -128,7 +128,7 @@ class ConfigObject
      * Значение по умолчанию: пустая строка для CLI,
      * и dirname($_SERVER['DOCUMENT_ROOT']) для остальных режимов.
      *
-     * @param $appDir
+     * @param string|mixed $appDir
      */
     private function appDirValidate(&$appDir)
     {
@@ -145,7 +145,7 @@ class ConfigObject
      *
      * Значение по умолчанию: 'prod'
      *
-     * @param $mode
+     * @param string|mixed $mode
      */
     private function modeValidate(&$mode)
     {
@@ -176,7 +176,7 @@ class ConfigObject
     }
 
     /**
-     * Возвращает значение конфигурации 'ERROR_REPORTING'.
+     * Возвращает значение ключа конфигурации 'ERROR_REPORTING'.
      *
      * @return int
      */
@@ -202,7 +202,7 @@ class ConfigObject
     }
 
     /**
-     * Вщзвращает значение конфигурации 'APP_DIR'.
+     * Возвращает значение конфигурации 'APP_DIR'.
      *
      * @return string
      */

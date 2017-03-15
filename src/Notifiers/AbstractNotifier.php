@@ -52,7 +52,7 @@ abstract class AbstractNotifier
      *
      * Реализует шаблонный метод для уведомителей.
      *
-     * @param ErrorObject $errorObject объект ошибки (wrapper)
+     * @param ErrorObject  $errorObject  объект ошибки (wrapper)
      * @param ConfigObject $configObject объект конфигурации
      * @param ErrorHandler $errorHandler объект основного контроллера обработки ошибок
      */
@@ -69,7 +69,9 @@ abstract class AbstractNotifier
     /**
      * Реализует и запускает шаблонный метод для уведомителей.
      *
-     * @return null | true флаг прерывания скрипта
+     * Возвращает флаг прерывания скрипта.
+     *
+     * @return null|true
      */
     final public function run()
     {
@@ -159,7 +161,7 @@ abstract class AbstractNotifier
      * ошибка была не фатальной верните true.
      *
      * @param string $error форматированная ошибка
-     * @return void | true флаг прерывания скрипта
+     * @return void|true флаг прерывания скрипта
      */
     abstract protected function notify(string $error);
 }

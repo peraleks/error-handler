@@ -26,8 +26,9 @@ class PropertyMustBeDefinedException extends ErrorHandlerException
      * PropertyMustBeDefinedException constructor.
      *
      * Форматирует сообщение исключения по шаблону:
-     * "{имя уведомителя}: the property '{$property}'=> must be defined".<br>
-     * Например: TailNotifier: the property 'file'=> must be defined.
+     * "{имя уведомителя}: the property '{$property}'=> must be defined".
+     * <br>
+     * Например: "TailNotifier: the property 'file'=> must be defined".
      *
      * @param string $key ключ нассива конфигурации
      */

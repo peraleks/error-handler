@@ -57,7 +57,7 @@ class Helper
     /**
      * Helper constructor.
      *
-     * @param string $configFile полное имя файла конфигурации
+     * @param string       $configFile   полное имя файла конфигурации
      * @param ErrorHandler $errorHandler объект основного контроллера обработки ошибок
      */
     public function __construct(string $configFile, ErrorHandler $errorHandler)
@@ -97,10 +97,11 @@ class Helper
      * запускает механизм уведомления, иначе передает
      * ErrorObject во внутренний обработчик ошибок.
      *
-     * @param \Throwable $e объект ошибки
-     * @param string $logType тип ошибки
-     * @param string $handler 'error' | 'exception' | 'shutdown'
-     * название функции обработчика
+     * @param \Throwable $e       объект ошибки
+     * @param string     $logType тип ошибки
+     * @param string     $handler 'error' | 'exception' | 'shutdown'
+     *                            название функции обработчика
+     * @return void
      */
     public function handle(\Throwable $e, $logType = '', string $handler)
     {
@@ -141,7 +142,7 @@ class Helper
      * отправляет текущий errorObject и саму ошибку во внутренний обработчик.<br>
      * Прекращает выполнение скрипта если уведомитель вернул true.
      *
-     * @param ErrorObject $errorObject объект ошибки (wrapper)
+     * @param ErrorObject  $errorObject  объект ошибки (wrapper)
      * @param ConfigObject $configObject объект конфигурации
      * @param ErrorHandler $errorHandler объект основного контроллера обработки ошибок
      */
@@ -216,10 +217,10 @@ class Helper
      *
      * Конвертирует ошибку в исключение и передает в $this->exception().
      *
-     * @param $code int сод ошибки
-     * @param $message string сообщение ошибки
-     * @param $file string полное имя файла ошибки
-     * @param $line int номер строки
+     * @param int    $code    сод ошибки
+     * @param string $message сообщение ошибки
+     * @param string $file    полное имя файла ошибки
+     * @param int    $line    номер строки
      * @return bool true
      */
     public function error($code, $message, $file, $line)
@@ -233,7 +234,7 @@ class Helper
      *
      * Инстанцирует внутренний обработчик ошибок и передаёт ему ошибку.
      *
-     * @param $e \Throwable | ErrorObject объект ошибки
+     * @param \Throwable|ErrorObject $e объект ошибки
      */
     public function exception($e)
     {

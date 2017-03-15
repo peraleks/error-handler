@@ -91,7 +91,7 @@ class ErrorHandler
     /**
      * Singleton.
      *
-     * @param null $configFile string полное имя файла конфигурации
+     * @param null          $configFile string полное имя файла конфигурации
      * @return ErrorHandler
      */
     public static function instance($configFile = null)
@@ -105,11 +105,11 @@ class ErrorHandler
      * Конвертирует полученную ошибку в объект исключения
      * и передаёт в обработчик исключений.
      *
-     * @param $code int код уровня ошибки
-     * @param $message string сообщение ошибки
-     * @param $file string файл, где произошла ошибка
-     * @param $line int строка ошибки
-     * @return bool true
+     * @param int    $code    код уровня ошибки
+     * @param string $message сообщение ошибки
+     * @param string $file    файл, где произошла ошибка
+     * @param int    $line    строка ошибки
+     * @return bool           true
      */
     public function error($code, $message, $file, $line)
     {
@@ -137,10 +137,10 @@ class ErrorHandler
      * Если не передать второй зараметр ServerErrorNotifier отправит
      * заголовок 500, покажет страницу ошибки и прервёт вполнение скрипта.
      *
-     * @param \Throwable $e объект ошибки
-     * @param string $logType тип ошибки
-     * @param string $handler название функции обработчика ('error' |
-     * 'exception' | 'shutdown')
+     * @param \Throwable $e       объект ошибки
+     * @param string     $logType тип ошибки
+     * @param string     $handler название функции обработчика ('error' |
+     *                            'exception' | 'shutdown')
      */
     public function exception(\Throwable $e, $logType = '', string $handler = 'exception')
     {
@@ -205,9 +205,9 @@ class ErrorHandler
      * в стеке выше shutdown function, для безопасного выполнения callbacks регистрируется
      * новый обработчик ошибок (Helper), исключения тоже перенаправляются в новый обработчик.
      *
-     * @param $handlerObj ErrorHandler | Helper
-     * @param $callbacks array callbacks
-     * @param null $data array саккумулированные данные ошибок
+     * @param ErrorHandler|Helper $handlerObj
+     * @param array               $callbacks  callbacks
+     * @param null|array          $data       саккумулированные данные ошибок
      */
     private function invokeCallbacks($handlerObj, array $callbacks, $data = null)
     {
@@ -233,8 +233,7 @@ class ErrorHandler
      * используя переменную __CLASS__
      *
      * @param string $key
-     * @param $value  mixed данные ошибок
-     * @return void
+     * @param mixed  $value данные ошибок
      */
     public function addErrorCallbackData(string $key, $value)
     {
@@ -248,7 +247,6 @@ class ErrorHandler
      * массив данных, сохранённых при помощи addErrorCallbackData()
      *
      * @param callable $callback функция для обработки и вывода ошибок
-     * @return void
      */
     public function addErrorCallback(callable $callback)
     {
@@ -261,7 +259,7 @@ class ErrorHandler
      * Фатальные ошибки в этом callback не могут быть
      * обработаны.
      *
-     * @param callable $callback callback
+     * @param callable $callback
      */
     public function addUserCallback(callable $callback)
     {

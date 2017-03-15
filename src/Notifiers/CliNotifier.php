@@ -40,8 +40,6 @@ class CliNotifier extends AbstractNotifier
 
     /**
      * Инициализирует массив соответствия кодов ошибок и цвета.
-     *
-     * @return void
      */
     protected function before()
     {
@@ -83,7 +81,7 @@ class CliNotifier extends AbstractNotifier
     /**
      * Форматирует ошибку для цветного вывода в терминале.
      *
-     * @param string $trace  стек вызовов
+     * @param string $trace стек вызовов
      * @return string  ошибка в формате строки
      */
     protected function ErrorToString(string $trace): string

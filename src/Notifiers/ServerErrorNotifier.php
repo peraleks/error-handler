@@ -60,7 +60,7 @@ class ServerErrorNotifier extends AbstractNotifier
     /**
      * Возвращает пустую строку - стек обрабатываться не будет.
      *
-     * @return string ''
+     * @return string
      */
     protected function traceFormatterClass(): string
     {

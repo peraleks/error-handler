@@ -12,10 +12,25 @@ declare(strict_types=1);
 
 namespace Peraleks\ErrorHandler\Trace;
 
+/**
+ * Class FileTraceFormatter
+ *
+ * Форматирует стек вызовов для записи в файл.
+ */
 class FileTraceFormatter extends AbstractTraceFormatter
 {
+    /**
+     * Ничего не делает.
+     */
     protected function before() {}
 
+    /**
+     * Здесь производим окончательное форматирование массива стека вызовов
+     * и формируем конечную строку.
+     *
+     * @param array $traceArray предварительно отформатированный стек
+     * @return string окончательный результат обработки стека
+     */
     protected function completion(array $traceArray): string
     {
         $path = $this->configObject->getAppDir();

@@ -53,7 +53,7 @@ class HtmlNotifier extends AbstractNotifier
      * Счётчик callbacks для отложенного показа ошибок.
      * Используется для того, чтобы не регистрировать callback повторно.
      *
-     * @var null | int
+     * @var null|int
      */
     protected static $count;
 
@@ -82,7 +82,7 @@ class HtmlNotifier extends AbstractNotifier
     }
 
     /**
-     * Форматирует ошибку в HTML.
+     * Возвращает форматированную ошибку ввиде HTML.
      *
      * @param string $trace стек вызовов
      * @return string ошибка в формате HTML

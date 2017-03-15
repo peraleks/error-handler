@@ -46,7 +46,7 @@ class ErrorObject
     protected $type = '';
 
     /**
-     * Лубая строка, заданная пользователем
+     * Лубая строка, заданная пользователем.
      *
      * Будет трактоваться как тип ошибки в логах и т.д.
      * Является флагом для ServerErrorNotifier
@@ -63,8 +63,7 @@ class ErrorObject
     protected $trace;
 
     /**
-     * Название функции обработчика
-     * ('error' | 'exception' | 'shutdown').
+     * Название функции обработчика ('error' | 'exception' | 'shutdown').
      *
      * @var string
      */
@@ -101,10 +100,9 @@ class ErrorObject
      * исключений - E_ERROR).<br>
      * Также определяет тип/название ошибки.
      *
-     * @param \Throwable $e объект ошибки клиентской части скрипта
-     * @param string $logType тип ошибки
-     * @param string $handler 'error' | 'exception' | 'shutdown'
-     * название функции обработчика
+     * @param \Throwable $e       объект ошибки клиентской части скрипта
+     * @param string     $logType тип ошибки
+     * @param string     $handler 'error' | 'exception' | 'shutdown' название функции обработчика
      */
     public function __construct(\Throwable $e, $logType = '', string $handler)
     {

@@ -12,77 +12,87 @@ declare(strict_types=1);
 
 namespace Peraleks\ErrorHandler\Trace;
 
+/**
+ * Class HtmlTraceFormatter
+ *
+ * Форматирует стек вызовов в HTML.
+ */
 class HtmlTraceFormatter extends AbstractTraceFormatter
 {
-    const TOOLTIP_ENABLE = 'tooltip_wrap';
-
     const FILE       = '<td class="trace_file">%s</td>';
-
     const PATH       = '<td class="trace_path">%s</td>';
-
     const LINE       = '<td class="trace_line">%s</td>';
-
     const CLASS_NAME = '<td class="trace_class">%s</td>';
-
     const CALL_TYPE  = '<td class="trace_call_type">%s</td>';
-
     const N_SPACE    = '<td class="trace_name_space">%s</td>';
-
     const FUNC       = '<td class="trace_function">%s</td>';
-
     const PARAMS     = '<td class="trace_function_params">%s</td>';
 
-    const DOC        = '<span class="doc">*</span><div class="doc_wrap hidden"><div class="doc_window">'
-                       .'<div class="doc_data">%s</div><div class="doc_text">%s</div></div></div>';
+    const ARGS     = '<td class="trace_args">%s</td>';
+    const NUM      = '<td class="trace_args numeric">%s</td>';
+    const BOOL     = '<td class="trace_args bool">%s</td>';
+    const CALL     = '<td class="trace_args callable">%s<div class="tooltip_wrap hidden">%s</div></td>';
 
-    const ARGS       = '<td class="trace_args">%s</td>';
+    const TOOLTIP  = 'tooltip_wrap';
+    const STRING   = '<td class="trace_args string tooltip"><span>%s&prime;</span>%s<span>&prime;</span>'
+                    .'<div class="%s hidden string"><span>&prime;</span>%s<span>&prime;</span></div></td>';
 
-    const ARGS_DOC   = '<td class="trace_args">%s<div class="doc hidden">%s</div></td>';
-
-    const NUM        = '<td class="trace_args numeric">%s</td>';
-
-    const CALL       = '<td class="trace_args callable">%s<div class="tooltip_wrap hidden">%s</div></td>';
-
-    const STRING     = '<td class="trace_args string tooltip"><span>%s&prime;</span>%s<span>&prime;</span>'
-                        .'<div class="%s hidden string"><span>&prime;</span>%s<span>&prime;</span></div></td>';
-
-    const ARR        = '<td class="trace_args array tooltip">%s<div class="tooltip_wrap hidden">%s</div></td>';
-
-    const RESOURCE   = '<td class="trace_args resource tooltip">%s<div class="tooltip_wrap hidden">%s</div></td>';
-
-    const BOOL       = '<td class="trace_args bool">%s</td>';
-
-    const ETC        = '<span class="etc">...</span>';
+    const ARR      = '<td class="trace_args array tooltip">%s<div class="tooltip_wrap hidden">%s</div></td>';
+    const RESOURCE = '<td class="trace_args resource tooltip">%s<div class="tooltip_wrap hidden">%s</div></td>';
 
     const S_CLASS_NAME = '<span class="trace_class">%s</span>';
-
     const S_N_SPACE    = '<span class="trace_name_space">%s</span>';
 
-    const TABLE        = '<table>%s</table>';
+    const TABLE = '<table>%s</table>';
+    const TR    = '<tr>%s</tr>';
+    const TD    = '<td>%s</td>';
 
-    const EMPTY_ARGS   = '<td class="trace_args empty"></td>';
+    const QUOTES = '<span class="string_quotes">&prime;</span>';
+    const BREAK  = '<span class="string_quotes">%s</span>';
+    const ETC    = '<span class="etc">...</span>';
 
-    const TR           = '<tr>%s</tr>';
-    const TD           = '<td>%s</td>';
+    const DOC      = '<span class="doc">*</span><div class="doc_wrap hidden"><div class="doc_window">'
+                    .'<div class="doc_data">%s</div><div class="doc_text">%s</div></div></div>';
 
-    const QUOTES       = '<span class="string_quotes">&prime;</span>';
+    const DOC_TAG  = '<span class="doc_tag">%s</span>';
+    const DOC_VAR  = '<span class="doc_var">%s</span>';
+    const DOC_TYPE = '<span class="doc_type">%s</span>';
+    const DOC_HREF = '<a href="%s" class="doc_href" target="_blank">%s</a>';
 
-    const BREAK        = '<span class="string_quotes">%s</span>';
-
-    const DOC_TAG      = '<span class="doc_tag">%s</span>';
-    const DOC_VAR      = '<span class="doc_var">%s</span>';
-    const DOC_TYPE     = '<span class="doc_type">%s</span>';
-
-    const DOC_HREF     = '<a href="%s" class="doc_href" target="_blank">%s</a>';
-
+    /**
+     * Максимальное количесво символов, отображаемое в ячейке таблицы,
+     * для строковых значений аргументов функций и методов.
+     *
+     * @var int
+     */
     protected $stringLength = 80;
 
+    /**
+     * Максимальное количество символов, отображаемое в блоке
+     * расширенного просмотра для строк длинна которых больше
+     * чем $this->stringLength
+     *
+     * @var int
+     */
     protected $tooltipLength = 1000;
 
+    /**
+     * Глубина вложенности массивов при расширенном просмотре.
+     *
+     * @var int
+     */
     protected $arrayLevel = 2;
 
+    /**
+     * Указатель текущей глубины рекурсивного обхода массива.
+     *
+     * @var int
+     */
     protected $recursion = 0;
 
+    /**
+     * Валидирует параметры конфигурации 'arrayLevel', 'stringLength', 'tooltipLength'.
+     */
     protected function before()
     {
         !is_int($level  = $this->configObject->get('arrayLevel')) ?: $this->arrayLevel = $level;
@@ -90,32 +100,80 @@ class HtmlTraceFormatter extends AbstractTraceFormatter
         !is_int($length = $this->configObject->get('tooltipLength')) ?: $this->tooltipLength = $length;
     }
 
+    /**
+     * Формирует html-таблицу.
+     *
+     * @param array $traceArray предварительно отформатированный стек
+     * @return string
+     */
+    protected function completion(array $traceArray): string
+    {
+        $trace = '';
+        foreach ($traceArray as $v) {
+            $tr = $v['file'].$v['line'].$v['class'].$v['function'];
+
+            isset($v['args']) ?: $v['args'] = [];
+
+            for ($k = 0; $k < $this->maxNumberOfArgs; ++$k) {
+                $tr .= $v['args'][$k] ?? sprintf(static::ARGS, '');
+            }
+            $trace .= sprintf(static::TR, $tr);
+        }
+        return sprintf(static::TABLE, $trace);
+    }
+
+    /**
+     * Возвращает форматированное имя файла.
+     *
+     * Разбивает полное имя файла на два столбца таблиы (1 -путь без имени, 2 - имя)
+     * Вычетает полное имя корневой директрории приложения
+     * из полного имени файла для экономии места в таблице.
+     *
+     * @param string $file полное имя файла
+     * @return string
+     */
     protected function file(string $file): string
     {
         if ('' === $file) return sprintf(static::PATH, $file).sprintf(static::FILE, '');
         $parts = explode(DIRECTORY_SEPARATOR, $file);
 
-        //получаем имя файла без пути
+        /* получаем имя файла без пути */
         $file = sprintf(static::FILE, '/'.array_pop($parts));
 
-        //получаем путь (уже без имени файла) относительно корня приложения для экономии пространства в таблице
+        /* получаем путь без имени файла относительно корня приложения  */
         $path = preg_replace('#^'.$this->configObject->getAppDir().'#', '', implode('/', $parts));
         $path = sprintf(static::PATH, $path);
 
         return $path.$file;
     }
 
+    /**
+     * Возвращает форматированный номер строки ошибки.
+     *
+     * @param int $line номер строки
+     * @return string
+     */
     protected function line(int $line): string
     {
         $line !== 0 ?: $line = '';
         return sprintf(static::LINE, $line);
     }
 
+    /**
+     * Возвращает форматированное имя класса и тип вызова метода.
+     *
+     * Разбивает имя класса на два столбца таблицы (1 - пространствоо имен, 2 - имя).
+     *
+     * @param string $class имя класса
+     * @param string $type  тип вызова метода (:: | ->)
+     *
+     * @return string
+     */
     protected function className(string $class, string $type): string
     {
         $parts = explode('\\', $class);
 
-        //получаем имя класса без пространства имён
+        /* получаем имя класса без пространства имён */
         $className = array_pop($parts);
 
         if ('' !== $class) {
@@ -128,71 +186,104 @@ class HtmlTraceFormatter extends AbstractTraceFormatter
         }
         $class = sprintf(static::CLASS_NAME, $className);
 
-        //получаем пространство имён без имени класса
+        /* получаем пространство имён без имени класса */
         $parts[] = '';
         $nameSpace = sprintf(static::N_SPACE, implode('\\', $parts));
 
-        //тип вызова функции
+        /* тип вызова функции */
         $type = sprintf(static::CALL_TYPE, $type);
 
         return $nameSpace.$class.$type;
     }
 
     /**
-     * @param string $doc
-     * @return void
+     * Возвращает форматированнцй PHPDoc метода или класса в HTML
+     *
+     * @param string $doc PHPDoc
+     * @return string
      */
     protected function formatDocToHtml(string $doc): string
     {
+        /* удаляем спецсимволы комментария (/** * /) и нормализуем окончание строк*/
         $doc = preg_replace('/(\r\n\s*\*)|(\n\s*\*)|(\r\s*\*)/', "\n", $doc);
         $doc = preg_replace('/(^.*?\/\*\*)|(\/$)/', '', $doc);
+
         $doc = htmlentities($doc, ENT_SUBSTITUTE | ENT_COMPAT);
-        $doc = preg_replace('/ {2}/', ' &nbsp;', $doc);
 
-        $docTypes = 'string|int|integer|bool|boolean|float|doable|array|object|callable|resource|null|mixed|void';
-        $doc = preg_replace('/([@|\$].*? )('.$docTypes.') /i', '$1'.sprintf(static::DOC_TYPE, '$2 '), $doc);
+        /* выделяем названия типов */
+        $doc = preg_replace('/(@param\s+)(.*?)(\s+\$)/', '$1'.sprintf(static::DOC_TYPE, '$2 ').'$3', $doc);
+        $doc = preg_replace('/(@return\s+)(.*? )/', '$1'.sprintf(static::DOC_TYPE, '$2 '), $doc);
 
+        /* выделяем теги PHPDoc */
         $doc = preg_replace('/(@.*?) /', sprintf(static::DOC_TAG, '$1 '), $doc);
 
-        $doc = preg_replace('/(@.*?)(\$.*? )/', '$1'.sprintf(static::DOC_VAR, '$2').'$3', $doc);
+        /* выделяем имена переменных */
+        $doc = preg_replace('/(@.*?)(\$.*?)( |\n)/', '$1'.sprintf(static::DOC_VAR, '$2').'$3', $doc);
 
-        $doc = preg_replace('#(http[s]?://.*?)( |&lt;|\n)#', sprintf(static::DOC_HREF, '$1', '$1').'$2', $doc);
+        /* выделяем ссылки */
+        $doc = preg_replace('#(http(?:s)?://.*?)( |&lt;|\n)#', sprintf(static::DOC_HREF, '$1', '$1').'$2', $doc);
+
+        /* каждый второй пробел меняем на нервзрывный пробел html,
+         * для сохранения всех пробелов с возможностью переноса по словам */
+        $doc = preg_replace('/ {2}/', ' &nbsp;', $doc);
 
         return str_replace("\n", '<br>', $doc);
     }
 
-    protected function functionName(string $func, string $param, string $doc): string
+    /**
+     * Возвращает форматированное имя функции и количество аргументов.
+     *
+     * @param string $function имя метода или функции
+     * @param string $param    пустая строка или строка вида 'a.b'
+     *                         где a - количество аргументов функции,
+     *                         b - количество обязателных аргументов
+     * @param string $doc      PHPDoc
+     * @return string
+     */
+    protected function functionName(string $function, string $param, string $doc): string
     {
        if ('' !== $doc) {
-           $func .= sprintf(static::DOC, $func, $this->formatDocToHtml($doc));
+           $function .= sprintf(static::DOC, $function, $this->formatDocToHtml($doc));
        }
-        return sprintf(static::FUNC, $func).sprintf(static::PARAMS, $param);
+        return sprintf(static::FUNC, $function).sprintf(static::PARAMS, $param);
     }
 
+    /**
+     * Возвращает форматированное значение строкового аргумента.
+     *
+     * @param string $arg значение строкового аргумента
+     * @return string
+     */
     protected function stringArg($arg): string
     {
         $length = mb_strlen($arg);
         $string = mb_substr($arg, 0, $this->stringLength);
         $string = htmlentities($string, ENT_SUBSTITUTE | ENT_COMPAT);
         $string = preg_replace('/ /', '&nbsp;', $string);
+
+        /* визуализируем окончания строк и удвляем во избежание переноса в ячейке таблицы */
         $string = str_replace("\r\n",  sprintf(static::BREAK, '\r\n'), $string);
         $string = str_replace("\n",  sprintf(static::BREAK, '\n'), $string);
         $string = str_replace("\r",  sprintf(static::BREAK, '\r'), $string);
 
         if ($length > $this->stringLength) {
-            // просмотр полной строки, но не длиннее tooltipLength
             $tooltip = mb_substr($arg, 0, $this->tooltipLength);
             $tooltip = htmlentities($tooltip, ENT_SUBSTITUTE | ENT_COMPAT);
+
+            /* каждый второй пробел меняем на нервзрывный пробел html,
+             * для сохранения всех пробелов с возможностью переноса по словам */
             $tooltip = preg_replace('/ {2}/', ' &nbsp;', $tooltip);
+
+            /* визуализируем окончания строк и делаем переносы для HTML */
             $tooltip = str_replace("\r\n",  sprintf(static::BREAK, '\r\n<br>'), $tooltip);
             $tooltip = str_replace("\n",  sprintf(static::BREAK, '\n<br>'), $tooltip);
             $tooltip = str_replace("\r",  sprintf(static::BREAK, '\r<br>'), $tooltip);
-            
+
             if ($length > $this->tooltipLength) {
                 $tooltip .= static::ETC;
             }
             $end = static::ETC;
-            $css_class = static::TOOLTIP_ENABLE;
+            $css_class = static::TOOLTIP;
         } else {
             $tooltip = $end = '';
             $css_class = '';
@@ -200,11 +291,23 @@ class HtmlTraceFormatter extends AbstractTraceFormatter
         return sprintf(static::STRING, $length, $string.$end, $css_class, $tooltip);
     }
 
+    /**
+     * Возвращает форматированное значение числового аргумента.
+     *
+     * @param int|float $arg значение числового аргумента
+     * @return string
+     */
     protected function numericArg($arg): string
     {
         return sprintf(static::NUM, $arg);
     }
 
+    /**
+     * Возвращает рекурсивно форматированный аргумент массив.
+     *
+     * @param array $arg массив
+     * @return string
+     */
     protected function arrayArg($arg): string
     {
         if ($this->recursion > $this->arrayLevel) {
@@ -216,6 +319,12 @@ class HtmlTraceFormatter extends AbstractTraceFormatter
         return sprintf(static::ARR, 'array['.count($arg).']', $tooltip);
     }
 
+    /**
+     * Возвращает форматированный массив для отображения ввиде HTML.
+     *
+     * @param array $array массив аргумента из стека вызовов
+     * @return string
+     */
     protected function arrayHandler(array $array): string
     {
         $tr = '';
@@ -245,41 +354,36 @@ class HtmlTraceFormatter extends AbstractTraceFormatter
         return sprintf(static::TABLE, $tr);
     }
 
-    protected function boolArg($arg): string
-    {
-        return sprintf(static::BOOL, $arg === true ? 'true' : 'false');
-    }
-
+    /**
+     * Возвращает форматированное значение аргумента null.
+     *
+     * @return string форматированное  'null'
+     */
     protected function nullArg(): string
     {
         return sprintf(static::BOOL, 'null');
     }
 
-    protected function objectArg($arg): string
+    /**
+     * Возвращает форматированное булево значение аргумента.
+     *
+     * @param bool $arg
+     * @return string форматированное 'true' | 'false'
+     */
+    protected function boolArg($arg): string
     {
-        $class = get_class($arg);
-        $parts = explode('\\', $class);
-
-        //получаем имя класса без пространства имён
-        $className = array_pop($parts);
-
-
-        $r = new \ReflectionClass($class);
-        if ($doc = $r->getDocComment()) {
-            $doc = $this->formatDocToHtml($doc);
-            $name = $r->getName();
-            !$doc ?: $className .= sprintf(static::DOC, $name, $doc);
-        }
-
-        //имя класса без пространства имён
-        $obj = sprintf(static::S_CLASS_NAME, $className);
-
-        //пространство имён без имени класса
-        $space = sprintf(static::S_N_SPACE, implode('\\', $parts).'\\');
-
-        return sprintf(static::ARGS, $space.$obj);
+        return sprintf(static::BOOL, $arg === true ? 'true' : 'false');
     }
 
+    /**
+     * Возвращает форматированное значение аргумента callable.
+     *
+     * Добавляет возможность просмотра кода функции,
+     * значения $this и имени файла.
+     *
+     * @param \Closure $arg значение аргумента callable
+     * @return string
+     */
     protected function callableArg($arg): string
     {
         $r = new \ReflectionFunction($arg);
@@ -294,6 +398,40 @@ class HtmlTraceFormatter extends AbstractTraceFormatter
         return sprintf(static::CALL, $r->getName(), $this->arrayHandler($arr));
     }
 
+    /**
+     * Возвращает форматированное значение аргумента object.
+     *
+     * Добавляет PHPDoc если таковой присутсвует в коде.
+     *
+     * @param object $arg значение аргумента object
+     * @return string
+     */
+    protected function objectArg($arg): string
+    {
+        $class = get_class($arg);
+        $parts = explode('\\', $class);
+
+        /* получаем имя класса без пространства имён */
+        $className = array_pop($parts);
+
+        $r = new \ReflectionClass($class);
+        if ($doc = $r->getDocComment()) {
+            $doc = $this->formatDocToHtml($doc);
+            !$doc ?: $className .= sprintf(static::DOC, $class, $doc);
+        }
+
+        /* пространство имён без имени класса */
+        $space = sprintf(static::S_N_SPACE, implode('\\', $parts).'\\');
+
+        return sprintf(static::ARGS, $space.sprintf(static::S_CLASS_NAME, $className));
+    }
+
+    /**
+     * Возвращает форматированное значение аргумента resource.
+     *
+     * @param resource $arg значение аргумента resource
+     * @return string
+     */
     protected function resourceArg($arg): string
     {
         $res = 'resource';
@@ -305,29 +443,25 @@ class HtmlTraceFormatter extends AbstractTraceFormatter
         return sprintf(static::RESOURCE, $res , $this->arrayHandler(stream_get_meta_data($arg)));
     }
 
+    /**
+     * Возвращает форматированную строку типа 'closed resource #...'
+     *
+     * @param string $string 'closed resource #...'
+     * @return string
+     */
     protected function closedResourceArg(string $string): string
     {
         return sprintf(static::RESOURCE, $string, '');
     }
 
+    /**
+     * Возвращает форматированное значение аргумента неизвестного типа.
+     *
+     * @param mixed $arg значение аргумента неизвестного типа
+     * @return string
+     */
     protected function otherArg($arg): string
     {
         return sprintf(static::ARGS, gettype($arg));
-    }
-
-    protected function completion(array $traceArray): string
-    {
-        $trace = '';
-        foreach ($traceArray as $v) {
-            $tr = $v['file'].$v['line'].$v['class'].$v['function'];
-
-            isset($v['args']) ?: $v['args'] = [];
-
-            for ($k = 0; $k < $this->maxNumberOfArgs; ++$k) {
-                $tr .= $v['args'][$k] ?? static::EMPTY_ARGS;
-            }
-            $trace .= sprintf(static::TR, $tr);
-        }
-        return sprintf(static::TABLE, $trace);
     }
 }

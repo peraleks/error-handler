@@ -58,7 +58,7 @@ class BrowserConsoleNotifier extends AbstractNotifier
      * Счётчик callbacks для отложенного показа ошибок.
      * Используется для того, чтобы не регистрировать callback повторно.
      *
-     * @var null | int
+     * @var null|int
      */
     protected static $count;
 
@@ -72,8 +72,6 @@ class BrowserConsoleNotifier extends AbstractNotifier
     /**
      * Инициализирует массив соответствия кодов ошибок и цвета.
      * Валидирует параметр конфигурации - 'console'.
-     *
-     * @return void
      */
     protected function before()
     {
@@ -117,10 +115,10 @@ class BrowserConsoleNotifier extends AbstractNotifier
     }
 
     /**
-     * Форматирует ошибку для вывода в консоль браузера.
+     * Возвращает форматированную ошибку для вывода в консоль браузера.
      *
      * @param string $trace стек вызовов
-     * @return string ошибка
+     * @return string
      */
     protected function ErrorToString(string $trace): string
     {

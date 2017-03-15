@@ -17,7 +17,7 @@ use Peraleks\ErrorHandler\Core\ConfigObject;
 /**
  * Class AbstractTraceHandler
  *
- * Определяет шаблонный метод и интерфейс для бработчиков стека вызовов.
+ * Определяет шаблонный метод и интерфейс для форматировщиков стека вызовов.
  */
 abstract class AbstractTraceFormatter implements FormatterInterface
 {
@@ -61,9 +61,10 @@ abstract class AbstractTraceFormatter implements FormatterInterface
      * Инизиализирует начальные параметры.
      *
      * Запускает шаблонный метод handleTrace()
+     * И возвращает форматированный стек вызовов.
      *
-     * @param array $dBTrace стек вызовов
-     * @param ConfigObject $configObject объект конфикурации
+     * @param array        $dBTrace      стек вызовов
+     * @param ConfigObject $configObject объект конфигурации
      * @return string  форматированный стек вызовов
      */
     final public function getFormattedTrace(array $dBTrace, ConfigObject $configObject): string
@@ -86,7 +87,7 @@ abstract class AbstractTraceFormatter implements FormatterInterface
      *
      * Шаблонный метод.
      *
-     * @param $dBTrace array массив стека вызовов
+     * @param array $dBTrace массив стека вызовов
      * @return string форматированный стек вызовов
      */
     final protected function handleTrace(array $dBTrace): string
@@ -127,7 +128,7 @@ abstract class AbstractTraceFormatter implements FormatterInterface
                     elseif ($cr = $this->isClosedResource($arg)) $args[] = $this->closedResourceArg($cr);
                     else $args[] = $this->otherArg($arg);
                 }
-                /* подсчёт наибольшего количеста аргументов */
+                /* подсчёт наибольшего количеста аргументов для размера таблицы*/
                 $cnt = count($arr['args']);
                 $this->maxNumberOfArgs > $cnt ?: $this->maxNumberOfArgs = $cnt;
             }
@@ -135,9 +136,25 @@ abstract class AbstractTraceFormatter implements FormatterInterface
         return $this->completion($traceArray);
     }
 
+    /**
+     * Здесь производим окончательное форматирование массива стека вызовов
+     * и формируем конечную строку.
+     *
+     * @param array $traceArray предварительно отформатированный стек
+     * @return string окончательный результат обработки стека
+     */
+    protected function completion(array $traceArray): string { return ''; }
+
+    /**
+     * Определяет является ли значение аргумента закрытым ресурсом.
+     *
+     * Возвращает или false или строку вида "closed resource#{номер ресурса}"
+     *
+     * @param mixed $arg
+     * @return bool|string   false | "closed resource#..."
+     */
     protected function isClosedResource($arg)
     {
-        /* определяем является ли тип закрытым ресурсом */
         if ('unknown type' === $type = gettype($arg)) {
             ob_start();
             echo $arg;
@@ -148,7 +165,27 @@ abstract class AbstractTraceFormatter implements FormatterInterface
         return false;
     }
 
-    protected function handleFunction(string $func, string $class, int $cntArgs): array
+    /**
+     * Возвращает информацю о функции или методе.
+     *
+     * Вычисляет количество (всего) параметров и обязательных параметров функции.<br>
+     * Проверяет был ли параметр уничтожен в ходе выполнения функции/метода
+     * и добовляет 'unset{количество}' к строке с количеством аргументов.
+     * Это покаежет, что стек вызовов содеожит не все параметры функции,
+     * которые ей реально были переданы.<br>
+     * Этот функционал добавлен потому, что уничтоженный
+     * (unset()) параметр невозможно отличить от непереданного.
+     * И если один из параметров был уничтожен, невозможно определить каким по счёту он был,
+     * значит произошло смещение параметров, и не стоит полагаться на их порядковое расположение
+     * при соотнесении с аргументами функции.
+     *
+     * @param string   $func    имя функции/метода
+     * @param string   $class   имя класса
+     * @param int|null $cntArgs фактическое количество аргументов взятое из массива стека вызовов
+     * @return array 'param' => string количество параметров функции <br>
+     *               'doc'   => string PHPDoc метода
+     */
+    protected function handleFunction(string $func, string $class, int $cntArgs = null): array
     {
         /* если функция является методом класса, а не замыканием
          * и не конструкцией языка (include и т.д.), получаем объект Reflection */
@@ -163,9 +200,7 @@ abstract class AbstractTraceFormatter implements FormatterInterface
             $param = $ref->getNumberOfParameters();
             $reqParam = $ref->getNumberOfRequiredParameters();
 
-            /* определяем был ли параметр уничтожен в ходе выполнения функции/метода
-             * и показываем это пользователю, так как уничтоженный (unset())
-             * параметр невозможно отличить от непереданного.*/
+            /* определяем был ли параметр уничтожен в ходе выполнения функции/метода */
             $c = $reqParam > $cntArgs ? ' unset '.($reqParam - $cntArgs) : '';
 
             $p = $param.'.'.$reqParam.$c;
@@ -177,8 +212,6 @@ abstract class AbstractTraceFormatter implements FormatterInterface
 
         return $arr;
     }
-
-    protected function completion(array $arr): string { return ''; }
 
     /**
      * Форматирует имя файла.
@@ -200,7 +233,8 @@ abstract class AbstractTraceFormatter implements FormatterInterface
      * Форматирует имя класса и тип вызова метода.
      *
      * @param string $class имя класса
-     * @param string $type тип вызова метода (:: | ->)
+     * @param string $type  тип вызова метода (:: | ->)
+     *
      * @return string форматированные имя класса и тип вызова метода
      */
     protected function className(string $class, string $type): string
@@ -213,8 +247,10 @@ abstract class AbstractTraceFormatter implements FormatterInterface
      * Форматирует имя функции и количество аргументов.
      *
      * @param string $function имя метода или функции
-     * @param string $param пустая строка или строка вида 'a.b'
-     * где a - количество аргументов функции, b - количество обязателных аргументов
+     * @param string $param    пустая строка или строка вида 'a.b'
+     *                         где a - количество аргументов функции,
+     *                         b - количество обязателных аргументов
+     * @param string $doc      PHPDoc
      * @return string форматированное название функции и количество аргументов
      */
     protected function functionName(string $function, string $param, string $doc): string
@@ -226,7 +262,7 @@ abstract class AbstractTraceFormatter implements FormatterInterface
     /**
      * Форматирует значение строкового аргумента.
      *
-     * @param $arg string значение строкового аргумента
+     * @param string $arg значение строкового аргумента
      * @return string форматированное значение строкового аргумента
      */
     protected function stringArg($arg): string { return ''; }
@@ -234,7 +270,7 @@ abstract class AbstractTraceFormatter implements FormatterInterface
     /**
      * Форматирует значение числового аргумента.
      *
-     * @param $arg int | float значение числового аргумента
+     * @param int|float $arg значение числового аргумента
      * @return string форматированное значение числового аргумента
      */
     protected function numericArg($arg): string { return ''; }
@@ -242,7 +278,7 @@ abstract class AbstractTraceFormatter implements FormatterInterface
     /**
      * Форматирует аргумент массив.
      *
-     * @param $arg array массив
+     * @param array $arg массив
      * @return string форматированный массив
      */
     protected function arrayArg($arg): string { return ''; }
@@ -257,31 +293,31 @@ abstract class AbstractTraceFormatter implements FormatterInterface
     /**
      * Форматирует булево значение аргумента.
      *
-     * @param $arg bool true | false
-     * @return string форматированное true | false
+     * @param bool $arg
+     * @return string форматированное 'true' | 'false'
      */
     protected function boolArg($arg): string { return ''; }
 
     /**
-     * Форматирует значение аргумента object.
-     *
-     * @param $arg object значение аргумента object
-     * @return string форматированное значение аргумента object
-     */
-    protected function objectArg($arg): string { return ''; }
-
-    /**
      * Форматирует значение аргумента callable.
      *
-     * @param $arg \Closure значение аргумента callable
+     * @param \Closure $arg значение аргумента callable
      * @return string форматированное значение аргумента callable
      */
     protected function callableArg($arg): string { return ''; }
 
     /**
+     * Форматирует значение аргумента object.
+     *
+     * @param object $arg значение аргумента object
+     * @return string форматированное значение аргумента object
+     */
+    protected function objectArg($arg): string { return ''; }
+
+    /**
      * Форматирует значение аргумента resource.
      *
-     * @param $arg resource значение аргумента resource
+     * @param resource $arg значение аргумента resource
      * @return string форматированное значение аргумента resource
      */
     protected function resourceArg($arg): string { return ''; }
@@ -289,7 +325,7 @@ abstract class AbstractTraceFormatter implements FormatterInterface
     /**
      * Форматирует строку типа 'closed resource #...'
      *
-     * @param $string string 'closed resource #...'
+     * @param string $string 'closed resource #...'
      * @return string форматированное значение
      */
     protected function closedResourceArg(string $string): string { return $string; }
@@ -297,7 +333,7 @@ abstract class AbstractTraceFormatter implements FormatterInterface
     /**
      * Форматирует значение аргумента неизвестного типа.
      *
-     * @param $arg mixed значение аргумента неизвестного типа
+     * @param mixed $arg значение аргумента неизвестного типа
      * @return string форматированное значение аргумента неизвестного типа
      */
     protected function otherArg($arg): string

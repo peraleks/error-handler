@@ -67,8 +67,7 @@ class SelfErrorHandler
     private $code;
 
     /**
-     * Маска ошибок, для которых
-     * надо показать стек вызовов.
+     * Маска ошибок, для которых надо показать стек вызовов.
      *
      * @var int
      */
@@ -104,7 +103,8 @@ class SelfErrorHandler
     /**
      * Запускает обработку ошибки.
      *
-     * @param $e \Throwable | ErrorObject объект ошибки
+     * @param \Throwable|ErrorObject $e объект ошибки
+     * @return void
      */
     public function report($e)
     {
@@ -131,7 +131,7 @@ class SelfErrorHandler
     /**
      * Выводит сообщение ошибки в CLI режиме.
      *
-     * @param $e \Throwable | ErrorObject объект ошибки
+     * @param \Throwable|ErrorObject $e объект ошибки
      */
     private function cliReport($e)
     {
@@ -141,7 +141,7 @@ class SelfErrorHandler
     /**
      * Выводит сообщение ошибки в браузер.
      *
-     * @param $e \Throwable | ErrorObject объект ошибки
+     * @param \Throwable|ErrorObject $e объект ошибки
      */
     private function htmlReport($e)
     {
@@ -155,12 +155,13 @@ class SelfErrorHandler
     }
 
     /**
-     * Пишет ошибку в файл и, если требуется,
-     * отправляет состояние 500 с последующим
+     * Пишет ошибку в файл.
+     *
+     * Eсли требуется, отправляет состояние 500 с последующим
      * прерыванием выполнения скрипта.
      *
-     * @param $e \Throwable | ErrorObject объект ошибки
-     * @param string $file полное имя вайла лога внутренних ошибок
+     * @param \Throwable|ErrorObject $e    объект ошибки
+     * @param string                 $file полное имя вайла лога внутренних ошибок
      */
     private function fileReport($e, string $file)
     {
@@ -197,8 +198,8 @@ class SelfErrorHandler
     /**
      *  Возвращает тип (название) ошибки.
      *
-     * @param $e \Throwable | ErrorObject объект ошибки
-     * @return string тип (название) ошибки
+     * @param \Throwable|ErrorObject $e объект ошибки
+     * @return string
      */
     private function getType($e): string
     {
@@ -212,8 +213,8 @@ class SelfErrorHandler
      * Возвращает конечную строку ошибки
      * со стеком вызовов или без.
      *
-     * @param $e \Throwable | ErrorObject объект ошибки
-     * @return string ошибку в текстовом виде
+     * @param \Throwable|ErrorObject $e объект ошибки
+     * @return string
      */
     private function getStringError($e): string
     {

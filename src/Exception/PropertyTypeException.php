@@ -27,13 +27,14 @@ class PropertyTypeException extends ErrorHandlerException
      *
      * Форматирует сообщение исключения по шаблону:
      * "{имя уведомителя}: the property value '{$key}'=> must be a {$type}
-     * gettype($value) given".<br>
-     * Например: TailNotifier: the property value 'file'=> must be a string, integer given.
+     * gettype($value) given".
+     * <br>
+     * Например: "TailNotifier: the property value 'file'=> must be a string, integer given".
      *
      *
      * @param string $value полученное значение параметра конфигурации
-     * @param string $key ключ массива конфикурации
-     * @param string $type ожидаемый тип значения параметра
+     * @param string $key   ключ массива конфикурации
+     * @param string $type  ожидаемый тип значения параметра
      */
     public function __construct($value, string $key, string $type)
     {

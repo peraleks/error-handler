@@ -66,10 +66,10 @@ class FileNotifier extends AbstractNotifier
     }
 
     /**
-     * Форматирует ошибку для записи в файл ввиде строки.
+     * Возвращает форматированную ошибку для записи в файл ввиде строки.
      *
      * @param string $trace стек вызовов
-     * @return string ошибка в формате строки
+     * @return string
      */
     protected function ErrorToString(string $trace): string
     {
