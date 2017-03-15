@@ -204,7 +204,7 @@ class HtmlTraceFormatter extends AbstractTraceFormatter
      */
     protected function formatDocToHtml(string $doc): string
     {
-        /* удаляем спецсимволы комментария (/** * /) и нормализуем окончание строк*/
+        /* удаляем спецсимволы комментария (/** * /) и нормализуем окончание строк */
         $doc = preg_replace('/(\r\n\s*\*)|(\n\s*\*)|(\r\s*\*)/', "\n", $doc);
         $doc = preg_replace('/(^.*?\/\*\*)|(\/$)/', '', $doc);
 
