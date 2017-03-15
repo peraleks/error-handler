@@ -24,7 +24,7 @@ return [
     ],
 
     \Peraleks\ErrorHandler\Notifiers\TailNotifier::class => [
-        'enabled'      => E_ALL,
+//        'enabled'      => E_ALL,
         'handleTrace'  => $trace,
         'simpleTrace'  => true,
         'stringLength' => 80,
@@ -33,7 +33,7 @@ return [
     ],
 
     \Peraleks\ErrorHandler\Notifiers\FileNotifier::class => [
-        'enabled'        => E_ALL,
+//        'enabled'        => E_ALL,
         'handleTrace'    => $trace,
 //        'phpNativeTrace' => true,
         'timeFormat'     => 'd-M-o H:i:s O',

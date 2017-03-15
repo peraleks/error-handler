@@ -8,12 +8,11 @@
  * @link      https://github.com/peraleks/error-handler
  */
 
-// @codingStandardsIgnoreFile
 /*********************** Перехватываемые (catchable)-- try{} catch (Throwable $e)  ******************
  * Все исключения (catchable exceptions) прерывают выполнение скрипта (FATAL) */
 
 /** [1]----------------  Error ------------------ exception_handler */
-// undefined_function();
+//  undefined_function();
 
 /** [1]---------------- ArithmeticError --------- exception_handler */
 // intdiv(PHP_INT_MIN, -1);
@@ -75,7 +74,7 @@
 try {
 /***************** Не прерывающие выполнение скрипта (NONFATAL) *********************/
 /** [2]---------------- E_WARNING --------------- error_handler */
-//    $i = 2 / 0;
+//   $i = 2 / 0;
 
 /** [8]---------------- E_NOTICE ---------------- error_handler */
 // echo $undefined_var;
