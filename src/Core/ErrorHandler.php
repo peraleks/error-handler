@@ -24,6 +24,11 @@ namespace Peraleks\ErrorHandler\Core;
 class ErrorHandler
 {
     /**
+     * Текущая версия пакета.
+     */
+    const VERSION = '0.9';
+
+    /**
      * Singleton.
      *
      * @var ErrorHandler
