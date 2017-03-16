@@ -2,7 +2,7 @@
 <a href="https://packagist.org/packages/peraleks/error-handler"><img src="https://poser.pugx.org/peraleks/error-handler/v/stable.svg" alt="Latest Stable Version"></a>
 <a href="https://packagist.org/packages/peraleks/error-handler"><img src="https://poser.pugx.org/peraleks/error-handler/license.svg" alt="License"></a>
 # ErrorHandler
-ErrorHandler - обработчик ошибок для PHP7 с возможностю расширения функциональности.
+Обработчик ошибок для PHP7 с возможностью расширения функциональности.
 Поддерживает все типы ошибок и исключений. Может быть использован как в крупномасштабных приложениях,
 так и в простых скриптах.
 
