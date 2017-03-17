@@ -60,7 +60,7 @@ class Helper
      * @param string       $configFile   полное имя файла конфигурации
      * @param ErrorHandler $errorHandler объект основного контроллера обработки ошибок
      */
-    public function __construct(string $configFile, ErrorHandler $errorHandler)
+    public function __construct(string $configFile = null, ErrorHandler $errorHandler)
     {
         $this->errorHandler = $errorHandler;
         $this->configFile = $configFile;

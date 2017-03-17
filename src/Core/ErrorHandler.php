@@ -86,7 +86,7 @@ class ErrorHandler
      */
     private function __construct($configFile = null)
     {
-        ini_set('display_errors', 'Off');
+         ini_set('display_errors', 'Off');
         set_error_handler([$this, 'error']);
         set_exception_handler([$this, 'exception']);
         register_shutdown_function([$this, 'shutdown']);
@@ -203,8 +203,7 @@ class ErrorHandler
     }
 
     /**
-     * Выполняет пользовательские callbacks
-     * и callbacks отложенного уведомления об ошибках.
+     * Выполняет пользовательские callbacks и callbacks отложенного уведомления об ошибках.
      *
      * Так как обработчики зарегистрированные в ErrorHandler не работают
      * в стеке выше shutdown function, для безопасного выполнения callbacks регистрируется

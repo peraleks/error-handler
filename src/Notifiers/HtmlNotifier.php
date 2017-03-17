@@ -100,7 +100,11 @@ class HtmlNotifier extends AbstractNotifier
         $line     = $eObj->getLine();
         $fontSize = $conf->get('fontSize');
         $handler  = $eObj->getHandler();
-        $code == E_ERROR ? $cssType = 'ERROR' : $cssType = $type;
+
+        if (E_ERROR === $code) $cssType = 'ERROR';
+        elseif (E_PARSE === $code) $cssType = 'ParseError';
+        else $cssType = $type;
+
         $conf->get('hideTrace') ? $hidden = 'hidden' : $hidden = '';
         $style = file_get_contents($this->errorCss);
         $trace == '' ?: $style .= file_get_contents($this->traceCss);
