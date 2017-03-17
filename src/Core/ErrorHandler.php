@@ -26,7 +26,7 @@ class ErrorHandler
     /**
      * Текущая версия пакета.
      */
-    const VERSION = '0.9';
+    const VERSION = '0.9.1';
 
     /**
      * Singleton.
@@ -86,7 +86,7 @@ class ErrorHandler
      */
     private function __construct($configFile = null)
     {
-         ini_set('display_errors', 'Off');
+        ini_set('display_errors', 'Off');
         set_error_handler([$this, 'error']);
         set_exception_handler([$this, 'exception']);
         register_shutdown_function([$this, 'shutdown']);
