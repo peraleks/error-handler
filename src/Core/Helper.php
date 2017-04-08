@@ -166,7 +166,7 @@ class Helper
                     if (0 === ($enabled & $errorObject->getCode())) {
                         continue;
                     }
-                }
+                } else continue;
 
                 /* проверяем игнорирует ли обработчик ошибки типа 'только для лога' */
                 if ($errorObject->isLogType() && $configObject->get('ignoreLogType')) {
