@@ -47,7 +47,7 @@
 
 .peraleks_tw .trace_class {
     text-align: left;
-    color: #fff;
+    color: #ddd;
     font-weight: 100;
     text-shadow: 2px 2px 7px rgba(0, 0, 0, 0.4), 0 0 1px #000;
 }
@@ -58,7 +58,7 @@
 
 .peraleks_tw .trace_name_space {
     text-align: right;
-    color: #dbdbad;
+    color: #c6c6a7;
 }
 
 .peraleks_tw .trace_function {

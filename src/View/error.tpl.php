@@ -21,17 +21,17 @@ $id = 'peraleks_wrap'.rand(); ?>
     <div class="text">
         <?= $message ?>
     </div>
-    <div id="<?= $id ?>" class="peraleks_tw <?= $hidden ?>">
-        <?= $trace ?>
-    </div>
     <div class="file">
         <span title="<?= $path ?>"><?= $file ?></span><span class="bracket">(</span><span
                 class="line"><?= $line ?></span><span class="bracket">)</span>
         <?php if ($trace != '') : ?>
-            <div class="but_trace" onclick="parentNode.previousElementSibling.classList.toggle('hidden')">
+            <div class="but_trace" onclick="parentNode.nextElementSibling.classList.toggle('hidden')">
                 trace <?= $traceCount ?>
             </div>
         <?php endif; ?>
+    </div>
+    <div id="<?= $id ?>" class="peraleks_tw <?= $hidden ?>">
+        <?= $trace ?>
     </div>
 </div>
 <?php if ($trace != '') : ?>

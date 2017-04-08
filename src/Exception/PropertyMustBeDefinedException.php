@@ -30,7 +30,7 @@ class PropertyMustBeDefinedException extends ErrorHandlerException
      * <br>
      * Например: "TailNotifier: the property 'file'=> must be defined".
      *
-     * @param string $key ключ нассива конфигурации
+     * @param string $key ключ массива конфигурации
      */
     public function __construct(string $key)
     {

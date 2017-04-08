@@ -42,7 +42,7 @@ class CliTraceFormatter extends AbstractTraceFormatter
     protected $align = 15;
 
     /**
-     * Максимальная длянна строки при показе содержимого
+     * Максимальная длинна строки при показе содержимого
      * строковых параметров и массивов.
      *
      * @var int

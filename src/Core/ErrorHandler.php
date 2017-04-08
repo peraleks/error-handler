@@ -26,7 +26,7 @@ class ErrorHandler
     /**
      * Текущая версия пакета.
      */
-    const VERSION = '0.9.1';
+    const VERSION = '0.9.2';
 
     /**
      * Singleton.
@@ -96,7 +96,7 @@ class ErrorHandler
     /**
      * Singleton.
      *
-     * @param null          $configFile string полное имя файла конфигурации
+     * @param null | string  $configFile  полное имя файла конфигурации
      * @return ErrorHandler
      */
     public static function instance($configFile = null)
@@ -139,13 +139,12 @@ class ErrorHandler
      * <br>
      * ErrorHandler::instance()->exception($e, 'someType').
      * <br>
-     * Если не передать второй зараметр ServerErrorNotifier отправит
-     * заголовок 500, покажет страницу ошибки и прервёт вполнение скрипта.
+     * Если не передать второй параметр, ServerErrorNotifier отправит
+     * заголовок "500", покажет страницу ошибки и прервёт вполнение скрипта.
      *
      * @param \Throwable $e       объект ошибки
      * @param string     $logType тип ошибки
-     * @param string     $handler название функции обработчика ('error' |
-     *                            'exception' | 'shutdown')
+     * @param string     $handler название функции обработчика ('error' | 'exception' | 'shutdown')
      */
     public function exception(\Throwable $e, $logType = '', string $handler = 'exception')
     {

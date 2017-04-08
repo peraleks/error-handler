@@ -16,7 +16,7 @@ namespace Peraleks\ErrorHandler\Exception;
  * Class ErrorHandlerException
  *
  * Исключение для любых ошибок, произошедших внутри обработчика
- * и не подподающих под категории исключений расширяющих данный класс.
+ * и не подпадающих под категории исключений расширяющих данный класс.
  */
 class ErrorHandlerException extends \Exception
 {

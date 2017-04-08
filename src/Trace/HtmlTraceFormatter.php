@@ -197,28 +197,32 @@ class HtmlTraceFormatter extends AbstractTraceFormatter
     }
 
     /**
-     * Возвращает форматированнцй PHPDoc метода или класса в HTML
+     * Возвращает форматированнцй в HTML PHPDoc метода или класса
      *
      * @param string $doc PHPDoc
      * @return string
      */
     protected function formatDocToHtml(string $doc): string
     {
+        $doc = preg_replace('/\t/', '    ', $doc);
+
         /* удаляем спецсимволы комментария (/** * /) и нормализуем окончание строк */
-        $doc = preg_replace('/(\r\n\s*\*)|(\n\s*\*)|(\r\s*\*)/', "\n", $doc);
-        $doc = preg_replace('/(^.*?\/\*\*)|(\/$)/', '', $doc);
+        $doc = preg_replace('/(\r\n *\*)|(\n *\*)|(\r *\*)/', "\n", $doc);
+        $doc = preg_replace('/(^.*?\/\*\*(?:\n))|(\/$)/', '', $doc);
 
         $doc = htmlentities($doc, ENT_SUBSTITUTE | ENT_COMPAT);
 
         /* выделяем названия типов */
-        $doc = preg_replace('/(@param\s+)(.*?)(\s+\$)/', '$1'.sprintf(static::DOC_TYPE, '$2 ').'$3', $doc);
-        $doc = preg_replace('/(@return\s+)(.*? )/', '$1'.sprintf(static::DOC_TYPE, '$2 '), $doc);
+        $doc = preg_replace(
+            '/^ *((?:@return|@throws|@param) +)([^ \n]+)( +)?(.*)$/m',
+            '$1'.sprintf(static::DOC_TYPE, '$2').'$3$4', $doc
+        );
 
         /* выделяем теги PHPDoc */
-        $doc = preg_replace('/(@.*?) /', sprintf(static::DOC_TAG, '$1 '), $doc);
+        $doc = preg_replace('/^ *(@[^ ]+)( +)?(.+)?$/m', sprintf(static::DOC_TAG, '$1').'$2$3', $doc);
 
         /* выделяем имена переменных */
-        $doc = preg_replace('/(@.*?)(\$.*?)( |\n)/', '$1'.sprintf(static::DOC_VAR, '$2').'$3', $doc);
+        $doc = preg_replace('/(@.*?)(\$.*?)(\s)/', '$1'.sprintf(static::DOC_VAR, '$2').'$3', $doc);
 
         /* выделяем ссылки */
         $doc = preg_replace('#(http(?:s)?://.*?)( |&lt;|\n)#', sprintf(static::DOC_HREF, '$1', '$1').'$2', $doc);
